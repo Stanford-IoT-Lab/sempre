@@ -5,6 +5,8 @@
 # derivation that use $StringValue (which is a catch all)
 exec java -ea '-Dmodules=core,overnight,freebase,thingtalk' \
               '-Djava.library.path=jni' \
+              '-Djavax.net.ssl.keyStore=/opt/sempre/data/ssl.ks' \
+              '-Djavax.net.ssl.keyStorePassword=7frountarceunWuvac' \
               '-cp' 'libsempre/*:lib/*' \
               'edu.stanford.nlp.sempre.APIServer' \
               '-LanguageAnalyzer' 'corenlp.CoreNLPAnalyzer' \
