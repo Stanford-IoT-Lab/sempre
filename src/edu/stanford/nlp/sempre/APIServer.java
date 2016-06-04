@@ -10,6 +10,7 @@ import java.net.HttpCookie;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -20,10 +21,14 @@ import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.net.ssl.SSLContext;
+
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpsConfigurator;
+import com.sun.net.httpserver.HttpsServer;
 
 import fig.basic.LogInfo;
 import fig.basic.Option;
@@ -33,6 +38,8 @@ public class APIServer implements Runnable {
 	public static class Options {
 		@Option
 		public int port = 8400;
+		@Option
+		public int ssl_port = -1;
 		@Option
 		public int numThreads = 4;
 		@Option
@@ -46,7 +53,7 @@ public class APIServer implements Runnable {
 	private final Map<String, Session> sessionMap = new HashMap<>();
 	private final Builder builder;
 
-	private class Handler implements HttpHandler {
+	private class QueryHandler implements HttpHandler {
 		@Override
 		public void handle(HttpExchange exchange) {
 			try {
@@ -105,12 +112,7 @@ public class APIServer implements Runnable {
 			if (opts.verbose >= 2)
 				LogInfo.logs("GET %s from %s (%ssessionId=%s)", uri, remoteHost, isNewSession ? "new " : "", sessionId);
 
-			String uriPath = uri.getPath();
-			if (uriPath.equals("/query")) {
-				handleQuery(sessionId);
-			} else {
-				exchange.sendResponseHeaders(404, 0);
-			}
+			handleQuery(sessionId);
 
 			exchange.close();
 		}
@@ -258,7 +260,22 @@ public class APIServer implements Runnable {
 	@Override
 	public void run() {
 		try {
-			HttpServer server = HttpServer.create(new InetSocketAddress(opts.port), 10);
+			HttpServer server = null;
+			HttpsServer ssl_server = null;
+			if (opts.port >= 0)
+				server = HttpServer.create(new InetSocketAddress(opts.port), 10);
+			if (opts.ssl_port >= 0) {
+				try {
+					SSLContext context = SSLContext.getDefault();
+					ssl_server = HttpsServer.create(new InetSocketAddress(opts.ssl_port), 10);
+					// use default configuration
+					ssl_server.setHttpsConfigurator(new HttpsConfigurator(context));
+				} catch (NoSuchAlgorithmException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			if (server == null && ssl_server == null)
+				throw new RuntimeException("Must specify one of port or ssl_port");
 
 			if (opts.chuid != null)
 				PosixHelper.setuid(opts.chuid);
@@ -273,10 +290,19 @@ public class APIServer implements Runnable {
 
 			String hostname = fig.basic.SysInfoUtils.getHostName();
 			ExecutorService pool = Executors.newFixedThreadPool(opts.numThreads);
-			server.createContext("/", new Handler());
-			server.setExecutor(pool);
-			server.start();
-			LogInfo.logs("Server started at http://%s:%s/sempre", hostname, opts.port);
+			
+			if (server != null) {
+				server.createContext("/query", new QueryHandler());
+				server.setExecutor(pool);
+				server.start();
+				LogInfo.logs("Server started at http://%s:%s/", hostname, opts.port);
+			}
+			if (ssl_server != null) {
+				ssl_server.createContext("/query", new QueryHandler());
+				ssl_server.setExecutor(pool);
+				ssl_server.start();
+				LogInfo.logs("Server started at https://%s:%s/", hostname, opts.port);
+			}
 
 			Timer gcTimer = new Timer(true);
 			gcTimer.schedule(new SessionGCTask(), 600000, 600000);
@@ -287,7 +313,10 @@ public class APIServer implements Runnable {
 			} catch (InterruptedException e) {
 			}
 
-			server.stop(0);
+			if (server != null)
+				server.stop(0);
+			if (ssl_server != null)
+				ssl_server.stop(0);
 			pool.shutdown();
 		} catch (IOException e) {
 			e.printStackTrace();
