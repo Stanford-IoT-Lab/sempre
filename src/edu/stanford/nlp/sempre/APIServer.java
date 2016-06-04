@@ -37,6 +37,8 @@ public class APIServer implements Runnable {
 		public int numThreads = 4;
 		@Option
 		public int verbose = 1;
+		@Option
+		public String chuid = null;
 	}
 
 	public static Options opts = new Options();
@@ -255,17 +257,21 @@ public class APIServer implements Runnable {
 
 	@Override
 	public void run() {
-		builder.build();
-
-		Dataset dataset = new Dataset();
-		dataset.read();
-
-		Learner learner = new Learner(builder.parser, builder.params, dataset);
-		learner.learn();
-
 		try {
-			String hostname = fig.basic.SysInfoUtils.getHostName();
 			HttpServer server = HttpServer.create(new InetSocketAddress(opts.port), 10);
+
+			if (opts.chuid != null)
+				PosixHelper.setuid(opts.chuid);
+
+			builder.build();
+
+			Dataset dataset = new Dataset();
+			dataset.read();
+
+			Learner learner = new Learner(builder.parser, builder.params, dataset);
+			learner.learn();
+
+			String hostname = fig.basic.SysInfoUtils.getHostName();
 			ExecutorService pool = Executors.newFixedThreadPool(opts.numThreads);
 			server.createContext("/", new Handler());
 			server.setExecutor(pool);

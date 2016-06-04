@@ -25,7 +25,7 @@
     <antcall target="compile.released"/>
   </target>
 
-  <target name="compile.released" depends="init,core,cache,corenlp,freebase,tables,overnight"/>
+  <target name="compile.released" depends="init,core,jni,cache,corenlp,freebase,tables,overnight"/>
 
   <!-- Compile core -->
   <target name="core" depends="init">
@@ -36,6 +36,14 @@
       <include name="edu/stanford/nlp/sempre/test/"/>
     </javac>
     <jar destfile="${libsempre}/sempre-core.jar" basedir="${classes}" includes="edu/**"/>
+  </target>
+
+  <!-- Build JNI helpers -->
+  <target name="jni" depends="core">
+   <exec executable="/usr/bin/make">
+     <arg value="-C"/>
+     <arg value="${root}/jni"/>
+   </exec>
   </target>
 
   <!-- Compile cache -->
@@ -89,7 +97,7 @@
   </target>
 
   <!-- Compile thingtalk -->
-  <target name="thingtalk" depends="init,core,corenlp,freebase,overnight">
+  <target name="thingtalk" depends="init,core,jni,corenlp,freebase,overnight">
     <echo message="Compiling ${ant.project.name}: thingtalk"/>
     <mkdir dir="${classes}/thingtalk"/>
     <javac srcdir="${src}" destdir="${classes}/thingtalk" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
