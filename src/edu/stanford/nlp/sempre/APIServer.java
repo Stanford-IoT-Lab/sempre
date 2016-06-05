@@ -80,7 +80,7 @@ public class APIServer implements Runnable {
 			this.exchange = exchange;
 
 			URI uri = exchange.getRequestURI();
-			this.remoteHost = exchange.getRemoteAddress().getHostName();
+			this.remoteHost = exchange.getRemoteAddress().toString();
 
 			// Don't use uri.getQuery: it can't distinguish between '+' and '-'
 			String[] tokens = uri.toString().split("\\?");
@@ -185,7 +185,6 @@ public class APIServer implements Runnable {
 		}
 
 		private void handleQueryForSession(Session session) throws IOException {
-			logs("handleQueryForSession");
 			session.remoteHost = remoteHost;
 
 			String query = reqParams.get("q");
