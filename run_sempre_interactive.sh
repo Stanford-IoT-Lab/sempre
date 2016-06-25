@@ -4,6 +4,7 @@
 # I have them because they help the parser ignore too many
 # derivation that use $StringValue (which is a catch all)
 exec java -ea '-Dmodules=core,overnight,freebase,thingtalk' \
+              '-Djava.library.path=jni' \
               '-cp' 'libsempre/*:lib/*' \
               'edu.stanford.nlp.sempre.Main' \
               '-LanguageAnalyzer' 'corenlp.CoreNLPAnalyzer' \
