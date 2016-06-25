@@ -1,12 +1,22 @@
 package edu.stanford.nlp.sempre;
 
-import fig.basic.*;
-import fig.exec.Execution;
-
-import java.io.PrintWriter;
-import java.util.*;
-
 import static fig.basic.LogInfo.logs;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import fig.basic.IOUtils;
+import fig.basic.ListUtils;
+import fig.basic.LogInfo;
+import fig.basic.MapUtils;
+import fig.basic.Option;
+import fig.exec.Execution;
 
 /**
  * A FloatingParser builds Derivations according to a Grammar without having to
@@ -64,7 +74,8 @@ public class FloatingParser extends Parser {
 
   public FloatingParser(Spec spec) { super(spec); }
 
-  public ParserState newParserState(Params params, Example ex, boolean computeExpectedCounts) {
+  @Override
+public ParserState newParserState(Params params, Example ex, boolean computeExpectedCounts) {
     return new FloatingParserState(this, params, ex, computeExpectedCounts);
   }
 }
@@ -144,22 +155,27 @@ class FloatingParserState extends ParserState {
       }
     }
 
-    DerivationStream results = rule.sem.call(ex,
-            new SemanticFn.CallInfo(rule.lhs, start, end, rule, children));
-    while (results.hasNext()) {
-      Derivation newDeriv = results.next();
-      newDeriv.canonicalUtterance = canonicalUtterance;
+		try (DerivationStream results = rule.sem.call(ex,
+				new SemanticFn.CallInfo(rule.lhs, start, end, rule, children))) {
+			while (results.hasNext()) {
+				Derivation newDeriv = results.next();
+				newDeriv.canonicalUtterance = canonicalUtterance;
 
-      // make sure we execute
-      if (FloatingParser.opts.executeAllDerivations && !(newDeriv.type instanceof FuncSemType))
-        newDeriv.ensureExecuted(parser.executor, ex.context);
+				// make sure we execute
+				if (FloatingParser.opts.executeAllDerivations && !(newDeriv.type instanceof FuncSemType))
+					newDeriv.ensureExecuted(parser.executor, ex.context);
 
-      if (pruner.isPruned(newDeriv)) continue;
-      // Avoid repetitive floating cells
-      addToChart(cell(rule.lhs, start, end, depth), newDeriv);
-      if (depth == -1)  // In addition, anchored cells become floating at level 0
-        addToChart(floatingCell(rule.lhs, 0), newDeriv);
-    }
+				if (pruner.isPruned(newDeriv))
+					continue;
+				// Avoid repetitive floating cells
+				addToChart(cell(rule.lhs, start, end, depth), newDeriv);
+				if (depth == -1) // In addition, anchored cells become floating
+									// at level 0
+					addToChart(floatingCell(rule.lhs, 0), newDeriv);
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
   }
 
   private void applyAnchoredRule(Rule rule, int start, int end, Derivation child1, Derivation child2, String canonicalUtterance) {
@@ -373,7 +389,8 @@ class FloatingParserState extends ParserState {
         if (deriv.score > -10) {
           writer.println(String.format("%s\t%s", deriv.canonicalUtterance, deriv.score));
           fWriter.println(String.format("%s\t%s", deriv.canonicalUtterance, deriv.formula.toString()));
-          vWriter.println(String.format("%s\t%s", deriv.canonicalUtterance, deriv.value.toString()));
+					vWriter.println(String.format("%s\t%s", deriv.canonicalUtterance,
+							((StringValue) ((ListValue) deriv.value).values.get(0)).value));
         }
       }
       writer.close();
