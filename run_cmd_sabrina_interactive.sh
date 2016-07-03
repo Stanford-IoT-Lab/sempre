@@ -10,9 +10,11 @@ exec java -ea '-Dmodules=core,overnight,freebase,thingtalk' \
               '-cp' 'libsempre/*:lib/*' \
               'edu.stanford.nlp.sempre.Main' \
               '-LanguageAnalyzer' 'corenlp.CoreNLPAnalyzer' \
-              '-Builder.parser' 'BeamParser' \
+              '-Builder.parser' 'FloatingParser' \
               '-Builder.executor' 'JavaExecutor' \
               '-JavaExecutor.unpackValues' 'false' \
+              '-Builder.dataset' 'thingtalk.ThingpediaDataset' \
+              '-Builder.valueEvaluator' 'thingtalk.JsonValueEvaluator' \
               '-Grammar.inPaths' 'sabrina/sabrina.grammar' \
               '-FeatureExtractor.featureDomains' 'denotation' 'rule' \
               '-FeatureExtractor.featureComputers' 'overnight.OvernightFeatureComputer' \
@@ -22,7 +24,7 @@ exec java -ea '-Dmodules=core,overnight,freebase,thingtalk' \
               '-OvernightDerivationPruningComputer.applyHardConstraints' \
               '-DerivationPruner.pruningComputer' 'overnight.OvernightDerivationPruningComputer' \
               '-FloatingParser.maxDepth' '12' \
-              '-Parser.beamSize' '9' \
+              '-Parser.beamSize' '40' \
               '-Learner.maxTrainIters' '1' \
               '-SimpleLexicon.inPaths' 'sabrina/sabrina.lexicon' \
               '-wordAlignmentPath' 'thingtalk/thingtalk.word_alignments.berkeley' \
