@@ -8,6 +8,7 @@ import java.util.Iterator;
 import org.apache.commons.dbcp2.BasicDataSource;
 
 import edu.stanford.nlp.sempre.*;
+import fig.basic.LogInfo;
 import fig.basic.Option;
 
 public class ThingpediaLexicon {
@@ -18,9 +19,15 @@ public class ThingpediaLexicon {
 		public String dbUser = "thingengine";
 		@Option
 		public String dbPw = "thingengine";
+		@Option
+		public int verbose = 0;
 	}
 
 	public static Options opts = new Options();
+
+	public enum Mode {
+		APP, KIND, TRIGGER, ACTION, QUERY;
+	};
 
 	public static abstract class Entry {
 		public abstract Formula toFormula();
@@ -29,12 +36,17 @@ public class ThingpediaLexicon {
 
 		public void addFeatures(FeatureVector vec) {
 		}
+
+		@Override
+		public String toString() {
+			return "[ " + getRawPhrase() + " => " + toFormula() + " ]";
+		}
 	}
 
 	private static class AppEntry extends Entry {
-		public final String rawPhrase;
-		public final long userId;
-		public final String appId;
+		private final String rawPhrase;
+		private final long userId;
+		private final String appId;
 
 		public AppEntry(String rawPhrase, long userId, String appId) {
 			this.rawPhrase = rawPhrase;
@@ -51,17 +63,12 @@ public class ThingpediaLexicon {
 		public Formula toFormula() {
 			return new ValueFormula<>(new NameValue("tt:app." + userId + "." + appId));
 		}
-
-		@Override
-		public String toString() {
-			return "[ " + rawPhrase + " => " + toFormula() + " ]";
-		}
 	}
 
 	private static class ChannelEntry extends Entry {
-		public final String rawPhrase;
-		public final String kind;
-		public final String name;
+		private final String rawPhrase;
+		private final String kind;
+		private final String name;
 
 		public ChannelEntry(String rawPhrase, String kind, String name) {
 			this.rawPhrase = rawPhrase;
@@ -80,13 +87,26 @@ public class ThingpediaLexicon {
 		}
 
 		@Override
-		public String toString() {
-			return "[ " + getRawPhrase() + " => " + toFormula() + " ]";
+		public void addFeatures(FeatureVector vec) {
+			vec.add("kinds", kind);
+		}
+	}
+
+	private static class KindEntry extends Entry {
+		private final String kind;
+
+		public KindEntry(String kind) {
+			this.kind = kind;
 		}
 
 		@Override
-		public void addFeatures(FeatureVector vec) {
-			vec.add("kinds", kind);
+		public String getRawPhrase() {
+			return kind;
+		}
+
+		@Override
+		public Formula toFormula() {
+			return new ValueFormula<>(new NameValue("tt:device." + kind));
 		}
 	}
 
@@ -117,7 +137,10 @@ public class ThingpediaLexicon {
 		}
 	}
 
-	public static abstract class EntryStream implements Iterator<Entry>, Closeable, AutoCloseable
+	public interface AbstractEntryStream extends Iterator<Entry>, Closeable, AutoCloseable {
+	}
+
+	public static abstract class EntryStream implements AbstractEntryStream
 	{
 		protected final ResultSet rs;
 		private final Statement stmt;
@@ -193,9 +216,42 @@ public class ThingpediaLexicon {
 		}
 	}
 
+	private static class KindEntryStream extends EntryStream {
+		public KindEntryStream(Connection con, Statement stmt, ResultSet rs) {
+			super(con, stmt, rs);
+		}
+
+		@Override
+		protected KindEntry createEntry() throws SQLException {
+			return new KindEntry(rs.getString(1));
+		}
+	}
+
+	private static class EmptyEntryStream implements AbstractEntryStream {
+		public EmptyEntryStream() {
+		}
+
+		@Override
+		public boolean hasNext() {
+			return false;
+		}
+
+		@Override
+		public Entry next() {
+			return null;
+		}
+
+		@Override
+		public void close() {
+		}
+	}
+
 	public EntryStream lookupApp(String phrase) throws SQLException {
-		String query = "";
-		if(Builder.opts.parser.equals("BeamParser")) {
+		if (opts.verbose >= 2)
+			LogInfo.logs("ThingpediaLexicon.lookupApp %s", phrase);
+
+		String query;
+		if (Builder.opts.parser.equals("BeamParser")) {
 			query = "select canonical,owner,appId from app where canonical = ?";
 		} else {
 			query = "select canonical,owner,appId from app where match canonical against (? in natural language mode)";
@@ -208,19 +264,43 @@ public class ThingpediaLexicon {
 		return new AppEntryStream(con, stmt, stmt.executeQuery());
 	}
 
-	public EntryStream lookupChannel(String phrase) throws SQLException {
-		String query = "";
-		if(Builder.opts.parser.equals("BeamParser")) {
-			query ="select dsc.canonical,ds.kind,dsc.name from device_schema_channels dsc, device_schema ds "
-					+ " where dsc.schema_id = ds.id and dsc.version = ds.approved_version and canonical = ?";
-		} else {
-			query ="select dsc.canonical,ds.kind,dsc.name from device_schema_channels dsc, device_schema ds "
-					+ " where dsc.schema_id = ds.id and dsc.version = ds.approved_version and match canonical against (? in natural language mode)";
-		}
+	public EntryStream lookupKind(String phrase) throws SQLException {
+		if (opts.verbose >= 2)
+			LogInfo.logs("ThingpediaLexicon.lookupKind %s", phrase);
+
+		String query = "select kind from device_schema where kind = ?";
 
 		Connection con = dataSource.getConnection();
 		PreparedStatement stmt = con.prepareStatement(query);
 		stmt.setString(1, phrase);
+
+		return new KindEntryStream(con, stmt, stmt.executeQuery());
+	}
+
+	public AbstractEntryStream lookupChannel(String phrase, Mode channel_type) throws SQLException {
+		if (opts.verbose >= 2)
+			LogInfo.logs("ThingpediaLexicon.lookupChannel(%s) %s", channel_type, phrase);
+		String[] tokens = phrase.split(" ");
+		if (tokens.length < 3 || tokens.length > 7)
+			return new EmptyEntryStream();
+		if (!"on".equals(tokens[tokens.length - 2]))
+			return new EmptyEntryStream();
+
+		String query;
+		if (Builder.opts.parser.equals("BeamParser")) {
+			query = "select dsc.canonical,ds.kind,dsc.name from device_schema_channels dsc, device_schema ds "
+					+ " where dsc.schema_id = ds.id and dsc.version = ds.approved_version and channel_type = ? "
+					+ " and canonical = ? and ds.kind_type <> 'primary'";
+		} else {
+			query = "select dsc.canonical,ds.kind,dsc.name from device_schema_channels dsc, device_schema ds "
+					+ " where dsc.schema_id = ds.id and dsc.version = ds.approved_version and channel_type = ? and "
+					+ "match canonical against (? in natural language mode) and ds.kind_type <> 'primary'";
+		}
+
+		Connection con = dataSource.getConnection();
+		PreparedStatement stmt = con.prepareStatement(query);
+		stmt.setString(1, channel_type.name().toLowerCase());
+		stmt.setString(2, phrase);
 
 		return new ChannelEntryStream(con, stmt, stmt.executeQuery());
 	}
