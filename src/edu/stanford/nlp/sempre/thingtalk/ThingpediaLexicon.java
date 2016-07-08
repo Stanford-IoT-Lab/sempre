@@ -26,7 +26,7 @@ public class ThingpediaLexicon {
 	public static Options opts = new Options();
 
 	public enum Mode {
-		APP, KIND, TRIGGER, ACTION, QUERY;
+		APP, KIND, PARAM, TRIGGER, ACTION, QUERY;
 	};
 
 	public static abstract class Entry {
@@ -40,6 +40,33 @@ public class ThingpediaLexicon {
 		@Override
 		public String toString() {
 			return "[ " + getRawPhrase() + " => " + toFormula() + " ]";
+		}
+	}
+
+	private static class ParamEntry extends Entry {
+		private final String rawPhrase;
+		private final String argname;
+		private final String kind;
+		private final String type;
+		private final String channelName;
+
+		public ParamEntry(String rawPhrase, String argname, String type, String kind, String channelName) {
+			this.rawPhrase = rawPhrase;
+			this.argname = argname;
+			this.type = type;
+			this.kind = kind;
+			this.channelName = channelName;
+		}
+
+		@Override
+		public String getRawPhrase() {
+			return rawPhrase;
+		}
+
+		@Override
+		public Formula toFormula() {
+			return new ValueFormula<>(
+					new ParamNameValue(argname, type, new NameValue("tt:" + kind + "." + channelName)));
 		}
 	}
 
@@ -227,6 +254,17 @@ public class ThingpediaLexicon {
 		}
 	}
 
+	private static class ParamEntryStream extends EntryStream {
+		public ParamEntryStream(Connection con, Statement stmt, ResultSet rs) {
+			super(con, stmt, rs);
+		}
+
+		@Override
+		protected ParamEntry createEntry() throws SQLException {
+			return new ParamEntry(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5));
+		}
+	}
+
 	private static class EmptyEntryStream implements AbstractEntryStream {
 		public EmptyEntryStream() {
 		}
@@ -246,7 +284,7 @@ public class ThingpediaLexicon {
 		}
 	}
 
-	public EntryStream lookupApp(String phrase) throws SQLException {
+	public AbstractEntryStream lookupApp(String phrase) throws SQLException {
 		if (opts.verbose >= 2)
 			LogInfo.logs("ThingpediaLexicon.lookupApp %s", phrase);
 
@@ -264,7 +302,7 @@ public class ThingpediaLexicon {
 		return new AppEntryStream(con, stmt, stmt.executeQuery());
 	}
 
-	public EntryStream lookupKind(String phrase) throws SQLException {
+	public AbstractEntryStream lookupKind(String phrase) throws SQLException {
 		if (opts.verbose >= 2)
 			LogInfo.logs("ThingpediaLexicon.lookupKind %s", phrase);
 
@@ -275,6 +313,35 @@ public class ThingpediaLexicon {
 		stmt.setString(1, phrase);
 
 		return new KindEntryStream(con, stmt, stmt.executeQuery());
+	}
+
+	public AbstractEntryStream lookupParam(String phrase) throws SQLException {
+		if (opts.verbose >= 2)
+			LogInfo.logs("ThingpediaLexicon.lookupParam %s", phrase);
+
+		String[] tokens = phrase.split(" ");
+
+		String query;
+		if (Builder.opts.parser.equals("BeamParser")) {
+			if (tokens.length > 4)
+				return new EmptyEntryStream();
+
+			query = "select canonical, argname, argtype, kind, channel_name from device_schema_arguments join device_schema "
+					+ "on schema_id = id and version = approved_version and canonical = ? and kind_type <> 'primary'";
+		} else {
+			if (tokens.length > 1)
+				return new EmptyEntryStream();
+
+			query = "select canonical, argname, argtype, kind, channel_name from device_schema_arguments join device_schema "
+					+ "on schema_id = id and version = approved_version and match canonical against (? in natural language "
+					+ "mode) and kind_type <> 'primary'";
+		}
+
+		Connection con = dataSource.getConnection();
+		PreparedStatement stmt = con.prepareStatement(query);
+		stmt.setString(1, phrase);
+
+		return new ParamEntryStream(con, stmt, stmt.executeQuery());
 	}
 
 	public AbstractEntryStream lookupChannel(String phrase, Mode channel_type) throws SQLException {
