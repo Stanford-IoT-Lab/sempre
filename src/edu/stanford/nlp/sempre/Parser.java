@@ -1,9 +1,9 @@
 package edu.stanford.nlp.sempre;
 
-import fig.basic.*;
-
 import java.io.PrintWriter;
 import java.util.*;
+
+import fig.basic.*;
 
 ////////////////////////////////////////////////////////////
 
@@ -152,13 +152,19 @@ public abstract class Parser {
       ex.targetValue = executor.execute(ex.targetFormula, ex.context).value;
 
     // Parse
+    ParserState state;
     StopWatch watch = new StopWatch();
-    watch.start();
-    LogInfo.begin_track("Parser.parse: parse");
-    ParserState state = newParserState(params, ex, computeExpectedCounts);
-    state.infer();
-    LogInfo.end_track();
-    watch.stop();
+    params.readLock();
+    try {
+      watch.start();
+      LogInfo.begin_track("Parser.parse: parse");
+      state = newParserState(params, ex, computeExpectedCounts);
+      state.infer();
+      LogInfo.end_track();
+      watch.stop();
+    } finally {
+      params.readUnlock();
+    }
     state.parseTime = watch.getCurrTimeLong();
     state.setEvaluation();
 
@@ -273,7 +279,7 @@ public abstract class Parser {
         boolean print = printAllPredictions || (numPrintedSoFar < opts.maxPrintedTrue);
         if (print) {
           LogInfo.logs(
-                  "True@%04d: %s [score=%s, prob=%s%s]", i, deriv.toString(),
+							"True@%04d: %s %s [score=%s, prob=%s%s]", i, deriv.toString(), deriv.canonicalUtterance,
                   Fmt.D(deriv.score), Fmt.D(probs[i]), compatibilities != null ? ", comp=" + Fmt.D(compatibilities[i]) : "");
           numPrintedSoFar++;
           if (opts.dumpAllFeatures) FeatureVector.logFeatureWeights("Features", deriv.getAllFeatureVector(), state.params);
@@ -288,7 +294,7 @@ public abstract class Parser {
         boolean print = printAllPredictions || (numPrintedSoFar < opts.maxPrintedTrue);
         if (print) {
           LogInfo.logs(
-                  "Part@%04d: %s [score=%s, prob=%s%s]", i, deriv.toString(),
+							"Part@%04d: %s %s [score=%s, prob=%s%s]", i, deriv.toString(), deriv.canonicalUtterance,
                   Fmt.D(deriv.score), Fmt.D(probs[i]), compatibilities != null ? ", comp=" + Fmt.D(compatibilities[i]) : "");
           numPrintedSoFar++;
           if (opts.dumpAllFeatures) FeatureVector.logFeatureWeights("Features", deriv.getAllFeatureVector(), state.params);
@@ -303,7 +309,7 @@ public abstract class Parser {
       boolean print = printAllPredictions || ((probs[i] >= probs[0] / 2 || i < 10) && i < opts.maxPrintedPredictions);
       if (print) {
         LogInfo.logs(
-                "Pred@%04d: %s [score=%s, prob=%s%s]", i, deriv.toString(),
+						"Pred@%04d: %s %s [score=%s, prob=%s%s]", i, deriv.toString(), deriv.canonicalUtterance,
                 Fmt.D(deriv.score), Fmt.D(probs[i]), compatibilities != null ? ", comp=" + Fmt.D(compatibilities[i]) : "");
         // LogInfo.logs("Derivation tree: %s", deriv.toRecursiveString());
         if (opts.dumpAllFeatures) FeatureVector.logFeatureWeights("Features", deriv.getAllFeatureVector(), state.params);

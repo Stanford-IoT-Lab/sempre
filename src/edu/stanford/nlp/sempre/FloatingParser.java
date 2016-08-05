@@ -149,7 +149,11 @@ class FloatingParserState extends ParserState {
 				new SemanticFn.CallInfo(rule.lhs, start, end, rule, children));
 		while (results.hasNext()) {
 			Derivation newDeriv = results.next();
-			newDeriv.canonicalUtterance = canonicalUtterance;
+			// only overwrite canonical utterance if it's missing
+			// this handles derivations produced by thingtalk.ThingpediaLexiconFn,
+			// where the canonical is already set (and we don't want to mess it up)
+			if (newDeriv.canonicalUtterance == null || newDeriv.canonicalUtterance.length() == 0)
+				newDeriv.canonicalUtterance = canonicalUtterance;
 
 			// make sure we execute
 			if (FloatingParser.opts.executeAllDerivations && !(newDeriv.type instanceof FuncSemType))
@@ -365,7 +369,7 @@ class FloatingParserState extends ParserState {
     if (Parser.opts.verbose >= 1) {
       LogInfo.begin_track("Summary of Example %s", ex.getUtterance());
       for (Derivation deriv : predDerivations)
-        LogInfo.logs("Generated: canonicalUtterance=%s, value=%s", deriv.canonicalUtterance, deriv.value);
+        LogInfo.logs("Generated: canonicalUtterance=%s", deriv.canonicalUtterance);
       LogInfo.end_track();
     }
 
@@ -375,7 +379,7 @@ class FloatingParserState extends ParserState {
       PrintWriter vWriter = IOUtils.openOutAppendEasy(Execution.getFile("utterances_value.tsv"));
       Derivation.sortByScore(predDerivations);
       for (Derivation deriv: predDerivations) {
-        if (deriv.score > -10) {
+				if (deriv.score > -50) {
           writer.println(String.format("%s\t%s", deriv.canonicalUtterance, deriv.score));
           fWriter.println(String.format("%s\t%s", deriv.canonicalUtterance, deriv.formula.toString()));
 					vWriter.println(String.format("%s\t%s", deriv.canonicalUtterance,

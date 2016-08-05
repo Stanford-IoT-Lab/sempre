@@ -1,0 +1,40 @@
+(def @language_tag es)
+
+(def @true cierto)
+(def @false falso)
+
+# FIXME!!
+(def @here here)
+(def @at_work (at work))
+(def @at_home (at home))
+
+(def @is es)
+(def @contains contiene)
+(def @has tiene)
+(def @is_greater_than (es mayor que))
+(def @is_less_than (es menos que))
+
+(def @with con)
+(def @and y)
+(def @monitor_if (controla se))
+
+(def @help ayuda)
+(def @discover buscar)
+(def @configure configurar)
+(def @devices dispositivos)
+(def @queries consultas)
+(def @commands comandos)
+(def @list lista)
+# FIXME!!
+(def @every_day_at (every day at))
+(def @every (every))
+
+(def @yes "sí")
+(def @no no)
+(def @hello hola)
+(def @thanks gracias)
+(def @sorry desculpame)
+(def @cool rico)
+(def @never_mind (no importa))
+
+(include "./sabrina.grammar")

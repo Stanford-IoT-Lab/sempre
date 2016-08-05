@@ -1,15 +1,13 @@
 package edu.stanford.nlp.sempre;
 
+import java.io.PrintWriter;
+import java.util.*;
+
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
+
 import fig.basic.*;
 import fig.exec.Execution;
-
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * The main learning loop.  Goes over a dataset multiple times, calling the
@@ -45,16 +43,19 @@ public class Learner {
     public boolean updateWeights = true;
     @Option(gloss = "whether to check gradient")
     public boolean checkGradient = false;
+
+    @Option(gloss = "whether to reduce the scoring noise at each iteration (see Parser.derivationScoreNoise)")
+    public boolean reduceParserScoreNoise = false;
   }
   public static Options opts = new Options();
 
   private Parser parser;
   private final Params params;
-  private final Dataset dataset;
+	private final AbstractDataset dataset;
   private final PrintWriter eventsOut;  // For printing a machine-readable log
   private final List<SemanticFn> semFuncsToUpdate;
 
-  public Learner(Parser parser, Params params, Dataset dataset) {
+	public Learner(Parser parser, Params params, AbstractDataset dataset) {
     this.parser = parser;
     this.params = params;
     this.dataset = dataset;
@@ -104,9 +105,13 @@ public class Learner {
       for (String group : dataset.groups())
         meanEvaluations.put(group, new Evaluation());
 
+      boolean lastIter = (iter == numIters);
+      // set scoring noise to 0 on last iteration (which is not training)
+      if (lastIter && opts.reduceParserScoreNoise)
+        Parser.opts.derivationScoreNoise = 0;
+
       // Test and train
       for (String group : dataset.groups()) {
-        boolean lastIter = (iter == numIters);
         boolean updateWeights = opts.updateWeights && group.equals("train") && !lastIter;  // Don't train on last iteration
         Evaluation eval = processExamples(
                 iter,
@@ -124,6 +129,9 @@ public class Learner {
         params.write(path);
         Utils.systemHard("ln -sf params." + iter + " " + Execution.getFile("params"));
       }
+
+      if (!lastIter && opts.reduceParserScoreNoise)
+        Parser.opts.derivationScoreNoise /= 1.5;
 
       LogInfo.end_track();
     }
@@ -219,19 +227,29 @@ public class Learner {
 
   private void checkGradient(Example ex, ParserState state) {
     double eps = 1e-2;
-    for (String feature : state.expectedCounts.keySet()) {
-      LogInfo.begin_track("feature=%s", feature);
-      double computedGradient = state.expectedCounts.get(feature);
-      Params perturbedParams = this.params.copyParams();
-      perturbedParams.getWeights().put(feature, perturbedParams.getWeight(feature) + eps);
-      ParserState perturbedState = parseExample(perturbedParams, ex, true);
-      double checkedGradient = (perturbedState.objectiveValue - state.objectiveValue) / eps;
-      LogInfo.logs("Learner.checkGradient(): weight=%s, pertWeight=%s, obj=%s, pertObj=%s, feature=%s, computed=%s, checked=%s, diff=%s",
-              params.getWeight(feature), perturbedParams.getWeight(feature),
-              state.objectiveValue, perturbedState.objectiveValue,
-              feature,
-              computedGradient, checkedGradient, Math.abs(checkedGradient - computedGradient));
-      LogInfo.end_track();
+    // finalizeWeights acquires the write lock, so call it outside the
+    // read lock
+    this.params.finalizeWeights();
+    this.params.readLock();
+    try {
+      for (String feature : state.expectedCounts.keySet()) {
+        LogInfo.begin_track("feature=%s", feature);
+        double computedGradient = state.expectedCounts.get(feature);
+        Params perturbedParams = this.params.copyParams();
+        perturbedParams.finalizeWeights();
+        perturbedParams.getWeights().put(feature, perturbedParams.getWeight(feature) + eps);
+        ParserState perturbedState = parseExample(perturbedParams, ex, true);
+        double checkedGradient = (perturbedState.objectiveValue - state.objectiveValue) / eps;
+        LogInfo.logs(
+            "Learner.checkGradient(): weight=%s, pertWeight=%s, obj=%s, pertObj=%s, feature=%s, computed=%s, checked=%s, diff=%s",
+            params.getWeight(feature), perturbedParams.getWeight(feature),
+            state.objectiveValue, perturbedState.objectiveValue,
+            feature,
+            computedGradient, checkedGradient, Math.abs(checkedGradient - computedGradient));
+        LogInfo.end_track();
+      }
+    } finally {
+      this.params.readUnlock();
     }
   }
 
