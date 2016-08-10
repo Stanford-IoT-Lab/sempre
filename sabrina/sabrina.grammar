@@ -21,19 +21,17 @@
 (def @special edu.stanford.nlp.sempre.thingtalk.ThingTalk.special)
 
 # Value Parsing
+(rule $NumValue (one) (ConstantFn (number 1)))
 (rule $NumValue ($PHRASE) (NumberFn) (anchored 1))
 (rule $DateValue ($PHRASE) (DateFn) (anchored 1))
 (rule $TimeValue ($PHRASE) (TimeFn) (anchored 1))
 (rule $NumberValue ($NumValue) (IdentityFn))
-(rule $TemperatureValue ($NumValue c) (lambda num (call @measureValueCast (string "C") (var num))))
-(rule $TemperatureValue ($NumValue f) (lambda num (call @measureValueCast (string "F") (var num))))
-(rule $TimeIntervalValue ($NumValue s) (lambda num (call @measureValueCast (string "s") (var num))))
-(rule $TimeIntervalValue ($NumValue min) (lambda num (call @measureValueCast (string "min") (var num))))
-(rule $TimeIntervalValue ($NumValue h) (lambda num (call @measureValueCast (string "h") (var num))))
-(rule $TimeIntervalValue ($NumValue day) (lambda num (call @measureValueCast (string "day") (var num))))
-(rule $TimeIntervalValue ($NumValue week) (lambda num (call @measureValueCast (string "week") (var num))))
-(rule $TimeIntervalValue ($NumValue month) (lambda num (call @measureValueCast (string "mon") (var num))))
-(rule $TimeIntervalValue ($NumValue year) (lambda num (call @measureValueCast (string "year") (var num))))
+(for @unit (s min h day week month year)
+	(rule $TimeIntervalValue ($NumValue @unit) (lambda num (call @measureValueCast (string @unit) (var num))))
+)
+(for @unit (C F)
+	(rule $MeasureValue ($NumValue @unit) (lambda num (call @measureValueCast (string @unit) (var num))))
+)
 (rule $BooleanValue (@true) (ConstantFn (boolean true)))
 (rule $BooleanValue (@false) (ConstantFn (boolean false)))
 (rule $StrValue ($PHRASE) (IdentityFn) (anchored 1))
@@ -58,12 +56,20 @@
 (rule $EmailAddress ($TOKEN) (NerValueFn EMAIL_ADDRESS) (anchored 1))
 (rule $EmailAddressValue ($EmailAddress) (lambda v (call @emailAddressCast (var v))))
 
-(def @non_string_values ($DateValue $TimeValue $NumberValue
-$TemperatureValue $TimeIntervalValue $BooleanValue $LocationValue
-$PhoneNumberValue $EmailAddressValue))
 (def @all_values ($DateValue $TimeValue $NumberValue
-$TemperatureValue $TimeIntervalValue $BooleanValue $LocationValue
+$MeasureValue $TimeIntervalValue $BooleanValue $LocationValue
 $PhoneNumberValue $EmailAddressValue $StringValue))
+
+# Answer handling
+# NOTE 1: string answers are handled by putting Sabrina in "raw" mode
+# which bypasses sempre
+# DO NOT put $Answer -> $StringValue here, it would catch everything and confuse the parser
+# NOTE 2: boolean answers are matched to yes/no, which are specials
+# but you still need to handle them here to match synonyms of true/false like on/off
+# that should not be learned as synonyms of yes/no
+(def @answer_values ($DateValue $TimeValue $NumberValue
+$MeasureValue $TimeIntervalValue $BooleanValue $LocationValue
+$PhoneNumberValue $EmailAddressValue))
 
 # FIXME: Integrate this to improve the canonicals
 #(rule $PersonValue ($PHRASE) (FilterNerSpanFn PERSON) (anchored 1))
@@ -144,12 +150,12 @@ $PhoneNumberValue $EmailAddressValue $StringValue))
 (rule $MonitorIf @monitor_if (ConstantFn (string "")))
 (rule $Notify ($MonitorIf $ValidTrigger) (SelectFn 1))
 
-(rule $ValidActionOrQuery ($ValidAction) (IdentityFn))
-(rule $ValidActionOrQuery ($ValidQuery) (IdentityFn))
 (rule $TimeRulePrefix @every_day_at (ConstantFn (string "")))
 (rule $TimeTrigger ($TimeRulePrefix $TimeValue) (SelectFn 1))
-(rule $TimeRule ($TimeTrigger $ValidActionOrQuery) (lambda time (lambda action (call @timeRule (var time) (var action)))))
-(rule $TimeRule (@every $TimeIntervalValue $ValidActionOrQuery) (lambda time (lambda action (call @timeSpanRule (var time) (var action)))))
+(for @what ($ValidAction $ValidQuery) 
+	(rule $TimeRule ($TimeTrigger @what) (lambda time (lambda action (call @timeRule (var time) (var action)))))
+	(rule $TimeRule (@every $TimeIntervalValue @what) (lambda time (lambda action (call @timeSpanRule (var time) (var action)))))
+)
 
 (rule $Device ($TOKEN) (thingtalk.ThingpediaLexiconFn @language_tag kind) (anchored 1))
 
@@ -191,15 +197,12 @@ $PhoneNumberValue $EmailAddressValue $StringValue))
 (rule $Special @never_mind (ConstantFn tt:root.special.nevermind))
 # this is a literal, it is not translated
 (rule $Special (debug) (ConstantFn tt:root.special.debug))
+# this is a special token that should never be matched
+# it represents the failure to parse meaningfully (which triggers
+# fallbacks on the client side)
+(rule $Special (failuretoparse) (ConstantFn tt:root.special.failed))
 
-# Answer handling
-# NOTE 1: string answers are handled by putting Sabrina in "raw" mode
-# which bypasses sempre
-# DO NOT put $Answer -> $StringValue here, it would catch everything and confuse the parser
-# NOTE 2: boolean answers are matched to yes/no, which are specials
-# but you still need to handle them here to match synonyms of true/false like on/off
-# that should not be learned as synonyms of yes/no
-(for @v @non_string_values
+(for @v @answer_values
 	(rule $Answer (@v) (lambda value (call @ansForm (var value))))
 )
 

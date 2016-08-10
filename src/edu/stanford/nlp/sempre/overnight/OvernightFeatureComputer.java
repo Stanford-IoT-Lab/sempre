@@ -203,7 +203,7 @@ public final class OvernightFeatureComputer implements FeatureComputer {
     // derivation, but we can only specify the local feature vector.  So to
     // make things cancel out, we subtract out the unwanted feature vectors of
     // descendents.
-    //subtractDescendentsFeatures(deriv, deriv);
+    subtractDescendentsFeatures(deriv, deriv);
 
     deriv.addFeature("paraphrase", "size", derivationSize(deriv));
 
@@ -314,7 +314,12 @@ public final class OvernightFeatureComputer implements FeatureComputer {
     ArrayList<Item> filteredInputTokens = filterStopWords(inputItems);
     ArrayList<Item> filteredDerivTokens = filterStopWords(derivItems);
 
-    int[] assignment = bMatcher.findMaxWeightAssignment(buildAlignmentMatrix(filteredInputTokens, filteredDerivTokens));
+    // the bipartite matcher explodes if filtered input tokens is zero length
+    int[] assignment;
+    if (!filteredInputTokens.isEmpty())
+      assignment = bMatcher.findMaxWeightAssignment(buildAlignmentMatrix(filteredInputTokens, filteredDerivTokens));
+    else
+      assignment = new int[0];
 
     if (opts.featureDomains.contains("root")) {
       //number of unmathced words based on exact match and ppdb
@@ -487,6 +492,10 @@ public final class OvernightFeatureComputer implements FeatureComputer {
     BipartiteMatcher bMatcher = new BipartiteMatcher();
     ArrayList<Item> filteredInputTokens = filterStopWords(inputItems);
     ArrayList<Item> filteredDerivTokens = filterStopWords(derivItems);
+
+    // the bipartite matcher explodes if filtered input tokens is zero length
+    if (filteredInputTokens.isEmpty())
+      return;
 
     double[][] alignmentMatrix = buildLexicalAlignmentMatrix(filteredInputTokens, filteredDerivTokens);
     int[] assignment = bMatcher.findMaxWeightAssignment(alignmentMatrix);
@@ -734,7 +743,13 @@ public final class OvernightFeatureComputer implements FeatureComputer {
   private static void subtractDescendentsFeatures(Derivation deriv, Derivation subderiv) {
     if (subderiv.children != null) {
       for (Derivation child : subderiv.children) {
-        deriv.getLocalFeatureVector().add(-1, child.getLocalFeatureVector());
+        deriv.getLocalFeatureVector().add(-1, child.getLocalFeatureVector(), new FeatureMatcher() {
+          @Override
+          public boolean matches(String feature) {
+            return feature.startsWith("paraphrase :: ") || feature.startsWith("lexical :: ");
+          }
+
+        });
         subtractDescendentsFeatures(deriv, child);
       }
     }
