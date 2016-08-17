@@ -73,7 +73,7 @@ public class APIServer implements Runnable {
     @Option
     public String chuid = null;
     @Option
-    public List<String> languages = Arrays.asList(new String[] { "en", "it", "es" });
+    public List<String> languages = Arrays.asList(new String[] { "en", "it", "es", "zh" });
     @Option
     public List<Pair<String, String>> onlineLearnFiles = new ArrayList<>();
     @Option
