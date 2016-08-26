@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import edu.stanford.nlp.sempre.*;
+import edu.stanford.nlp.sempre.LanguageInfo.LanguageUtils;
 import fig.basic.LogInfo;
 import fig.basic.Option;
 
@@ -99,9 +100,11 @@ public class ThingpediaLexicon {
     private final String kind;
     private final String name;
     private final List<String> argnames;
+    private final List<String> argcanonicals;
     private final List<String> argtypes;
 
-    public ChannelEntry(String rawPhrase, String kind, String name, String argnames, String argtypes)
+    public ChannelEntry(String rawPhrase, String kind, String name, String argnames, String argcanonicals,
+        String argtypes)
         throws JsonProcessingException {
       this.rawPhrase = rawPhrase;
       this.kind = kind;
@@ -110,6 +113,7 @@ public class ThingpediaLexicon {
       TypeReference<List<String>> typeRef = new TypeReference<List<String>>() {
       };
       this.argnames = Json.readValueHard(argnames, typeRef);
+      this.argcanonicals = Json.readValueHard(argcanonicals, typeRef);
       this.argtypes = Json.readValueHard(argtypes, typeRef);
     }
 
@@ -120,7 +124,7 @@ public class ThingpediaLexicon {
 
     @Override
     public Formula toFormula() {
-      return new ValueFormula<>(new ChannelNameValue(kind, name, argnames, argtypes));
+      return new ValueFormula<>(new ChannelNameValue(kind, name, argnames, argcanonicals, argtypes));
     }
 
     @Override
@@ -376,16 +380,20 @@ public class ThingpediaLexicon {
       LogInfo.logs("ThingpediaLexicon cacheMiss");
 
     String query;
+    boolean isBeam;
     if (Builder.opts.parser.equals("BeamParser")) {
-      query = "select dscc.canonical,ds.kind,dsc.name,dsc.argnames,dsc.types from device_schema_channels dsc, device_schema ds, "
+      isBeam = true;
+      query = "select dscc.canonical,ds.kind,dsc.name,dsc.argnames,dscc.argcanonicals,dsc.types from device_schema_channels dsc, device_schema ds, "
           + " device_schema_channel_canonicals dscc where dsc.schema_id = ds.id and dsc.version = ds.developer_version and "
           + " dscc.schema_id = dsc.schema_id and dscc.version = dsc.version and dscc.name = dsc.name and language = ? and channel_type = ? "
           + " and canonical = ? and ds.kind_type <> 'primary' limit " + Parser.opts.beamSize;
     } else {
-      query = "select dscc.canonical,ds.kind,dsc.name,dsc.argnames,dsc.types from device_schema_channels dsc, device_schema ds, "
+      isBeam = false;
+      query = "select dscc.canonical,ds.kind,dsc.name,dsc.argnames,dscc.argcanonicals,dsc.types from device_schema_channels dsc, device_schema ds, "
           + " device_schema_channel_canonicals dscc where dsc.schema_id = ds.id and dsc.version = ds.developer_version and "
           + " dscc.schema_id = dsc.schema_id and dscc.version = dsc.version and dscc.name = dsc.name and language = ? and channel_type = ? "
-          + " and match canonical against (? in natural language mode) and ds.kind_type <> 'primary' limit "
+          + " and (match canonical against (? in natural language mode) or match keywords against (? in natural language mode)) "
+          + " and ds.kind_type <> 'primary' limit "
           + Parser.opts.beamSize;
     }
 
@@ -395,13 +403,23 @@ public class ThingpediaLexicon {
       try (PreparedStatement stmt = con.prepareStatement(query)) {
         stmt.setString(1, languageTag);
         stmt.setString(2, channel_type.toString().toLowerCase());
-        stmt.setString(3, phrase);
+        if (isBeam) {
+          stmt.setString(3, phrase);
+        } else {
+          String search = "";
+          for (int i = 0; i < tokens.length; i++) {
+            search += " " + tokens[i];
+            search += " " + LanguageUtils.stem(tokens[i]);
+          }
+          stmt.setString(3, search);
+          stmt.setString(3, search);
+        }
 
         entries = new LinkedList<>();
         try (ResultSet rs = stmt.executeQuery()) {
           while (rs.next())
             entries.add(new ChannelEntry(rs.getString(1), rs.getString(2), rs.getString(3),
-                rs.getString(4), rs.getString(5)));
+                rs.getString(4), rs.getString(5), rs.getString(6)));
         } catch (SQLException | JsonProcessingException e) {
           if (opts.verbose > 0)
             LogInfo.logs("Exception during lexicon lookup: %s", e.getMessage());
