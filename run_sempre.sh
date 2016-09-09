@@ -5,8 +5,7 @@
 # derivation that use $StringValue (which is a catch all)
 exec java -ea -Dmodules=core,corenlp,overnight,thingtalk,api \
               -Djava.library.path=jni \
-              -Djavax.net.ssl.keyStore=/opt/sempre/data/ssl.ks \
-              -Djavax.net.ssl.keyStorePassword=7frountarceunWuvac \
+              ${JAVA_ARGS} \
               -cp 'libsempre/*:lib/*' \
               edu.stanford.nlp.sempre.api.APIServer \
               -LanguageAnalyzer corenlp.CoreNLPAnalyzer \
@@ -38,3 +37,4 @@ exec java -ea -Dmodules=core,corenlp,overnight,thingtalk,api \
               -BeamParser.executeAllDerivations true \
               -FloatingParser.executeAllDerivations true \
               "$@"
+
