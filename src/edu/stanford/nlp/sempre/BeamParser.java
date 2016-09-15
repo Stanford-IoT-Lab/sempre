@@ -151,7 +151,7 @@ public void infer() {
           Derivation newDeriv = results.next();
 
           // make sure we execute
-          if (BeamParser.opts.executeAllDerivations && !(newDeriv.formula instanceof LambdaFormula))
+          if (BeamParser.opts.executeAllDerivations)
             newDeriv.ensureExecuted(parser.executor, ex.context);
 
           featurizeAndScoreDerivation(newDeriv);
@@ -162,7 +162,6 @@ public void infer() {
         Derivation deriv = new Derivation.Builder()
             .cat(rule.lhs).start(start).end(end).rule(rule)
             .children(ImmutableList.copyOf(children))
-            .formula(Formula.nullFormula)
             .createDerivation();
         addToChart(deriv);
         return 1;

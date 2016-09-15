@@ -135,15 +135,6 @@ public class DerivationPruner {
         }
       }
     }
-    // Prune if the denotation is an error and the formula is not a partial formula
-    if (containsStrategy("nonLambdaError") && !(deriv.formula instanceof LambdaFormula)) {
-      deriv.ensureExecuted(parser.executor, ex.context);
-      if (deriv.value instanceof ErrorValue) {
-        if (opts.pruningVerbosity >= 3)
-          LogInfo.logs("PRUNED [nonLambdaError] %s", formula);
-        return true;
-      }
-    }
     // Prune if the denotation has too many values
     if (containsStrategy("tooManyValues") && deriv.isRoot(ex.numTokens())) {
       deriv.ensureExecuted(parser.executor, ex.context);

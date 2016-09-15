@@ -99,49 +99,6 @@ public class JavaExecutor extends Executor {
         return null;
     }
 
-    // Apply func to each element of |list| and return the resulting list.
-    public static List<Object> map(List<Object> list, LambdaFormula func) {
-      List<Object> newList = new ArrayList<>();
-      for (Object elem : list) {
-        Object newElem = apply(func, elem);
-        newList.add(newElem);
-      }
-      return newList;
-    }
-
-    // list = [3, 5, 2], func = (lambda x (lambda y (call + (var x) (var y))))
-    // Returns (3 + 5) + 2 = 10
-    public static Object reduce(List<Object> list, LambdaFormula func) {
-      if (list.size() == 0) return null;
-      Object x = list.get(0);
-      for (int i = 1; i < list.size(); i++)
-        x = apply(func, x, list.get(i));
-      return x;
-    }
-
-    // Return elements x of |list| such that func(x) is true.
-    public static List<Object> select(List<Object> list, LambdaFormula func) {
-      List<Object> newList = new ArrayList<>();
-      for (Object elem : list) {
-        Object test = apply(func, elem);
-        if ((Boolean) test)
-          newList.add(elem);
-      }
-      return newList;
-    }
-
-    private static Object apply(LambdaFormula func, Object x) {
-      // Apply the function func to x.  In order to do that, need to convert x into a value.
-      Formula formula = Formulas.lambdaApply(func, new ValueFormula<>(toValue(x)));
-      return defaultExecutor.processFormula(formula);
-    }
-    private static Object apply(LambdaFormula func, Object x, Object y) {
-      // Apply the function func to x and y.  In order to do that, need to convert x into a value.
-      Formula formula = Formulas.lambdaApply(func, new ValueFormula<>(toValue(x)));
-      formula = Formulas.lambdaApply((LambdaFormula) formula, new ValueFormula<>(toValue(y)));
-      return defaultExecutor.processFormula(formula);
-    }
-
     public static List<Integer> range(int start, int end) {
       List<Integer> result = new ArrayList<>();
       for (int i = start; i < end; i++)
@@ -152,10 +109,6 @@ public class JavaExecutor extends Executor {
 
   @Override
 public Response execute(Formula formula, ContextValue context) {
-    // We can do beta reduction here since macro substitution preserves the
-    // denotation (unlike for lambda DCS).
-    formula = Formulas.betaReduction(formula);
-
     try {
       return new Response(toValue(processFormula(formula)));
     } catch (Exception e) {

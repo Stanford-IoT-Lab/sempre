@@ -1,11 +1,12 @@
 package edu.stanford.nlp.sempre;
 
+import java.util.*;
+
 import com.google.common.base.Joiner;
+
 import fig.basic.*;
 import fig.exec.Execution;
 import fig.prob.SampleUtils;
-
-import java.util.*;
 
 /**
  * @author joberant
@@ -182,6 +183,7 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
 
 
 
+  @Override
   protected void addToAgenda(DerivationStream derivationStream) {
     addToAgenda(derivationStream, 0d);
   }
@@ -212,6 +214,7 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
 
   // we need to override the method because parameters are prefixed with "search_"
   // this means that the score will not be the dot product and features and weights
+  @Override
   protected void featurizeAndScoreDerivation(Derivation deriv) {
     if (deriv.isFeaturizedAndScored()) return;
 
@@ -255,6 +258,7 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
             chart[0][numTokens].get(Rule.rootCat).size() < getBeamSize();
   }
 
+  @Override
   public void infer() {
     if (numTokens == 0)
       return;
@@ -585,6 +589,7 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
     }
   }
 
+  @Override
   public void setEvaluation() {
     LogInfo.begin_track_printAll("ReinforcementParserParserState.setEvaluation");
     super.setEvaluation();
@@ -875,10 +880,6 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
       if (deriv1.compatibility > deriv2.compatibility) return -1;
       if (deriv1.compatibility < deriv2.compatibility) return +1;
 
-      boolean deriv1Join = containsJoin(deriv1);
-      boolean deriv2Join = containsJoin(deriv2);
-      if (deriv1Join && !deriv2Join) return -1;
-      if (!deriv1Join && deriv2Join) return +1;
       // by score
       if (deriv1.score > deriv2.score) return -1;
       if (deriv1.score < deriv2.score) return +1;
@@ -886,19 +887,6 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
       if (deriv1.creationIndex < deriv2.creationIndex) return -1;
       if (deriv1.creationIndex > deriv2.creationIndex) return +1;
       return 0;
-    }
-
-    private boolean containsJoin(Derivation d) {
-      SemanticFn semanticFn = d.rule.getSem();
-      if (semanticFn != null) {
-        if (semanticFn instanceof JoinFn)
-          return true;
-      }
-      for (Derivation child : d.children) {
-        if (containsJoin(child))
-          return true;
-      }
-      return false;
     }
   }
 }
@@ -922,6 +910,7 @@ class PrioritizedDerivationStream implements Comparable<PrioritizedDerivationStr
     return 0;
   }
 
+  @Override
   public double getScore() { return derivStream.peek().score; }
   public void addProb(double prob) { probSum += prob; }
 }
@@ -966,6 +955,7 @@ class DerivInfo {
     return result;
   }
 
+  @Override
   public String toString() {
     return cat + "(" + start + "," + end + ") " + formula.toString();
   }

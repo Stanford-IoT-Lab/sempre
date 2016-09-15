@@ -4,7 +4,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 
 import fig.basic.MapUtils;
@@ -87,7 +86,6 @@ public class FeatureExtractor {
     extractSpanFeatures(ex, deriv);
     extractDenotationFeatures(ex, deriv);
     extractDependencyFeatures(ex, deriv);
-    conjoinLemmaAndBinary(ex, deriv);
     extractBigramFeatures(ex, deriv);
     for (FeatureComputer featureComputer : featureComputers)
       featureComputer.extractLocal(ex, deriv);
@@ -199,22 +197,6 @@ public class FeatureExtractor {
   public static final String ORG = "fb:organization.organization";
 
 
-  //used in Berant et al., 2013 and in the RL parser
-  //conjoins all binaries in the logical form with all non-entity lemmas
-  void conjoinLemmaAndBinary(Example ex, Derivation deriv) {
-    if (!containsDomain("lemmaAndBinaries")) return;
-    if (!deriv.isRoot(ex.numTokens())) return;
-
-    List<String> nonEntityLemmas = new LinkedList<>();
-    extractNonEntityLemmas(ex, deriv, nonEntityLemmas);
-    List<String> binaries = extractBinaries(deriv.formula);
-    String binariesStr = Joiner.on('_').join(binaries);
-    for (String nonEntityLemma : nonEntityLemmas) {
-      deriv.addFeature("lemmaAndBinaries", "nonEntitylemmas=" + nonEntityLemma +
-              ",binaries=" + binariesStr);
-    }
-  }
-
   // Extract the utterance that the derivation generates (not necessarily the
   // one in the input utterance).
   private void extractUtterance(Derivation deriv, List<String> utterance) {
@@ -248,17 +230,6 @@ public class FeatureExtractor {
         }
       }
     }
-  }
-
-  //Used in Berant et al., 2013 and in agenda-based RL parser
-  private List<String> extractBinaries(Formula formula) {
-    List<String> res = new LinkedList<>();
-    Set<String> atomicElements = Formulas.extractAtomicFreebaseElements(formula);
-    for (String atomicElement : atomicElements) {
-      if (atomicElement.split("\\.").length == 3 && !atomicElement.equals("fb:type.object.type"))
-        res.add(atomicElement);
-    }
-    return res;
   }
 
   /**

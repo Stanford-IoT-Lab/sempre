@@ -390,7 +390,7 @@ public class Grammar {
           else if (isRequiredCat.get(0) || isRequiredCat.get(1))
             sem = new SelectFn(0);
           else
-            sem = new ConstantFn(Formula.nullFormula);
+            sem = new ConstantFn(null);
 
           // We can't allow empty RHS, but if we need it, just mark it as all
           // can be optional.

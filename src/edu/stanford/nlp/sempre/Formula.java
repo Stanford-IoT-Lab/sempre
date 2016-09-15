@@ -1,11 +1,12 @@
 package edu.stanford.nlp.sempre;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Function;
-import fig.basic.LispTree;
 
-import java.util.List;
+import fig.basic.LispTree;
 
 /**
  * A Formula is a logical form, which is the result of semantic parsing. Current
@@ -31,6 +32,7 @@ public abstract class Formula {
   // Apply to formulas.  If |func| returns an empty set or |alwaysRecurse|, then recurse on children.
   public abstract List<Formula> mapToList(Function<Formula, List<Formula>> func, boolean alwaysRecurse);
 
+  @Override
   @JsonValue
   public String toString() { return toLispTree().toString(); }
 
@@ -47,11 +49,4 @@ public abstract class Formula {
   }
 
   public abstract int computeHashCode();
-
-  public static Formula nullFormula = new PrimitiveFormula() {
-      public LispTree toLispTree() { return LispTree.proto.newLeaf("null"); }
-      @SuppressWarnings({"equalshashcode"})
-      @Override public boolean equals(Object o) { return this == o; }
-      public int computeHashCode() { return 0; }
-  };
 }

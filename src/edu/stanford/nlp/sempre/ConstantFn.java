@@ -13,7 +13,7 @@ public class ConstantFn extends SemanticFn {
   public ConstantFn() { }
 
   public ConstantFn(Formula formula) {
-    init(LispTree.proto.newList("ConstantFn", formula.toLispTree()));
+    init(LispTree.proto.newList("ConstantFn", formula != null ? formula.toLispTree() : LispTree.proto.newLeaf("null")));
   }
 
   @Override

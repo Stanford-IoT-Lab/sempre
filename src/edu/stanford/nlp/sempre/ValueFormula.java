@@ -1,5 +1,9 @@
 package edu.stanford.nlp.sempre;
 
+import java.util.List;
+
+import com.google.common.base.Function;
+
 import fig.basic.LispTree;
 
 /**
@@ -8,13 +12,25 @@ import fig.basic.LispTree;
  *
  * @author Percy Liang
  */
-public class ValueFormula<T extends Value> extends PrimitiveFormula {
+public class ValueFormula<T extends Value> extends Formula {
   public final T value;
 
   public ValueFormula(T value) { this.value = value; }
+  @Override
   public LispTree toLispTree() {
     if (value instanceof NameValue) return LispTree.proto.newLeaf(((NameValue) value).id);
     return value.toLispTree();
+  }
+
+  @Override
+  public Formula map(Function<Formula, Formula> func) {
+    Formula result = func.apply(this);
+    return result == null ? this : result;
+  }
+
+  @Override
+  public List<Formula> mapToList(Function<Formula, List<Formula>> func, boolean alwaysRecurse) {
+    return func.apply(this);
   }
 
   @SuppressWarnings({"equalshashcode"})
@@ -27,6 +43,7 @@ public class ValueFormula<T extends Value> extends PrimitiveFormula {
     return true;
   }
 
+  @Override
   public int computeHashCode() {
     return value.hashCode();
   }

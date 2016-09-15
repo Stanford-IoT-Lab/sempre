@@ -156,7 +156,7 @@ class FloatingParserState extends ParserState {
         newDeriv.canonicalUtterance = canonicalUtterance;
 
       // make sure we execute
-      if (FloatingParser.opts.executeAllDerivations && !(newDeriv.formula instanceof LambdaFormula))
+      if (FloatingParser.opts.executeAllDerivations)
         newDeriv.ensureExecuted(parser.executor, ex.context);
 
       if (pruner.isPruned(newDeriv))
