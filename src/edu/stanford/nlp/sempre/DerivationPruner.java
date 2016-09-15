@@ -71,7 +71,7 @@ public class DerivationPruner {
   // ============================================================
 
   private boolean pruneFormula(Derivation deriv) {
-    return pruneSingleton(deriv) || pruneSuperlatives(deriv) || pruneMerges(deriv);
+    return pruneSingleton(deriv) || pruneSuperlatives(deriv);
   }
 
   /**
@@ -86,17 +86,6 @@ public class DerivationPruner {
    * Prune strings of multiple superlatives.
    */
   private boolean pruneSuperlatives(Derivation deriv) {
-    if (containsStrategy("doubleSuperlatives")) {
-      // Prune if there is an arg{max|min} whose head has arg{max|min}
-      if (deriv.formula instanceof SuperlativeFormula) {
-        SuperlativeFormula superlative = (SuperlativeFormula) deriv.formula;
-        if (superlative.head instanceof SuperlativeFormula) {
-          if (opts.pruningVerbosity >= 2)
-            LogInfo.logs("PRUNED [doubleSuperlatives] %s", deriv.formula);
-          return true;
-        }
-      }
-    }
     if (containsStrategy("multipleSuperlatives")) {
       // Prune if there are more than arg{max|min} appearing in the formula (don't need to be adjacent)
       List<LispTree> stack = new ArrayList<>();
@@ -122,22 +111,6 @@ public class DerivationPruner {
     return false;
   }
 
-  /**
-   * Prune merges.
-   */
-  private boolean pruneMerges(Derivation deriv) {
-    if (!(deriv.formula instanceof MergeFormula)) return false;
-    MergeFormula merge = (MergeFormula) deriv.formula;
-    if (containsStrategy("sameMerge")) {
-      if (merge.child1.equals(merge.child2)) {
-        if (opts.pruningVerbosity >= 2)
-          LogInfo.logs("PRUNED [sameMerge] %s", deriv.formula);
-        return true;
-      }
-    }
-    return false;
-  }
-
   // ============================================================
   // Denotation-based Pruning
   // ============================================================
@@ -146,7 +119,7 @@ public class DerivationPruner {
    * Pruning based on denotations.
    */
   private boolean pruneDenotation(Derivation deriv) {
-    return pruneFinalDenotation(deriv) || prunePartialDenotation(deriv);
+    return pruneFinalDenotation(deriv);
   }
 
   private boolean pruneFinalDenotation(Derivation deriv) {
@@ -178,26 +151,6 @@ public class DerivationPruner {
         if (((ListValue) deriv.value).values.size() > opts.maxNumValues) {
           if (opts.pruningVerbosity >= 3)
             LogInfo.logs("PRUNED [tooManyValues] %s", formula);
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  private boolean prunePartialDenotation(Derivation deriv) {
-    Formula formula = deriv.formula;
-    if (containsStrategy("badSuperlativeHead")) {
-      Formula head = null;
-      if (formula instanceof AggregateFormula)
-        head = ((AggregateFormula) formula).child;
-      else if (formula instanceof SuperlativeFormula)
-        head = ((SuperlativeFormula) formula).head;
-      if (head != null) {
-        Value headValue = parser.executor.execute(head, ex.context).value;
-        if (headValue instanceof ListValue && ((ListValue) headValue).values.size() < 2) {
-          if (opts.pruningVerbosity >= 3)
-            LogInfo.logs("PRUNED [badSuperlativeHead] %s", formula);
           return true;
         }
       }

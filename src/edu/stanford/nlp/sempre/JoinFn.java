@@ -205,13 +205,6 @@ public class JoinFn extends SemanticFn {
     private void doJoins(Derivation binaryDeriv, Derivation unaryDeriv) {
       String binaryPos = ex.languageInfo.getCanonicalPos(binaryDeriv.start);
       String unaryPos = ex.languageInfo.getCanonicalPos(unaryDeriv.start);
-      if (unaryCanBeArg0) {
-        Derivation deriv = doJoin(
-            binaryDeriv, Formulas.reverseFormula(binaryDeriv.formula),
-            unaryDeriv, unaryDeriv.formula,
-            "binary=" + binaryPos + ",unary=" + unaryPos + "_reverse");
-        if (deriv != null) derivations.add(deriv);
-      }
       if (unaryCanBeArg1) {
         Derivation deriv = doJoin(
             binaryDeriv, binaryDeriv.formula,

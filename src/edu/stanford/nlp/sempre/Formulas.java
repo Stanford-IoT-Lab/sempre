@@ -1,12 +1,13 @@
 package edu.stanford.nlp.sempre;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
-import fig.basic.LispTree;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+
+import fig.basic.LispTree;
 
 /**
  * Utilities for working with Formulas.
@@ -17,10 +18,10 @@ public abstract class Formulas {
   public static Formula fromLispTree(LispTree tree) {
     // Try to interpret as ValueFormula
     if (tree.isLeaf())  // Leaves are name values
-      return new ValueFormula<NameValue>(new NameValue(tree.value, null));
+      return new ValueFormula<>(new NameValue(tree.value, null));
     Value value = Values.fromLispTreeOrNull(tree);  // General case
     if (value != null)
-      return new ValueFormula<Value>(value);
+      return new ValueFormula<>(value);
 
     String func = tree.child(0).value;
     if (func != null) {
@@ -28,12 +29,6 @@ public abstract class Formulas {
         return new VariableFormula(tree.child(1).value);
       if (func.equals("lambda"))
         return new LambdaFormula(tree.child(1).value, fromLispTree(tree.child(2)));
-      if (func.equals("mark"))
-        return new MarkFormula(tree.child(1).value, fromLispTree(tree.child(2)));
-      if (func.equals("not"))
-        return new NotFormula(fromLispTree(tree.child(1)));
-      if (func.equals("reverse"))
-        return new ReverseFormula(fromLispTree(tree.child(1)));
       if (func.equals("call")) {
         Formula callFunc = fromLispTree(tree.child(1));
         List<Formula> args = Lists.newArrayList();
@@ -41,38 +36,6 @@ public abstract class Formulas {
           args.add(fromLispTree(tree.child(i)));
         return new CallFormula(callFunc, args);
       }
-    }
-
-    { // Merge: (and (fb:type.object.type fb:people.person) (fb:people.person.children fb:en.barack_obama))
-      MergeFormula.Mode mode = MergeFormula.parseMode(func);
-      if (mode != null)
-        return new MergeFormula(mode, fromLispTree(tree.child(1)), fromLispTree(tree.child(2)));
-    }
-
-    { // Aggregate: (count (fb:type.object.type fb:people.person))
-      AggregateFormula.Mode mode = AggregateFormula.parseMode(func);
-      if (mode != null)
-        return new AggregateFormula(mode, fromLispTree(tree.child(1)));
-    }
-
-    { // Superlative: (argmax 1 1 (fb:type.object.type fb:people.person) (lambda x (!fb:people.person.height_meters (var x))))
-      SuperlativeFormula.Mode mode = SuperlativeFormula.parseMode(func);
-      if (mode != null) {
-        Formula rank = parseIntToFormula(tree.child(1));
-        Formula count = parseIntToFormula(tree.child(2));
-        return new SuperlativeFormula(
-            mode,
-            rank,
-            count,
-            fromLispTree(tree.child(3)),
-            fromLispTree(tree.child(4)));
-      }
-    }
-
-    { // Arithmetic: (- (!fb:people.person.height_meters (var x)) (!fb:people.person.height_meters (var y)))
-      ArithmeticFormula.Mode mode = ArithmeticFormula.parseMode(func);
-      if (mode != null)
-        return new ArithmeticFormula(mode, fromLispTree(tree.child(1)), fromLispTree(tree.child(2)));
     }
 
     // Default is join: (fb:type.object.type fb:people.person)
@@ -85,7 +48,7 @@ public abstract class Formulas {
   private static Formula parseIntToFormula(LispTree tree) {
     try {
       int i = Integer.parseInt(tree.value);
-      double d = (double) i;
+      double d = i;
       NumberValue value = new NumberValue(d);
       return new ValueFormula(value);
     } catch (NumberFormatException e) {
@@ -100,6 +63,7 @@ public abstract class Formulas {
   public static Formula substituteVar(Formula formula, final String var, final Formula replaceFormula) {
     return formula.map(
         new Function<Formula, Formula>() {
+          @Override
           public Formula apply(Formula formula) {
             if (formula instanceof VariableFormula) {  // Replace variable
               String name = ((VariableFormula) formula).name;
@@ -117,6 +81,7 @@ public abstract class Formulas {
   public static Formula substituteFormula(Formula formula, final Formula searchFormula, final Formula replaceFormula) {
     return formula.map(
         new Function<Formula, Formula>() {
+          @Override
           public Formula apply(Formula formula) {
             if (formula.equals(searchFormula)) return replaceFormula;
             return null;
@@ -133,6 +98,7 @@ public abstract class Formulas {
   public static Formula betaReduction(Formula formula) {
     return formula.map(
         new Function<Formula, Formula>() {
+          @Override
           public Formula apply(Formula formula) {
             if (formula instanceof JoinFormula) {
               Formula relation = betaReduction(((JoinFormula) formula).relation);
@@ -149,10 +115,6 @@ public abstract class Formulas {
   public static boolean containsFreeVar(Formula formula, VariableFormula var) {
     if (formula instanceof PrimitiveFormula)
       return formula.equals(var);
-    if (formula instanceof MergeFormula) {
-      MergeFormula merge = (MergeFormula) formula;
-      return containsFreeVar(merge.child1, var) || containsFreeVar(merge.child2, var);
-    }
     if (formula instanceof JoinFormula) {
       JoinFormula join = (JoinFormula) formula;
       return containsFreeVar(join.relation, var) || containsFreeVar(join.child, var);
@@ -161,28 +123,6 @@ public abstract class Formulas {
       LambdaFormula lambda = (LambdaFormula) formula;
       if (lambda.var.equals(var.name)) return false;  // Blocked by bound variable
       return containsFreeVar(lambda.body, var);
-    }
-    if (formula instanceof MarkFormula) {
-      MarkFormula mark = (MarkFormula) formula;
-      // Note: marks are transparent, unlike lambdas
-      return containsFreeVar(mark.body, var);
-    }
-    if (formula instanceof ReverseFormula) {
-      return containsFreeVar(((ReverseFormula) formula).child, var);
-    }
-    if (formula instanceof AggregateFormula) {
-      return containsFreeVar(((AggregateFormula) formula).child, var);
-    }
-    if (formula instanceof ArithmeticFormula) {
-      return containsFreeVar(((ArithmeticFormula) formula).child1, var) || containsFreeVar(((ArithmeticFormula) formula).child2, var);
-    }
-    if (formula instanceof SuperlativeFormula) {
-      SuperlativeFormula superlative = (SuperlativeFormula) formula;
-      return containsFreeVar(superlative.rank, var) || containsFreeVar(superlative.count, var) || containsFreeVar(superlative.head, var) || containsFreeVar(superlative.relation, var);
-    }
-    if (formula instanceof NotFormula) {
-      NotFormula notForm = (NotFormula) formula;
-      return containsFreeVar(notForm.child, var);
     }
     throw new RuntimeException("Unhandled: " + formula);
   }
@@ -210,14 +150,10 @@ public abstract class Formulas {
 
   // TODO(jonathan): move to feature extractor (this function doesn't seem fundamental)
   public static boolean isCountFormula(Formula formula) {
-    if (formula instanceof AggregateFormula)
-      return ((AggregateFormula) formula).mode == AggregateFormula.Mode.count;
     if (formula instanceof JoinFormula) {
       Formula relation = ((JoinFormula) formula).relation;
       if (relation instanceof LambdaFormula) {
         Formula l = ((LambdaFormula) relation).body;
-        if (l instanceof AggregateFormula)
-          return ((AggregateFormula) l).mode == AggregateFormula.Mode.count;
       }
     }
     return false;
@@ -261,7 +197,7 @@ public abstract class Formulas {
   }
 
   public static ValueFormula<NameValue> newNameFormula(String id) {
-    return new ValueFormula<NameValue>(new NameValue(id));
+    return new ValueFormula<>(new NameValue(id));
   }
 
   /*
@@ -269,7 +205,7 @@ public abstract class Formulas {
    * TODO(joberant): replace this with Formulas.map
    */
   public static Set<String> extractSubparts(Formula f) {
-    Set<String> res = new HashSet<String>();
+    Set<String> res = new HashSet<>();
     extractSubpartsRecursive(f, res);
     return res;
   }
@@ -278,10 +214,7 @@ public abstract class Formulas {
     // base
     res.add(f.toString());
     // recurse
-    if (f instanceof AggregateFormula) {
-      AggregateFormula aggFormula = (AggregateFormula) f;
-      extractSubpartsRecursive(aggFormula, res);
-    } else if (f instanceof CallFormula) {
+    if (f instanceof CallFormula) {
       CallFormula callFormula = (CallFormula) f;
       extractSubpartsRecursive(callFormula.func, res);
       for (Formula argFormula : callFormula.args)
@@ -293,75 +226,6 @@ public abstract class Formulas {
     } else if (f instanceof LambdaFormula) {
       LambdaFormula lambdaFormula = (LambdaFormula) f;
       extractSubpartsRecursive(lambdaFormula.body, res);
-    } else if (f instanceof MarkFormula) {
-      MarkFormula markFormula = (MarkFormula) f;
-      extractSubpartsRecursive(markFormula.body, res);
-    } else if (f instanceof MergeFormula) {
-      MergeFormula mergeFormula = (MergeFormula) f;
-      extractSubpartsRecursive(mergeFormula.child1, res);
-      extractSubpartsRecursive(mergeFormula.child2, res);
-    } else if (f instanceof NotFormula) {
-      NotFormula notFormula = (NotFormula) f;
-      extractSubpartsRecursive(notFormula.child, res);
-    } else if (f instanceof ReverseFormula) {
-      ReverseFormula revFormula = (ReverseFormula) f;
-      extractSubpartsRecursive(revFormula.child, res);
-    } else if (f instanceof SuperlativeFormula) {
-      SuperlativeFormula superlativeFormula = (SuperlativeFormula) f;
-      extractSubpartsRecursive(superlativeFormula.rank, res);
-      extractSubpartsRecursive(superlativeFormula.count, res);
-      extractSubpartsRecursive(superlativeFormula.head, res);
-      extractSubpartsRecursive(superlativeFormula.relation, res);
     }
   }
-
-  // Takes in a |rawFormula| which represents a function x => y and returns a
-  // function y => x.
-  public static Formula reverseFormula(Formula rawFormula) {
-    if (rawFormula instanceof ValueFormula) {
-      @SuppressWarnings({ "unchecked" })
-      ValueFormula<NameValue> vf = (ValueFormula<NameValue>) rawFormula;
-      return reverseNameFormula(vf);
-    } else if (rawFormula instanceof LambdaFormula) {
-      // Convert (lambda x (relation1 (relation2 (var x)))) <=> (lambda x (!relation2 (!relation1 (var x))))
-      // Note: currently only handles chains.  Make this more generic.
-      LambdaFormula formula = (LambdaFormula) rawFormula;
-      if (isChain(formula.body))
-        return new LambdaFormula(formula.var, reverseChain(formula.body, new VariableFormula(formula.var)));
-      else
-        return new ReverseFormula(formula);
-    } else {
-      return new ReverseFormula(rawFormula);
-      // throw new RuntimeException("Not handled: " + rawFormula);
-    }
-  }
-
-  // Helper function for reverseFormula().
-  // Check to see if formula has the form (a (b (c (var x))))
-  private static boolean isChain(Formula source) {
-    if (source instanceof JoinFormula) {
-      JoinFormula join = (JoinFormula) source;
-      return isChain(join.child);
-    }
-    return source instanceof VariableFormula;
-  }
-  // Reverse the chain
-  private static Formula reverseChain(Formula source, Formula result) {
-    if (source instanceof JoinFormula) {
-      JoinFormula join = (JoinFormula) source;
-      return reverseChain(join.child, new JoinFormula(reverseFormula(join.relation), result));
-    } else if (source instanceof VariableFormula) {
-      return result;
-    } else {
-      throw new RuntimeException("Not handled: " + source);
-    }
-  }
-
-  // !fb:people.person.place_of_birth <=> fb:people.person.place_of_birth
-  private static ValueFormula<NameValue> reverseNameFormula(ValueFormula<NameValue> formula) {
-    String id = formula.value.id;
-    return new ValueFormula<>(
-            new NameValue(CanonicalNames.isReverseProperty(id) ?  id.substring(1) : "!" + id));
-  }
-
 }
