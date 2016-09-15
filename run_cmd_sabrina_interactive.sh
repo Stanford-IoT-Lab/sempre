@@ -10,7 +10,7 @@ exec java -Xmx12G -ea -Dmodules=core,corenlp,overnight,thingtalk \
               -CoreNLPAnalyzer.entityRecognizers corenlp.PhoneNumberEntityRecognizer corenlp.EmailEntityRecognizer \
               -CoreNLPAnalyzer.yearsAsNumbers -CoreNLPAnalyzer.splitHyphens false \
               -Builder.parser FloatingParser \
-              -Builder.executor JavaExecutor \
+              -Builder.executor DumbExecutor \
               -Builder.valueEvaluator thingtalk.JsonValueEvaluator \
               -JavaExecutor.unpackValues false \
               -Builder.dataset thingtalk.ThingpediaDataset \

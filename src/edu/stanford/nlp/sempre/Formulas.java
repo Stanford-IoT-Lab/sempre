@@ -1,9 +1,6 @@
 package edu.stanford.nlp.sempre;
 
-import java.util.List;
-
 import com.google.common.base.Function;
-import com.google.common.collect.Lists;
 
 import fig.basic.LispTree;
 
@@ -20,17 +17,6 @@ public abstract class Formulas {
     Value value = Values.fromLispTreeOrNull(tree);  // General case
     if (value != null)
       return new ValueFormula<>(value);
-
-    String func = tree.child(0).value;
-    if (func != null) {
-      if (func.equals("call")) {
-        Formula callFunc = fromLispTree(tree.child(1));
-        List<Formula> args = Lists.newArrayList();
-        for (int i = 2; i < tree.children.size(); i++)
-          args.add(fromLispTree(tree.child(i)));
-        return new CallFormula(callFunc, args);
-      }
-    }
 
     throw new RuntimeException("Unsupported formula syntax");
   }

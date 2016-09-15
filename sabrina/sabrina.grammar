@@ -29,11 +29,11 @@
 (for @unit (s min h day week mon year)
 	(rule $TimeUnit (@unit) (ConstantFn (string @unit)))
 )
-(rule $TimeIntervalValue ($NumValue $TimeUnit) (thingtalk.CallFn @measureValueCast))
+(rule $TimeIntervalValue ($NumValue $TimeUnit) (thingtalk.CallFn @measureValueCast 2))
 (for @unit (C F byte KB MB GB TB)
 	(rule $Unit (@unit) (ConstantFn (string @unit)))
 )
-(rule $MeasureValue ($NumValue $Unit) (thingtalk.CallFn @measureValueCast))
+(rule $MeasureValue ($NumValue $Unit) (thingtalk.CallFn @measureValueCast 2))
 (rule $BooleanValue (@true) (ConstantFn (boolean true)))
 (rule $BooleanValue (@false) (ConstantFn (boolean false)))
 # one can choose to enable floating strings, which means full strings to be picked up
@@ -57,10 +57,10 @@
 
 # recognize email addresses and phone numbers as strings
 (rule $PhoneNumber ($PHRASE) (NerValueFn PHONE_NUMBER) (anchored 1))
-(rule $PhoneNumberValue ($PhoneNumber) (thingtalk.CallFn @phoneNumberCast))
+(rule $PhoneNumberValue ($PhoneNumber) (thingtalk.CallFn @phoneNumberCast 1))
 # optimization: email addresses are always single token
 (rule $EmailAddress ($TOKEN) (NerValueFn EMAIL_ADDRESS) (anchored 1))
-(rule $EmailAddressValue ($EmailAddress) (thingtalk.CallFn @emailAddressCast))
+(rule $EmailAddressValue ($EmailAddress) (thingtalk.CallFn @emailAddressCast 1))
 
 (rule $PeriodicTimeValue ($PHRASE) (thingtalk.TimeDurationFn) (anchored 1))
 (rule $PeriodicTimeValue (@every $TimeIntervalValue) (SelectFn 0))
@@ -97,7 +97,7 @@ $PhoneNumberValue $EmailAddressValue))
 
 # Action Handling
 (rule $ActionName ($TOKEN) (thingtalk.ThingpediaLexiconFn @language_tag action) (anchored 1))
-(rule $Action ($ActionName) (thingtalk.CallFn @actParam))
+(rule $Action ($ActionName) (thingtalk.CallFn @actParam 1))
 (rule $ActionWithArg ($Action $WithArg) (thingtalk.ApplyFn action))
 (rule $ActionIntermediate ($ActionWithArg $Op) (thingtalk.AddOperatorFn action))
 (for @v @all_values
@@ -105,7 +105,7 @@ $PhoneNumberValue $EmailAddressValue))
 )
 
 (rule $TriggerName ($TOKEN) (thingtalk.ThingpediaLexiconFn @language_tag trigger) (anchored 1))
-(rule $Trigger ($TriggerName) (thingtalk.CallFn @trigParam))
+(rule $Trigger ($TriggerName) (thingtalk.CallFn @trigParam 1))
 (rule $TriggerWithArg ($Trigger $WithArg) (thingtalk.ApplyFn trigger))
 (rule $TriggerIntermediate ($TriggerWithArg $Op) (thingtalk.AddOperatorFn trigger))
 (for @v @all_values
@@ -113,7 +113,7 @@ $PhoneNumberValue $EmailAddressValue))
 )
 
 (rule $QueryName ($TOKEN) (thingtalk.ThingpediaLexiconFn @language_tag query) (anchored 1))
-(rule $Query ($QueryName) (thingtalk.CallFn @queryParam))
+(rule $Query ($QueryName) (thingtalk.CallFn @queryParam 1))
 (rule $QueryWithArg ($Query $WithArg) (thingtalk.ApplyFn query))
 (rule $QueryIntermediate ($QueryWithArg $Op) (thingtalk.AddOperatorFn query))
 (for @v @all_values
@@ -130,15 +130,15 @@ $PhoneNumberValue $EmailAddressValue))
 (rule $TimeActionRule ($TimeTrigger $Action)              (thingtalk.CallFn @timeRule))
 (rule $TimeQueryRule  ($PeriodicTimeValue $Query)         (thingtalk.CallFn @timeSpanRule))
 (rule $TimeActionRule ($PeriodicTimeValue $Action)        (thingtalk.CallFn @timeSpanRule))
-(rule $TimeActionRule ($TimeQueryRule @then $Action)      (thingtalk.CallFn @ifttt))
+(rule $TimeActionRule ($TimeQueryRule @then $Action)      (thingtalk.CallFn @ifttt 2))
 
 # manually binarize rule meaningfully
 (rule $IfTrigger       (@if $Trigger) (SelectFn 0))
 (rule $IfTriggerThen   ($IfTrigger @then)  (SelectFn 0))
-(rule $IftttQueryRule  ($IfTriggerThen $Query)            (thingtalk.CallFn @ifttt))
-(rule $IftttActionRule ($IfTriggerThen $Action)           (thingtalk.CallFn @ifttt))
-(rule $IftttActionRule ($IftttQueryRule @then $Action)    (thingtalk.CallFn @ifttt))
-(rule $IftttChain      ($Query @then $Action)        (thingtalk.CallFn @ifttt))
+(rule $IftttQueryRule  ($IfTriggerThen $Query)            (thingtalk.CallFn @ifttt 2))
+(rule $IftttActionRule ($IfTriggerThen $Action)           (thingtalk.CallFn @ifttt 2))
+(rule $IftttActionRule ($IftttQueryRule @then $Action)    (thingtalk.CallFn @ifttt 2))
+(rule $IftttChain      ($Query @then $Action)        (thingtalk.CallFn @ifttt 2))
 
 # the following rules are very very tricky
 # they deal with "with foo is that" passing of arguments from trigger to action
@@ -186,10 +186,10 @@ $PhoneNumberValue $EmailAddressValue))
 (rule $Special (failuretoparse) (ConstantFn tt:root.special.failed))
 
 (for @v @answer_values
-	(rule $Answer (@v) (thingtalk.CallFn @ansForm))
+	(rule $Answer (@v) (thingtalk.CallFn @ansForm 1))
 )
 
 (for @v ($Command $Action $Notify $Query $Answer $TimeQueryRule $TimeActionRule $IftttActionRule $IftttQueryRule $IftttChain)
-	(rule $ROOT (@v) (thingtalk.CallFn @jsonOut))
+	(rule $ROOT (@v) (thingtalk.CallFn @jsonOut 1))
 )
-(rule $ROOT ($Special) (thingtalk.CallFn @special))
+(rule $ROOT ($Special) (thingtalk.CallFn @special 1))

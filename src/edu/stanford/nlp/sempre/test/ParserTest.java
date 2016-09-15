@@ -1,13 +1,14 @@
 package edu.stanford.nlp.sempre.test;
 
-import edu.stanford.nlp.sempre.*;
-import fig.basic.LogInfo;
-import org.testng.annotations.Test;
+import static org.testng.AssertJUnit.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.testng.AssertJUnit.assertEquals;
+import org.testng.annotations.Test;
+
+import edu.stanford.nlp.sempre.*;
+import fig.basic.LogInfo;
 
 /**
  * Test parsers.
@@ -24,7 +25,7 @@ public class ParserTest {
     }
 
     public Parser.Spec getParserSpec() {
-      Executor executor = new JavaExecutor();
+      Executor executor = new DumbExecutor();
       FeatureExtractor extractor = new FeatureExtractor(executor);
       FeatureExtractor.opts.featureDomains.add("rule");
       ValueEvaluator valueEvaluator = new ExactValueEvaluator();

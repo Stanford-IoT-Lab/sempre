@@ -1,19 +1,19 @@
 package edu.stanford.nlp.sempre.test;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
-
-import edu.stanford.nlp.sempre.*;
-import fig.basic.Pair;
-import fig.basic.Evaluation;
-
-import org.testng.annotations.Test;
+import static org.testng.AssertJUnit.assertEquals;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.testng.AssertJUnit.assertEquals;
+import org.testng.annotations.Test;
+
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
+
+import edu.stanford.nlp.sempre.*;
+import fig.basic.Evaluation;
+import fig.basic.Pair;
 
 /**
  * Various end-to-end sanity checks.
@@ -28,7 +28,7 @@ public class SystemSanityTest {
 
     Builder b = new Builder();
     b.grammar = g;
-    b.executor = new FormulaMatchExecutor();
+    b.executor = new DumbExecutor();
     b.buildUnspecified();
     return b;
   }

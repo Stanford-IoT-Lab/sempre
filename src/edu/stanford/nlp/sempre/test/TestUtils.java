@@ -45,7 +45,7 @@ public final class TestUtils {
   public static Builder makeSimpleBuilder() {
     Builder builder = new Builder();
     builder.grammar = makeNumberConcatGrammar();
-    builder.executor = new FormulaMatchExecutor();
+    builder.executor = new DumbExecutor();
     builder.buildUnspecified();
     return builder;
   }

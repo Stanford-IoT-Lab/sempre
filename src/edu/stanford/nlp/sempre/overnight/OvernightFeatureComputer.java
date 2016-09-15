@@ -255,7 +255,6 @@ public final class OvernightFeatureComputer implements FeatureComputer {
     extractRootFeatures(ex, deriv, inputItems.unigrams, candidateItems.unigrams);
     extractLexicalFeatures(ex, deriv, inputItems.unigrams, candidateItems.unigrams);
     extractPhraseAlignmentFeatures(ex, deriv, candidateItems.unigrams);
-    extractLogicalFormFeatures(ex, deriv);
 
     if (!opts.itemAnalysis) return;
     
@@ -398,58 +397,6 @@ public final class OvernightFeatureComputer implements FeatureComputer {
             deriv.addFeature("root_lexical", "deleted_token=" + derivToken.data1);
           }
         }
-      }
-    }
-  }
-
-  private List<Formula> getCallFormulas(Derivation deriv) {
-    return deriv.formula.mapToList(formula -> {
-      List<Formula> res = new ArrayList<>();
-      if (formula instanceof CallFormula) {
-        res.add(((CallFormula) formula).func);
-      }
-      return res;
-    }, true);
-  }
-  private void extractLogicalFormFeatures(Example ex, Derivation deriv) {
-    if (!opts.featureDomains.contains("lf")) return;
-    for (int i = 0; i < ex.numTokens(); ++i) {
-      List<Formula> callFormulas = getCallFormulas(deriv);
-      if (ex.posTag(i).equals("JJS")) {
-        if (ex.token(i).equals("least") || ex.token(i).equals("most")) //at least and at most are not what we want
-          continue;
-        for (Formula callFormula: callFormulas) {
-          String callFormulaDesc = callFormula.toString();
-          //LogInfo.logs("SUPER: utterance=%s, formula=%s", ex.utterance, deriv.formula);
-          deriv.addFeature("lf", callFormulaDesc + "& superlative");
-        }
-      }
-    }
-    if (!opts.featureDomains.contains("simpleworld")) return;
-    //specific handling of simple world methods
-    if (deriv.formula instanceof CallFormula) {
-      CallFormula callFormula = (CallFormula) deriv.formula;
-      String desc = callFormula.func.toString();
-      switch (desc) {
-        case "edu.stanford.nlp.sempre.overnight.SimpleWorld.filter":
-          deriv.addFeature("simpleworld", "filter&" + callFormula.args.get(1));
-          break;
-        case "edu.stanford.nlp.sempre.overnight.SimpleWorld.getProperty":
-          deriv.addFeature("simpleworld", "getProperty&" + callFormula.args.get(1));
-          break;
-        case "edu.stanford.nlp.sempre.overnight.SimpleWorld.superlative":
-          deriv.addFeature("simpleworld", "superlative&" + callFormula.args.get(1) + "&" + callFormula.args.get(2));
-          break;
-        case "edu.stanford.nlp.sempre.overnight.SimpleWorld.countSuperlative":
-          deriv.addFeature("simpleworld", "countSuperlative&" + callFormula.args.get(1) + "&" + callFormula.args.get(2));
-          break;
-        case "edu.stanford.nlp.sempre.overnight.SimpleWorld.countComparative":
-          deriv.addFeature("simpleworld", "countComparative&" + callFormula.args.get(2) + "&" + callFormula.args.get(1));
-          break;
-        case "edu.stanford.nlp.sempre.overnight.SimpleWorld.aggregate":
-          deriv.addFeature("simpleworld", "countComparative&" + callFormula.args.get(0));
-          break;
-        default: break;
       }
     }
   }

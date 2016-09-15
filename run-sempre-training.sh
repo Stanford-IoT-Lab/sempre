@@ -19,7 +19,7 @@ java -Xmx32G -ea -Dmodules=core,corenlp,overnight,thingtalk \
               -CoreNLPAnalyzer.yearsAsNumbers -CoreNLPAnalyzer.splitHyphens false \
               -CoreNLPAnalyzer.languageTag ${LANGUAGE_TAG} \
               -Builder.parser FloatingParser \
-              -Builder.executor JavaExecutor \
+              -Builder.executor DumbExecutor \
               -Builder.valueEvaluator thingtalk.JsonValueEvaluator \
               -JavaExecutor.unpackValues false \
               -Builder.dataset thingtalk.ThingpediaDataset \

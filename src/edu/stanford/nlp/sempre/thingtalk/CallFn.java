@@ -1,19 +1,36 @@
 package edu.stanford.nlp.sempre.thingtalk;
 
-import java.util.Collections;
-
-import com.beust.jcommander.internal.Lists;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import edu.stanford.nlp.sempre.*;
 import fig.basic.LispTree;
 
 public class CallFn extends SemanticFn {
-  private String function;
+  private int arity;
+  private Method method;
 
   @Override
   public void init(LispTree tree) {
     super.init(tree);
-    function = tree.child(1).value;
+
+    String function = tree.child(1).value;
+    arity = Integer.parseInt(tree.child(2).value);
+
+    try {
+      int idx = function.lastIndexOf('.');
+      String className = function.substring(0, idx);
+      String methodName = function.substring(idx + 1);
+
+      Class<?> _class = Class.forName(className);
+
+      Class<?>[] parameters = new Class<?>[arity];
+      for (int i = 0; i < arity; i++)
+        parameters[i] = Value.class;
+      method = _class.getMethod(methodName, parameters);
+    } catch (ClassNotFoundException | NoSuchMethodException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
@@ -21,18 +38,21 @@ public class CallFn extends SemanticFn {
     return new SingleDerivationStream() {
       @Override
       public Derivation createDerivation() {
-        Formula f;
-        int n = c.getChildren().size(); 
-        if (n == 1)
-          f = new CallFormula(function, Collections.singletonList(c.child(0).formula));
-        else if (n == 2)
-          f = new CallFormula(function, Lists.newArrayList(c.child(0).formula, c.child(1).formula));
-        else
-          throw new RuntimeException();
+        Object o;
+        try {
+          if (arity == 1)
+            o = method.invoke(null, c.child(0).value);
+          else if (arity == 2)
+            o = method.invoke(null, c.child(0).value, c.child(1).value);
+          else
+            throw new RuntimeException();
+        } catch (InvocationTargetException | IllegalAccessException e) {
+          throw new RuntimeException(e);
+        }
 
         return new Derivation.Builder()
             .withCallable(c)
-            .formula(f)
+            .formula(new ValueFormula<>((Value) o))
             .createDerivation();
       }
     };
