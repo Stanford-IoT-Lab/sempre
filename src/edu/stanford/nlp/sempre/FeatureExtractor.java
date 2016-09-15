@@ -47,15 +47,13 @@ public class FeatureExtractor {
 
   public static Options opts = new Options();
 
-  private Executor executor;
   private List<FeatureComputer> featureComputers = new ArrayList<>();
 
-  public FeatureExtractor(Executor executor) {
-    this(executor, opts.languageTag);
+  public FeatureExtractor() {
+    this(opts.languageTag);
   }
 
-  public FeatureExtractor(Executor executor, String languageTag) {
-    this.executor = executor;
+  public FeatureExtractor(String languageTag) {
     for (String featureComputer : opts.featureComputers) {
       try {
         Class<?> fcClass = Class.forName(SempreUtils.resolveClassName(featureComputer));
@@ -114,8 +112,6 @@ public class FeatureExtractor {
   void extractDenotationFeatures(Example ex, Derivation deriv) {
     if (!containsDomain("denotation")) return;
     if (!deriv.isRoot(ex.numTokens())) return;
-
-    deriv.ensureExecuted(executor, ex.context);
 
     if (deriv.value instanceof ErrorValue) {
       deriv.addFeature("denotation", "error");

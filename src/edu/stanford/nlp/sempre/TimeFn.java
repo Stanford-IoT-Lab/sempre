@@ -18,9 +18,9 @@ public class TimeFn extends SemanticFn {
         if (dateValue == null)
           return null;
         return new Derivation.Builder()
-                .withCallable(c)
-                .formula(new ValueFormula<>(dateValue))
-                .createDerivation();
+            .withCallable(c)
+            .value(dateValue)
+            .createDerivation();
       }
     };
   }

@@ -45,7 +45,7 @@ public class Session {
       Derivation deriv = derivations.get(0);
       List<ContextValue.Exchange> newExchanges = new ArrayList<>();
       newExchanges.addAll(context.exchanges);
-      newExchanges.add(new ContextValue.Exchange(ex.utterance, deriv.formula, deriv.value));
+      newExchanges.add(new ContextValue.Exchange(ex.utterance, deriv.value));
       while (newExchanges.size() > maxExchanges)
         newExchanges.remove(0);
       context = context.withNewExchange(newExchanges);
@@ -56,7 +56,7 @@ public class Session {
     List<ContextValue.Exchange> newExchanges = new ArrayList<>();
     for (int i = 0; i < context.exchanges.size() - 1; i++)
       newExchanges.add(context.exchanges.get(i));
-    newExchanges.add(new ContextValue.Exchange(ex.utterance, deriv.formula, deriv.value));
+    newExchanges.add(new ContextValue.Exchange(ex.utterance, deriv.value));
     context = context.withNewExchange(newExchanges);
   }
 

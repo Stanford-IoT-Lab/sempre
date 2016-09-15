@@ -1,34 +1,37 @@
 package edu.stanford.nlp.sempre.corenlp.test;
 
-import edu.stanford.nlp.sempre.*;
-import edu.stanford.nlp.sempre.corenlp.CoreNLPAnalyzer;
-import edu.stanford.nlp.sempre.test.TestUtils;
-import fig.basic.LispTree;
-import org.testng.annotations.Test;
+import static org.testng.AssertJUnit.assertEquals;
 
 import java.util.Collections;
 import java.util.List;
 
-import static org.testng.AssertJUnit.assertEquals;
+import org.testng.annotations.Test;
+
+import edu.stanford.nlp.sempre.*;
+import edu.stanford.nlp.sempre.corenlp.CoreNLPAnalyzer;
+import edu.stanford.nlp.sempre.test.TestUtils;
+import fig.basic.LispTree;
 
 /**
  * Test SemanticFns that depend on CoreNLP (e.g., NumberFn on "one thousand")
  * @author Percy Liang
  */
 public class CoreNLPSemanticFnTest {
-  private static Formula F(String s) { return Formula.fromString(s); }
-
-  void check(Formula target, DerivationStream derivations) {
-    if (!derivations.hasNext()) throw new RuntimeException("Expected 1 derivation, got " + derivations);
-    assertEquals(target, derivations.next().formula);
+  private static Value V(String s) {
+    return Values.fromString(s);
   }
 
-  void check(Formula target, String utterance, SemanticFn fn, List<Derivation> children) {
+  void check(Value target, DerivationStream derivations) {
+    if (!derivations.hasNext()) throw new RuntimeException("Expected 1 derivation, got " + derivations);
+    assertEquals(target, derivations.next().value);
+  }
+
+  void check(Value target, String utterance, SemanticFn fn, List<Derivation> children) {
     Example ex = TestUtils.makeSimpleExample(utterance);
     check(target, fn.call(ex, new SemanticFn.CallInfo(null, 0, ex.numTokens(), Rule.nullRule, children)));
   }
 
-  void check(Formula target, String utterance, SemanticFn fn) {
+  void check(Value target, String utterance, SemanticFn fn) {
     List<Derivation> empty = Collections.emptyList();
     check(target, utterance, fn, empty);
   }
@@ -37,9 +40,9 @@ public class CoreNLPSemanticFnTest {
     assertEquals(num, derivations.estimatedSize());
   }
 
-  Derivation D(Formula f) {
+  Derivation D(Value f) {
     return (new Derivation.Builder())
-        .formula(f)
+        .value(f)
         .prob(1.0)
         .createDerivation();
   }
@@ -53,9 +56,9 @@ public class CoreNLPSemanticFnTest {
 
   @Test public void dateFn() {
     LanguageAnalyzer.setSingleton(new CoreNLPAnalyzer());
-    check(F("(date 2013 8 7)"), "August 7, 2013", new DateFn());
-    check(F("(date 1982 -1 -1)"), "1982", new DateFn());
-    check(F("(date -1 6 4)"), "june 4", new DateFn());
+    check(V("(date 2013 8 7)"), "August 7, 2013", new DateFn());
+    check(V("(date 1982 -1 -1)"), "1982", new DateFn());
+    check(V("(date -1 6 4)"), "june 4", new DateFn());
   }
 
   @Test public void filterNerTagFn() {
@@ -83,7 +86,7 @@ public class CoreNLPSemanticFnTest {
 
   @Test public void numberFn() {
     LanguageAnalyzer.setSingleton(new CoreNLPAnalyzer());
-    check(F("(number 35000)"), "thirty-five thousand", new NumberFn());
+    check(V("(number 35000)"), "thirty-five thousand", new NumberFn());
   }
 
   // TODO(chaganty): Test select fn

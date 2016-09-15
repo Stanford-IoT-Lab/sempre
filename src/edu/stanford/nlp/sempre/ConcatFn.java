@@ -15,11 +15,13 @@ public class ConcatFn extends SemanticFn {
     this.delim = delim;
   }
 
+  @Override
   public void init(LispTree tree) {
     super.init(tree);
     delim = tree.child(1).value;
   }
 
+  @Override
   public DerivationStream call(Example ex, final Callable c) {
     return new SingleDerivationStream() {
       @Override
@@ -30,9 +32,9 @@ public class ConcatFn extends SemanticFn {
           out.append(c.childStringValue(i));
         }
         return new Derivation.Builder()
-                .withCallable(c)
-                .withStringFormulaFrom(out.toString())
-                .createDerivation();
+            .withCallable(c)
+            .withStringValueFrom(out.toString())
+            .createDerivation();
       }
     };
   }

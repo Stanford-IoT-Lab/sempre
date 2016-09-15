@@ -14,18 +14,10 @@ import fig.basic.*;
  */
 public class Derivation implements SemanticFn.Callable, HasScore {
   public static class Options {
-    @Option(gloss = "When printing derivations, to show values (could be quite verbose)")
-    public boolean showValues = true;
-    @Option(gloss = "When printing derivations, to show the first value (ignored when showValues is set)")
-    public boolean showFirstValue = false;
-    @Option(gloss = "When printing derivations, to show types")
-    public boolean showTypes = true;
     @Option(gloss = "When printing derivations, to show rules")
     public boolean showRules = false;
     @Option(gloss = "When printing derivations, to show canonical utterance")
     public boolean showUtterance = false;
-    @Option(gloss = "When executing, show formulae (for debugging)")
-    public boolean showExecutions = false;
   }
 
 	public enum Cacheability {
@@ -58,12 +50,6 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   public final List<Derivation> children;  // Corresponds to the RHS of the rule.
 
   //// SemanticFn fields: read/written by SemanticFn.
-  // Note: SemanticFn should only depend on Formula and the Freebase type
-  // information.  This could be its own class, but expose more right now to
-  // be more flexible.
-
-  public final Formula formula; // Logical form produced by this derivation
-
 	// Cacheability of this derivation (ie, will replaying the derivation later
 	// give the same value?)
 	// This depends on the semantic function used, not on the executor
@@ -87,7 +73,7 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   // This information should be set to null after parsing is done.
   private Map<String, Object> tempState;
 
-  // What the formula evaluates to (optionally set later; only non-null for the root Derivation)
+  // What the derivation evaluates to
   public Value value;
   public Evaluation executorStats;
 
@@ -122,7 +108,6 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     private int end;
     private Rule rule;
     private List<Derivation> children;
-    private Formula formula;
     private FeatureVector localFeatureVector = new FeatureVector();
     private double score = Double.NaN;
     private Value value;
@@ -143,7 +128,6 @@ public class Derivation implements SemanticFn.Callable, HasScore {
 				this.meetCache(child.cache);
 			return this;
 		}
-    public Builder formula(Formula formula) { this.formula = formula; return this; }
     public Builder localFeatureVector(FeatureVector localFeatureVector) { this.localFeatureVector = localFeatureVector; return this; }
     public Builder score(double score) { this.score = score; return this; }
     public Builder value(Value value) { this.value = value; return this; }
@@ -157,12 +141,13 @@ public class Derivation implements SemanticFn.Callable, HasScore {
 			return this;
 		}
 
-    public Builder withStringFormulaFrom(String value) {
-      this.formula = new ValueFormula<>(new StringValue(value));
+    public Builder withStringValueFrom(String value) {
+      this.value = new StringValue(value);
       return this;
     }
-    public Builder withFormulaFrom(Derivation deriv) {
-      this.formula = deriv.formula;
+
+    public Builder withValueFrom(Derivation deriv) {
+      this.value = deriv.value;
       return this;
     }
 
@@ -171,19 +156,19 @@ public class Derivation implements SemanticFn.Callable, HasScore {
       this.start = c.getStart();
       this.end = c.getEnd();
       this.rule = c.getRule();
-			this.children(c.getChildren());
+      this.children(c.getChildren());
       return this;
     }
 
     public Derivation createDerivation() {
       return new Derivation(
-          cat, start, end, rule, children, formula,
+          cat, start, end, rule, children,
           localFeatureVector, score, value, executorStats, compatibility, prob,
 					canonicalUtterance, cache);
     }
   }
 
-  Derivation(String cat, int start, int end, Rule rule, List<Derivation> children, Formula formula,
+  Derivation(String cat, int start, int end, Rule rule, List<Derivation> children,
       FeatureVector localFeatureVector, double score, Value value, Evaluation executorStats, double compatibility, double prob,
 			String canonicalUtterance, Cacheability cache) {
     this.cat = cat;
@@ -191,7 +176,6 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     this.end = end;
     this.rule = rule;
     this.children = children;
-    this.formula = formula;
     this.localFeatureVector = localFeatureVector;
     this.score = score;
     this.value = value;
@@ -199,39 +183,52 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     this.compatibility = compatibility;
     this.prob = prob;
     this.canonicalUtterance = canonicalUtterance;
-		this.cache = cache;
+    this.cache = cache;
     this.creationIndex = numCreated++;
   }
 
-  public Formula getFormula() { return formula; }
   @Override
-public double getScore() { return score; }
+  public double getScore() {
+    return score;
+  }
   public double getProb() { return prob; }
   public double getCompatibility() { return compatibility; }
   @Override
-public List<Derivation> getChildren() { return children; }
+  public List<Derivation> getChildren() {
+    return children;
+  }
   public Value getValue() { return value; }
 
   public boolean isFeaturizedAndScored() { return !Double.isNaN(score); }
   public boolean isExecuted() { return value != null; }
   public int getMaxBeamPosition() { return maxBeamPosition; }
   @Override
-public String getCat() { return cat; }
+  public String getCat() {
+    return cat;
+  }
   @Override
-public int getStart() { return start; }
+  public int getStart() {
+    return start;
+  }
   @Override
-public int getEnd() { return end; }
+  public int getEnd() {
+    return end;
+  }
   public boolean containsIndex(int i) { return i < end && i >= start; }
   @Override
-public Rule getRule() { return rule; }
+  public Rule getRule() {
+    return rule;
+  }
   public Evaluation getExecutorStats() { return executorStats; }
   public FeatureVector getLocalFeatureVector() { return localFeatureVector; }
 
   @Override
-public Derivation child(int i) { return children.get(i); }
+  public Derivation child(int i) {
+    return children.get(i);
+  }
   @Override
-public String childStringValue(int i) {
-    return Formulas.getString(children.get(i).formula);
+  public String childStringValue(int i) {
+    return Values.getString(children.get(i).value);
   }
 
   // Return whether |deriv| is built over the root Derivation.
@@ -282,36 +279,11 @@ public String childStringValue(int i) {
     return score;
   }
 
-  // If we haven't executed the formula associated with this derivation, then
-  // execute it!
-  public void ensureExecuted(Executor executor, ContextValue context) {
-    if (isExecuted()) return;
-    StopWatchSet.begin("Executor.execute");
-    if (opts.showExecutions)
-      LogInfo.logs("%s - %s", canonicalUtterance, formula);
-    Executor.Response response = executor.execute(formula, context);
-    StopWatchSet.end();
-    value = response.value;
-    executorStats = response.stats;
-  }
-
   public LispTree toLispTree() {
     LispTree tree = LispTree.proto.newList();
     tree.addChild("derivation");
-    if (formula != null)
-      tree.addChild(LispTree.proto.newList("formula", formula.toLispTree()));
     if (value != null) {
-      if (opts.showValues)
-        tree.addChild(LispTree.proto.newList("value", value.toLispTree()));
-      else if (value instanceof ListValue) {
-        List<Value> values = ((ListValue) value).values;
-        if (opts.showFirstValue && values.size() > 0) {
-          tree.addChild(LispTree.proto.newList(values.size() + " values", values.get(0).toLispTree()));
-        } else {
-          tree.addChild(values.size() + " values");
-        }
-      }
-
+      tree.addChild(LispTree.proto.newList("value", value.toLispTree()));
     }
     if (opts.showRules) {
       if (rule != null) tree.addChild(getRuleLispTree());
@@ -329,8 +301,6 @@ public String childStringValue(int i) {
     LispTree tree = LispTree.proto.newList();
     tree.addChild("derivation");
     tree.addChild(LispTree.proto.newList("span", cat + "[" + start + ":" + end + "]"));
-    if (formula != null)
-      tree.addChild(LispTree.proto.newList("formula", formula.toLispTree()));
     for (Derivation child : children)
       tree.addChild(child.toRecursiveLispTree());
     return tree;
@@ -442,7 +412,7 @@ public String toString() { return toLispTree().toString(); }
 
   // for debugging
   public void printDerivationRecursively() {
-		LogInfo.logs("Deriv: %s(%s,%s) %s", cat, start, end, formula);
+    LogInfo.logs("Deriv: %s(%s,%s) %s", cat, start, end, value);
     for (int i = 0; i < children.size(); i++) {
       LogInfo.begin_track("child %s:", i);
       children.get(i).printDerivationRecursively();

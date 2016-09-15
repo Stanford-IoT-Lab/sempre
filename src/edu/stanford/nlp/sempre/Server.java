@@ -1,26 +1,21 @@
 package edu.stanford.nlp.sempre;
 
+import static fig.basic.LogInfo.logs;
+
+import java.io.*;
+import java.math.BigInteger;
+import java.net.*;
+import java.security.SecureRandom;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import com.google.common.collect.Lists;
+import com.sun.net.httpserver.*;
+
 import fig.basic.*;
 import fig.html.HtmlElement;
 import fig.html.HtmlUtils;
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.URLDecoder;
-import java.net.HttpCookie;
-import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.Headers;
-
-import java.io.*;
-import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-import java.math.BigInteger;
-import java.security.SecureRandom;
-
-import static fig.basic.LogInfo.logs;
 
 final class SecureIdentifiers {
   private SecureIdentifiers() { }
@@ -55,6 +50,7 @@ public class Server {
   public static final HtmlUtils H = new HtmlUtils();
 
   class Handler implements HttpHandler {
+    @Override
     public void handle(HttpExchange exchange) {
       try {
         new ExchangeState(exchange);
@@ -243,7 +239,7 @@ public class Server {
 
     HtmlElement makeDetails(Master.Response response, String uri) {
       Example ex = response.getExample();
-      List<HtmlElement> items = new ArrayList<HtmlElement>();
+      List<HtmlElement> items = new ArrayList<>();
       if (opts.htmlVerbose >= 1)
         items.add(makeLexical(ex));
       if (ex.getPredDerivations().size() > 0) {
@@ -280,7 +276,8 @@ public class Server {
       } else {
         cat = H.span(deriv.cat);
       }
-      String description = cat + "[&nbsp;" + H.span().child(ex.phraseString(deriv.start, deriv.end)).cls("word") + "]" + " &rarr; " + deriv.formula;
+      String description = cat + "[&nbsp;" + H.span().child(ex.phraseString(deriv.start, deriv.end)).cls("word") + "]"
+          + " &rarr; " + deriv.value;
       HtmlElement node = H.div().child(indent + description);
       for (Derivation child : deriv.children)
         node.child(makeDerivationHelper(ex, child, indent + "&nbsp;&nbsp;&nbsp;&nbsp;", moreInfo));
@@ -291,7 +288,7 @@ public class Server {
       HtmlElement table = H.table();
 
       Params params = master.getParams();
-      Map<String, Double> features = new HashMap<String, Double>();
+      Map<String, Double> features = new HashMap<>();
       if (local)
         deriv.incrementLocalFeatureVector(1, features);
       else
@@ -304,7 +301,7 @@ public class Server {
         if (entry.getValue() == 0) continue;
         double value = entry.getValue() * params.getWeight(feature);
         sumValue += value;
-        entries.add(new java.util.AbstractMap.SimpleEntry<String, Double>(feature, value));
+        entries.add(new java.util.AbstractMap.SimpleEntry<>(feature, value));
       }
       Collections.sort(entries, new ValueComparator<String, Double>(false));
       table.child(
@@ -357,14 +354,14 @@ public class Server {
         Derivation deriv = ex.getPredDerivations().get(i);
 
         HtmlElement correct = makeTooltip(
-          H.span().cls("correctButton").child("[Correct]"),
-          H.div().cls("bubble").child("If this answer is correct, click to add as a new training example!"),
-          uri + "&accept=" + i);
+            H.span().cls("correctButton").child("[Correct]"),
+            H.div().cls("bubble").child("If this answer is correct, click to add as a new training example!"),
+            uri + "&accept=" + i);
         String value = shorten(deriv.getValue() == null ? "" : deriv.getValue().toString(), 200);
         HtmlElement formula = makeTooltip(
-          H.span(deriv.getFormula().toString()),
-          H.div().cls("nowrap").child(makeDerivation(ex, deriv, false)),
-          uri + "&select=" + i);
+            H.span(deriv.getValue().toString()),
+            H.div().cls("nowrap").child(makeDerivation(ex, deriv, false)),
+            uri + "&select=" + i);
         HtmlElement row = H.tr()
            .child(H.td(linkSelect(i, uri, i + " " + correct)).cls("nowrap"))
            .child(H.td(Fmt.D(deriv.getScore())))
@@ -389,19 +386,19 @@ public class Server {
       if (deriv.getRule() != null &&
           deriv.getRule().getSem() != null &&
           deriv.getRule().getSem().getClass().getSimpleName().equals("LexiconFn"))
-        predicates[deriv.getStart()].add(deriv.getFormula(), deriv.getEnd() - deriv.getStart(), deriv.getScore());
+        predicates[deriv.getStart()].add(deriv.getValue(), deriv.getEnd() - deriv.getStart(), deriv.getScore());
       for (Derivation child : deriv.getChildren())
         markLexical(child, predicates);
     }
 
     class CandidatePredicates {
       // Parallel arrays
-      List<Formula> predicates = new ArrayList<Formula>();
-      List<Integer> spanLengths = new ArrayList<Integer>();
-      List<Double> scores = new ArrayList<Double>();
+      List<Value> predicates = new ArrayList<>();
+      List<Integer> spanLengths = new ArrayList<>();
+      List<Double> scores = new ArrayList<>();
 
-      void add(Formula formula, int spanLength, double score) {
-        predicates.add(formula);
+      void add(Value value, int spanLength, double score) {
+        predicates.add(value);
         spanLengths.add(spanLength);
         scores.add(score);
       }
@@ -447,7 +444,7 @@ public class Server {
           // Show possible predicates for a word
           HtmlElement pe = H.table().cls("predInfo");
           int[] perm = ListUtils.sortedIndices(toDoubleArray(predicates[i].scores), true);
-          Set<String> formulaSet = new HashSet<String>();
+          Set<String> formulaSet = new HashSet<>();
           for (int j : perm) {
             String formula = predicates[i].formatPredicate(j);
             if (formulaSet.contains(formula)) continue;  // Dedup
@@ -465,21 +462,21 @@ public class Server {
     }
 
     String makeJson(Master.Response response) {
-      Map<String, Object> json = new HashMap<String, Object>();
-      List<Object> items = new ArrayList<Object>();
+      Map<String, Object> json = new HashMap<>();
+      List<Object> items = new ArrayList<>();
       json.put("candidates", items);
       for (Derivation deriv : response.getExample().getPredDerivations()) {
-        Map<String, Object> item = new HashMap<String, Object>();
+        Map<String, Object> item = new HashMap<>();
         Value value = deriv.getValue();
         if (value instanceof UriValue) {
           item.put("url", ((UriValue) value).value);
         } else if (value instanceof TableValue) {
           TableValue tableValue = (TableValue) value;
           item.put("header", tableValue.header);
-          List<List<String>> rowsObj = new ArrayList<List<String>>();
+          List<List<String>> rowsObj = new ArrayList<>();
           item.put("rows", rowsObj);
           for (List<Value> row : tableValue.rows) {
-            List<String> rowObj = new ArrayList<String>();
+            List<String> rowObj = new ArrayList<>();
             for (Value v : row)
               rowObj.add(v.toString());
             rowsObj.add(rowObj);
@@ -580,8 +577,6 @@ public class Server {
         for (ContextValue.Exchange e : session.context.exchanges) {
           HtmlElement row = H.tr().child(H.td(H.span().cls("word").child(e.utterance)));
           row.child(H.td(H.span("&nbsp;&nbsp;&nbsp;&nbsp;"))).child(H.td(e.value.toString()));
-          if (opts.htmlVerbose >= 1)
-            row.child(H.td(H.span("&nbsp;&nbsp;&nbsp;&nbsp;"))).child(H.td(e.formula.toString()));
           context.child(row);
         }
         out.println(context.toString());

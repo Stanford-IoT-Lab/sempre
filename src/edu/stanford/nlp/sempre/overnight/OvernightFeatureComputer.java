@@ -232,8 +232,6 @@ public final class OvernightFeatureComputer implements FeatureComputer {
     // Optimization: feature vector same as child, so don't do anything.
     if (deriv.rule.isCatUnary()) {
       if (deriv.isRootCat()) {
-        extractValueInFormulaFeature(deriv);
-
         ItemList inputItems = computeInputItems(ex);
         ItemList candidateItems = computeCandidateItems(ex, deriv);
         extractRootFeatures(ex, deriv, inputItems.unigrams, candidateItems.unigrams);
@@ -305,43 +303,6 @@ public final class OvernightFeatureComputer implements FeatureComputer {
       deriv.incrementAllFeatureVector(+1, features);
       LogInfo.logs("category %s, %s %s", deriv.cat, inputItems, candidateItems);
       FeatureVector.logFeatures(features);
-    }
-  }
-
-  private void extractValueInFormulaFeature(Derivation deriv) {
-    if (!opts.featureDomains.contains("denotation")) return;
-
-    if (deriv.value instanceof StringValue) {
-
-      //get strings from value
-      List<String> valueList = new ArrayList<>();
-
-      String value = ((StringValue) deriv.value).value;
-
-      if (value.charAt(0) == '[')
-        value = value.substring(1, value.length() - 1); //strip "[]"
-      String[] tokens = value.split(",");
-      for (String token : tokens) {
-        token = token.trim(); //strip spaces
-        if (token.length() > 0)
-          valueList.add(token);
-      }
-
-      //get strings from formula
-      List<Formula> formulaList = deriv.formula.mapToList(formula -> {
-        List<Formula> res = new ArrayList<>();
-        if (formula instanceof ValueFormula) {
-          res.add(formula);
-        }
-        return res;
-      }, true);
-
-      for (Formula f : formulaList) {
-        Value formulaValue = ((ValueFormula<?>) f).value;
-        String valueStr = (formulaValue instanceof StringValue) ? ((StringValue) formulaValue).value : formulaValue.toString();
-        if (valueList.contains(valueStr))
-          deriv.addFeature("denotation", "value_in_formula");
-      }
     }
   }
 

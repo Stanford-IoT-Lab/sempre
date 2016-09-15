@@ -28,7 +28,7 @@ public class ThingpediaLexicon {
   };
 
   public static abstract class Entry {
-    public abstract Formula toFormula();
+    public abstract Value toValue();
 
     public abstract String getRawPhrase();
 
@@ -41,7 +41,7 @@ public class ThingpediaLexicon {
 
     @Override
     public String toString() {
-      return "[ " + getRawPhrase() + " => " + toFormula() + " ]";
+      return "[ " + getRawPhrase() + " => " + toValue() + " ]";
     }
   }
 
@@ -67,9 +67,8 @@ public class ThingpediaLexicon {
     }
 
     @Override
-    public Formula toFormula() {
-      return new ValueFormula<>(
-          new ParamNameValue(argname, type));
+    public Value toValue() {
+      return new ParamNameValue(argname, type);
     }
   }
 
@@ -90,8 +89,8 @@ public class ThingpediaLexicon {
     }
 
     @Override
-    public Formula toFormula() {
-      return new ValueFormula<>(new NameValue("tt:app." + userId + "." + appId));
+    public Value toValue() {
+      return new NameValue("tt:app." + userId + "." + appId);
     }
   }
 
@@ -125,8 +124,8 @@ public class ThingpediaLexicon {
     }
 
     @Override
-    public Formula toFormula() {
-      return new ValueFormula<>(new ChannelNameValue(kind, name, argnames, argcanonicals, argtypes));
+    public Value toValue() {
+      return new ChannelNameValue(kind, name, argnames, argcanonicals, argtypes);
     }
 
     @Override
@@ -155,8 +154,8 @@ public class ThingpediaLexicon {
     }
 
     @Override
-    public Formula toFormula() {
-      return new ValueFormula<>(new NameValue("tt:device." + kind));
+    public Value toValue() {
+      return new NameValue("tt:device." + kind);
     }
   }
 

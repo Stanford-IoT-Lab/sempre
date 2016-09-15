@@ -21,8 +21,6 @@ import fig.exec.Execution;
 public class BeamParser extends Parser {
   public static class Options {
     @Option public int maxNewTreesPerSpan = Integer.MAX_VALUE;
-		@Option(gloss = "Whether to always execute the derivation")
-		public boolean executeAllDerivations = false;
   }
   public static Options opts = new Options();
 
@@ -149,10 +147,6 @@ public void infer() {
         StopWatchSet.end();
         while (results.hasNext()) {
           Derivation newDeriv = results.next();
-
-          // make sure we execute
-          if (BeamParser.opts.executeAllDerivations)
-            newDeriv.ensureExecuted(parser.executor, ex.context);
 
           featurizeAndScoreDerivation(newDeriv);
           addToChart(newDeriv);

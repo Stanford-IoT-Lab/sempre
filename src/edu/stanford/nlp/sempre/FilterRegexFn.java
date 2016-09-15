@@ -28,7 +28,7 @@ public class FilterRegexFn extends SemanticFn {
 
         return new Derivation.Builder()
             .withCallable(c)
-            .formula(new ValueFormula<>(new StringValue(matcher.group(1))))
+            .value(new StringValue(matcher.group(1)))
             .createDerivation();
       }
     };

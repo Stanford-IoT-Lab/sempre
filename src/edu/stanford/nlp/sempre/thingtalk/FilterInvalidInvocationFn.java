@@ -56,7 +56,7 @@ public class FilterInvalidInvocationFn extends SemanticFn {
 
         return new Derivation.Builder()
             .withCallable(c)
-            .withFormulaFrom(child)
+            .withValueFrom(child)
             .createDerivation();
       }
     };

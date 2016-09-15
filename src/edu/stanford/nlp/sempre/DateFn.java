@@ -21,7 +21,7 @@ public DerivationStream call(final Example ex, final Callable c) {
           return null;
         return new Derivation.Builder()
             .withCallable(c)
-            .formula(new ValueFormula<>(dateValue))
+            .value(dateValue)
             .meetCache(
                 value.equals("PRESENT_REF") ? Cacheability.NON_DETERMINISTIC : Cacheability.CACHEABLE)
             .createDerivation();

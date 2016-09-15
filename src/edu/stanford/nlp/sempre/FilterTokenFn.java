@@ -1,9 +1,9 @@
 package edu.stanford.nlp.sempre;
 
-import fig.basic.LispTree;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import fig.basic.LispTree;
 
 /**
  * Given a token at a particular position, keep it is from a select set.
@@ -14,6 +14,7 @@ public class FilterTokenFn extends SemanticFn {
   List<String> acceptableTokens = new ArrayList<>();
   String mode;
 
+  @Override
   public void init(LispTree tree) {
     super.init(tree);
     mode = tree.child(1).value;
@@ -24,6 +25,7 @@ public class FilterTokenFn extends SemanticFn {
     }
   }
 
+  @Override
   public DerivationStream call(final Example ex, final Callable c) {
     return new SingleDerivationStream() {
       @Override
@@ -32,9 +34,9 @@ public class FilterTokenFn extends SemanticFn {
           return null;
         else {
           return new Derivation.Builder()
-                  .withCallable(c)
-                  .withFormulaFrom(c.child(0))
-                  .createDerivation();
+              .withCallable(c)
+              .withValueFrom(c.child(0))
+              .createDerivation();
         }
       }
     };

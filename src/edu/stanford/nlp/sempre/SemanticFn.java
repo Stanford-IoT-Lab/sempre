@@ -1,10 +1,10 @@
 package edu.stanford.nlp.sempre;
 
-import fig.basic.LispTree;
-import fig.basic.Option;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import fig.basic.LispTree;
+import fig.basic.Option;
 
 /**
  * A semantic function takes a sequence of child derivations and produces a set
@@ -58,14 +58,21 @@ public abstract class SemanticFn {
       this.rule = rule;
       this.children = children;
     }
+    @Override
     public String getCat() { return cat; }
+    @Override
     public int getStart() { return start; }
+    @Override
     public int getEnd() { return end; }
+    @Override
     public Rule getRule() { return rule; }
+    @Override
     public List<Derivation> getChildren() { return children; }
+    @Override
     public Derivation child(int i) { return children.get(i); }
+    @Override
     public String childStringValue(int i) {
-      return Formulas.getString(children.get(i).formula);
+      return Values.getString(children.get(i).value);
     }
 
     public static final CallInfo NULL_INFO =

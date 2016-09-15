@@ -1,9 +1,9 @@
 package edu.stanford.nlp.sempre;
 
-import fig.basic.LispTree;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import fig.basic.LispTree;
 
 /**
  * For timeouts, server exceptions, etc.
@@ -11,13 +11,6 @@ import java.util.Map;
  * @author Percy Liang
  */
 public class ErrorValue extends Value {
-  // Logical form is invalid and can't be converted into SQL query for some reason.
-  // Example: (and x y), where x and y are two predicates
-  // Example: unbound variables
-  public static final ErrorValue badFormula(BadFormulaException e) {
-    return new ErrorValue("BADFORMULA: " + e);
-  }
-
   // Request is taking too long (caused by client-side timeouts).
   public static final ErrorValue timeout = new ErrorValue("TIMEOUT");
 
@@ -42,14 +35,16 @@ public class ErrorValue extends Value {
   public ErrorValue(LispTree tree) { this.type = tree.child(1).value; }
   public ErrorValue(String type) { this.type = type; }
 
+  @Override
   public LispTree toLispTree() {
     LispTree tree = LispTree.proto.newList();
     tree.addChild("error");
     tree.addChild(type != null ? type : "");
     return tree;
   }
+  @Override
   public Map<String,Object> toJson() {
-    Map<String,Object> json = new HashMap<String,Object>();
+    Map<String,Object> json = new HashMap<>();
     json.put("type", type != null ? type : "");
     return json;
   }

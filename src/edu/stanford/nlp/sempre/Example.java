@@ -33,7 +33,6 @@ public class Example {
   @JsonProperty public ContextValue context;
 
   // What we should try to predict.
-  @JsonProperty public Formula targetFormula;  // Logical form (e.g., database query)
   @JsonProperty public Value targetValue;  // Denotation (e.g., answer)
 
   //// Information after preprocessing (e.g., tokenization, POS tagging, NER, syntactic parsing, etc.).
@@ -54,7 +53,6 @@ public class Example {
     private String id;
     private String utterance;
     private ContextValue context;
-    private Formula targetFormula;
     private Value targetValue;
     private List<Derivation> predDerivations;
     private LanguageInfo languageInfo;
@@ -62,19 +60,17 @@ public class Example {
     public Builder setId(String id) { this.id = id; return this; }
     public Builder setUtterance(String utterance) { this.utterance = utterance; return this; }
     public Builder setContext(ContextValue context) { this.context = context; return this; }
-    public Builder setTargetFormula(Formula targetFormula) { this.targetFormula = targetFormula; return this; }
     public Builder setTargetValue(Value targetValue) { this.targetValue = targetValue; return this; }
     public Builder setLanguageInfo(LanguageInfo languageInfo) { this.languageInfo = languageInfo; return this; }
     public Builder withExample(Example ex) {
       setId(ex.id);
       setUtterance(ex.utterance);
       setContext(ex.context);
-      setTargetFormula(ex.targetFormula);
       setTargetValue(ex.targetValue);
       return this;
     }
     public Example createExample() {
-      return new Example(id, utterance, context, targetFormula, targetValue, languageInfo);
+      return new Example(id, utterance, context, targetValue, languageInfo);
     }
   }
 
@@ -82,13 +78,11 @@ public class Example {
   public Example(@JsonProperty("id") String id,
                  @JsonProperty("utterance") String utterance,
                  @JsonProperty("context") ContextValue context,
-                 @JsonProperty("targetFormula") Formula targetFormula,
                  @JsonProperty("targetValue") Value targetValue,
                  @JsonProperty("languageInfo") LanguageInfo languageInfo) {
     this.id = id;
     this.utterance = utterance;
     this.context = context;
-    this.targetFormula = targetFormula;
     this.targetValue = targetValue;
     this.languageInfo = languageInfo;
   }
@@ -100,7 +94,6 @@ public class Example {
   public List<Derivation> getPredDerivations() { return predDerivations; }
 
   public void setContext(ContextValue context) { this.context = context; }
-  public void setTargetFormula(Formula targetFormula) { this.targetFormula = targetFormula; }
   public void setTargetValue(Value targetValue) { this.targetValue = targetValue; }
 
   public String spanString(int start, int end) {
@@ -134,8 +127,6 @@ public class Example {
         b.setUtterance(arg.child(1).value);
       } else if ("canonicalUtterance".equals(label)) {
         b.setUtterance(arg.child(1).value);
-      } else if ("targetFormula".equals(label)) {
-        b.setTargetFormula(Formulas.fromLispTree(arg.child(1)));
       } else if ("targetValue".equals(label) || "targetValues".equals(label)) {
         if (arg.children.size() != 2)
           throw new RuntimeException("Expect one target value");
@@ -189,8 +180,6 @@ public class Example {
     LogInfo.logs("NER values: %s", languageInfo.nerValues);
     if (context != null)
       LogInfo.logs("context: %s", context);
-    if (targetFormula != null)
-      LogInfo.logs("targetFormula: %s", targetFormula);
     if (targetValue != null)
       LogInfo.logs("targetValue: %s", targetValue);
     LogInfo.logs("Dependency children: %s", languageInfo.dependencyChildren);
@@ -216,8 +205,6 @@ public class Example {
       tree.addChild(LispTree.proto.newList("id", id));
     if (utterance != null)
       tree.addChild(LispTree.proto.newList("utterance", utterance));
-    if (targetFormula != null)
-      tree.addChild(LispTree.proto.newList("targetFormula", targetFormula.toLispTree()));
     if (targetValue != null)
       tree.addChild(LispTree.proto.newList("targetValue", targetValue.toLispTree()));
 
@@ -261,8 +248,6 @@ public class Example {
     if (!valueTree.isLeaf() || !"null".equals(valueTree.value))
       b.value(Values.fromLispTree(valueTree));
 
-    b.formula(Formulas.fromLispTree(item.child(i++)));
-
     FeatureVector fv = new FeatureVector();
     LispTree features = item.child(i++);
     for (int j = 0; j < features.children.size(); j++)
@@ -283,7 +268,6 @@ public class Example {
       item.addChild(deriv.value.toLispTree());
     else
       item.addChild("null");
-    item.addChild(deriv.formula.toLispTree());
 
     HashMap<String, Double> features = new HashMap<>();
     deriv.incrementAllFeatureVector(1, features);

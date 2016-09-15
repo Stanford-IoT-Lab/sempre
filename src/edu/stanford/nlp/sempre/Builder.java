@@ -20,7 +20,6 @@ import fig.basic.Utils;
 public class Builder {
   public static class Options {
     @Option public String inParamsPath;
-    @Option public String executor = "JavaExecutor";
     @Option public String valueEvaluator = "ExactValueEvaluator";
     @Option public String parser = "BeamParser";
     @Option
@@ -32,7 +31,6 @@ public class Builder {
   public static Options opts = new Options();
 
   public Grammar grammar;
-  public Executor executor;
   public ValueEvaluator valueEvaluator;
   public FeatureExtractor extractor;
   public Parser parser;
@@ -41,7 +39,6 @@ public class Builder {
 
   public void build() {
     grammar = null;
-    executor = null;
     valueEvaluator = null;
     extractor = null;
     parser = null;
@@ -51,7 +48,6 @@ public class Builder {
 
   public void buildForLanguage(String languageTag) {
     grammar = null;
-    executor = null;
     valueEvaluator = null;
     extractor = null;
     parser = null;
@@ -78,13 +74,9 @@ public class Builder {
         params.read(precomputed);
     }
 
-    // Executor
-    if (executor == null)
-      executor = (Executor) Utils.newInstanceHard(SempreUtils.resolveClassName(opts.executor));
-
     // Feature extractor
     if (extractor == null)
-      extractor = new FeatureExtractor(executor, languageTag);
+      extractor = new FeatureExtractor(languageTag);
 
     buildLanguageAgnostic();
   }
@@ -104,13 +96,9 @@ public class Builder {
         params.read(opts.inParamsPath);
     }
 
-    // Executor
-    if (executor == null)
-      executor = (Executor) Utils.newInstanceHard(SempreUtils.resolveClassName(opts.executor));
-
     // Feature extractor
     if (extractor == null)
-      extractor = new FeatureExtractor(executor);
+      extractor = new FeatureExtractor();
 
     buildLanguageAgnostic();
   }
@@ -122,7 +110,7 @@ public class Builder {
 
     // Parser
     if (parser == null)
-      parser = buildParser(new Parser.Spec(grammar, extractor, executor, valueEvaluator));
+      parser = buildParser(new Parser.Spec(grammar, extractor, valueEvaluator));
 
     // Dataset
     if (dataset == null) {

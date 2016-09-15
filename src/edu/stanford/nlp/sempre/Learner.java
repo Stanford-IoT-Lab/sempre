@@ -307,7 +307,6 @@ public class Learner {
     if (ex.predDerivations.size() > 0) {
       Derivation deriv = ex.predDerivations.get(0);
       fields.add("predValue=" + deriv.value);
-      fields.add("predFormula=" + deriv.formula);
     }
     fields.add(ex.evaluation.summary("\t"));
     eventsOut.println(Joiner.on('\t').join(fields));

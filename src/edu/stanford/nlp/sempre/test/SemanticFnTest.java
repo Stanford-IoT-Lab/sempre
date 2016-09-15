@@ -1,33 +1,36 @@
 package edu.stanford.nlp.sempre.test;
 
-import edu.stanford.nlp.sempre.*;
-import fig.basic.LispTree;
-import org.testng.annotations.Test;
+import static org.testng.AssertJUnit.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.testng.AssertJUnit.assertEquals;
+import org.testng.annotations.Test;
+
+import edu.stanford.nlp.sempre.*;
+import fig.basic.LispTree;
 
 /**
  * Test Formulas.
  * @author Percy Liang
  */
 public class SemanticFnTest {
-  private static Formula F(String s) { return Formula.fromString(s); }
-
-  void check(Formula target, DerivationStream derivations) {
-    if (!derivations.hasNext()) throw new RuntimeException("Expected 1 derivation, got " + derivations);
-    assertEquals(target, derivations.next().formula);
+  private static Value V(String s) {
+    return Values.fromString(s);
   }
 
-  void check(Formula target, String utterance, SemanticFn fn, List<Derivation> children) {
+  void check(Value target, DerivationStream derivations) {
+    if (!derivations.hasNext()) throw new RuntimeException("Expected 1 derivation, got " + derivations);
+    assertEquals(target, derivations.next().value);
+  }
+
+  void check(Value target, String utterance, SemanticFn fn, List<Derivation> children) {
     Example ex = TestUtils.makeSimpleExample(utterance);
     check(target, fn.call(ex, new SemanticFn.CallInfo(null, 0, ex.numTokens(), Rule.nullRule, children)));
   }
 
-  void check(Formula target, String utterance, SemanticFn fn) {
+  void check(Value target, String utterance, SemanticFn fn) {
     List<Derivation> empty = Collections.emptyList();
     check(target, utterance, fn, empty);
   }
@@ -38,12 +41,12 @@ public class SemanticFnTest {
 
   @Test public void constantFn() {
     LanguageAnalyzer.setSingleton(new SimpleAnalyzer());
-    check(F("(number 3)"), "whatever", new ConstantFn(F("(number 3)")));
+    check(V("(number 3)"), "whatever", new ConstantFn(V("(number 3)")));
   }
 
-  Derivation D(Formula f) {
+  Derivation D(Value f) {
     return (new Derivation.Builder())
-        .formula(f)
+        .value(f)
         .prob(1.0)
         .createDerivation();
   }
@@ -56,8 +59,8 @@ public class SemanticFnTest {
 
   @Test public void concatFn() {
     LanguageAnalyzer.setSingleton(new SimpleAnalyzer());
-    check(F("(string \"a b\")"), "a b", new ConcatFn(" "),
-        Arrays.asList(D(F("(string a)")), D(F("(string b)"))));
+    check(V("(string \"a b\")"), "a b", new ConcatFn(" "),
+        Arrays.asList(D(V("(string a)")), D(V("(string b)"))));
   }
 
   // TODO(chaganty): Test context fn

@@ -13,7 +13,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import edu.stanford.nlp.sempre.*;
+import edu.stanford.nlp.sempre.GenericObjectCache;
+import edu.stanford.nlp.sempre.Json;
+import edu.stanford.nlp.sempre.Value;
 import fig.basic.LogInfo;
 import fig.basic.Option;
 
@@ -28,11 +30,11 @@ public class LocationLexicon {
   public static Options opts = new Options();
 
   public static class Entry {
-    public final Formula formula;
+    public final Value value;
     public final String rawPhrase;
 
-    public Entry(Formula formula, String rawPhrase) {
-      this.formula = formula;
+    public Entry(Value value, String rawPhrase) {
+      this.value = value;
       this.rawPhrase = rawPhrase;
     }
   }
@@ -103,8 +105,7 @@ public class LocationLexicon {
         return map(Json.readValueHard(reader, new TypeReference<List<NominatimEntry>>() {
         }), (NominatimEntry entry) -> {
           String canonical = entry.display_name.toLowerCase().replaceAll("[,\\s+]", " ");
-          return new Entry(new ValueFormula<>(
-              new LocationValue(entry.lat, entry.lon)),
+          return new Entry(new LocationValue(entry.lat, entry.lon),
               canonical);
         });
       }

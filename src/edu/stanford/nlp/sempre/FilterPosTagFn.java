@@ -1,9 +1,9 @@
 package edu.stanford.nlp.sempre;
 
-import fig.basic.LispTree;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import fig.basic.LispTree;
 
 /**
  * Given a token at a particular position, keep it if its POS tag is from a
@@ -17,6 +17,7 @@ public class FilterPosTagFn extends SemanticFn {
   String mode;
   boolean reverse;
 
+  @Override
   public void init(LispTree tree) {
     super.init(tree);
     mode = tree.child(1).value;
@@ -33,6 +34,7 @@ public class FilterPosTagFn extends SemanticFn {
     }
   }
 
+  @Override
   public DerivationStream call(final Example ex, final Callable c) {
     return new SingleDerivationStream() {
       @Override
@@ -49,22 +51,22 @@ public class FilterPosTagFn extends SemanticFn {
     // Only apply to single tokens
     String posTag = ex.posTag(c.getStart());
     if (c.getEnd() - c.getStart() != 1 ||
-            (!posTags.contains(posTag) ^ reverse))
+        (!posTags.contains(posTag) ^ reverse))
       return null;
     else {
       return new Derivation.Builder()
-              .withCallable(c)
-              .withFormulaFrom(c.child(0))
-              .createDerivation();
+          .withCallable(c)
+          .withValueFrom(c.child(0))
+          .createDerivation();
     }
   }
 
   private Derivation callSpan(Example ex, Callable c) {
     if (isValidSpan(ex, c)) {
       return new Derivation.Builder()
-              .withCallable(c)
-              .withFormulaFrom(c.child(0))
-              .createDerivation();
+          .withCallable(c)
+          .withValueFrom(c.child(0))
+          .createDerivation();
     } else {
       return null;
     }

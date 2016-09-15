@@ -57,13 +57,13 @@ public class LocationLexiconFn extends SemanticFn {
 
       LocationLexicon.Entry entry = entries.next();
       Derivation deriv = new Derivation.Builder().withCallable(callable)
-          .formula(entry.formula)
+          .value(entry.value)
           .canonicalUtterance(entry.rawPhrase)
           .createDerivation();
 
       // Doesn't generalize, but add it for now, otherwise not separable
       if (FeatureExtractor.containsDomain("lexAlign"))
-        deriv.addFeature("lexAlign", phrase + " --- " + entry.formula);
+        deriv.addFeature("lexAlign", phrase + " --- " + entry.value);
 
       if (SemanticFn.opts.trackLocalChoices)
         deriv.addLocalChoice("SimpleLexiconFn " + deriv.startEndString(ex.getTokens()) + " " + entry);

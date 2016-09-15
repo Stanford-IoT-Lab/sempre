@@ -51,7 +51,7 @@ public class AddOperatorFn extends SemanticFn {
         // make a new IntermediateParamValue with the operator set
         IntermediateParamValue ipv2 = new IntermediateParamValue(ipv.where, new ParamValue(ipv.toAdd.name, null, operator.value, null));
 
-        return new Derivation.Builder().withCallable(c).formula(new ValueFormula<>(ipv2))
+        return new Derivation.Builder().withCallable(c).value(ipv2)
             .createDerivation();
       }
     };

@@ -31,7 +31,7 @@ public class ApplyFn extends SemanticFn {
       // build a pseudo-derivation with the formula and the canonical
       Derivation.Builder bld = new Derivation.Builder()
           .canonicalUtterance(c.child(1).canonicalUtterance + " " + argcanonical)
-          .formula(new ValueFormula<>(new ParamNameValue(argname, argtype)));
+          .value(new ParamNameValue(argname, argtype));
       return bld.createDerivation();
     }).iterator();
 
@@ -55,7 +55,7 @@ public class ApplyFn extends SemanticFn {
           // wrap left and right into an intermediate value
           IntermediateParamValue ipv = new IntermediateParamValue(leftValue, pv);
 
-          Derivation.Builder bld = new Derivation.Builder().withCallable(c).formula(new ValueFormula<>(ipv))
+          Derivation.Builder bld = new Derivation.Builder().withCallable(c).value(ipv)
               .canonicalUtterance(left.canonicalUtterance + " " + right.canonicalUtterance);
           return bld.createDerivation();
         }

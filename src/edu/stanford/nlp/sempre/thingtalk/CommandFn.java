@@ -35,7 +35,7 @@ public class CommandFn extends SemanticFn {
           cmd = ThingTalk.cmdForm(new StringValue(commandType), new StringValue(secondArg));
         }
 
-        return new Derivation.Builder().withCallable(c).formula(new ValueFormula<>(cmd)).createDerivation();
+        return new Derivation.Builder().withCallable(c).value(cmd).createDerivation();
       }
     };
   }

@@ -155,10 +155,6 @@ class FloatingParserState extends ParserState {
       if (newDeriv.canonicalUtterance == null || newDeriv.canonicalUtterance.length() == 0)
         newDeriv.canonicalUtterance = canonicalUtterance;
 
-      // make sure we execute
-      if (FloatingParser.opts.executeAllDerivations)
-        newDeriv.ensureExecuted(parser.executor, ex.context);
-
       if (pruner.isPruned(newDeriv))
         continue;
       // Avoid repetitive floating cells
@@ -375,20 +371,17 @@ class FloatingParserState extends ParserState {
 
     if (FloatingParser.opts.printPredictedUtterances) {
       PrintWriter writer = IOUtils.openOutAppendEasy(Execution.getFile("canonical_utterances"));
-      PrintWriter fWriter = IOUtils.openOutAppendEasy(Execution.getFile("utterances_formula.tsv"));
       PrintWriter vWriter = IOUtils.openOutAppendEasy(Execution.getFile("utterances_value.tsv"));
       Derivation.sortByScore(predDerivations);
       for (Derivation deriv: predDerivations) {
-				if (deriv.score > -50) {
+        if (deriv.score > -50) {
           writer.println(String.format("%s\t%s", deriv.canonicalUtterance, deriv.score));
-          fWriter.println(String.format("%s\t%s", deriv.canonicalUtterance, deriv.formula.toString()));
-					vWriter.println(String.format("%s\t%s", deriv.canonicalUtterance,
-							((StringValue) (deriv.value)).value));
+          vWriter.println(String.format("%s\t%s", deriv.canonicalUtterance,
+              ((StringValue) (deriv.value)).value));
         }
       }
       writer.close();
-      fWriter.close();
-			vWriter.close();
+      vWriter.close();
     }
 
     LogInfo.end_track();

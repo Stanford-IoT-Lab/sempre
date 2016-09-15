@@ -1,9 +1,9 @@
 package edu.stanford.nlp.sempre;
 
-import fig.basic.LispTree;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import fig.basic.LispTree;
 
 /**
  * Given a phrase at a particular position, keep it if its NER tags all match
@@ -15,12 +15,14 @@ public class FilterNerSpanFn extends SemanticFn {
   // Accepted NER tags (PERSON, LOCATION, ORGANIZATION, etc)
   List<String> acceptableNerTags = new ArrayList<>();
 
+  @Override
   public void init(LispTree tree) {
     super.init(tree);
     for (int j = 1; j < tree.children.size(); j++)
       acceptableNerTags.add(tree.child(j).value);
   }
 
+  @Override
   public DerivationStream call(final Example ex, final Callable c) {
     return new SingleDerivationStream() {
       @Override
@@ -29,9 +31,9 @@ public class FilterNerSpanFn extends SemanticFn {
           return null;
         else {
           return new Derivation.Builder()
-                  .withCallable(c)
-                  .withFormulaFrom(c.child(0))
-                  .createDerivation();
+              .withCallable(c)
+              .withValueFrom(c.child(0))
+              .createDerivation();
         }
       }
     };

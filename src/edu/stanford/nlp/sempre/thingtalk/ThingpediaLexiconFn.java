@@ -114,14 +114,14 @@ public class ThingpediaLexiconFn extends SemanticFn {
 
       FeatureVector features = new FeatureVector();
       entry.addFeatures(features);
-      Derivation deriv = new Derivation.Builder().withCallable(callable).formula(entry.toFormula())
+      Derivation deriv = new Derivation.Builder().withCallable(callable).value(entry.toValue())
           .localFeatureVector(features).canonicalUtterance(entry.getRawPhrase())
           .meetCache(Cacheability.LEXICON_DEPENDENT)
           .createDerivation();
 
       // Doesn't generalize, but add it for now, otherwise not separable
       if (FeatureExtractor.containsDomain("lexAlign"))
-        deriv.addFeature("lexAlign", phrase + " --- " + entry.toFormula());
+        deriv.addFeature("lexAlign", phrase + " --- " + entry.toValue());
 
       if (SemanticFn.opts.trackLocalChoices)
         deriv.addLocalChoice("SimpleLexiconFn " + deriv.startEndString(ex.getTokens()) + " " + entry);

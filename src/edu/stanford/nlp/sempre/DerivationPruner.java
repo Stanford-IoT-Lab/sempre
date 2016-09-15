@@ -3,8 +3,6 @@ package edu.stanford.nlp.sempre;
 import java.util.ArrayList;
 import java.util.List;
 
-import fig.basic.LispTree;
-import fig.basic.LogInfo;
 import fig.basic.Option;
 
 /**
@@ -58,93 +56,8 @@ public class DerivationPruner {
 
   public boolean isPruned(Derivation deriv) {
     if (opts.pruningStrategies.isEmpty() && pruningComputers.isEmpty()) return false;
-    if (pruneFormula(deriv)) return true;
-    if (pruneDenotation(deriv)) return true;
     for (DerivationPruningComputer pruningComputer : pruningComputers) {
       if (pruningComputer.isPruned(deriv)) return true;
-    }
-    return false;
-  }
-
-  // ============================================================
-  // Formula-based Pruning
-  // ============================================================
-
-  private boolean pruneFormula(Derivation deriv) {
-    return pruneSingleton(deriv) || pruneSuperlatives(deriv);
-  }
-
-  /**
-   * Prune singleton formula at the root.
-   */
-  private boolean pruneSingleton(Derivation deriv) {
-    if (!containsStrategy("singleton")) return false;
-    return deriv.isRoot(ex.numTokens()) && deriv.formula instanceof ValueFormula;
-  }
-
-  /**
-   * Prune strings of multiple superlatives.
-   */
-  private boolean pruneSuperlatives(Derivation deriv) {
-    if (containsStrategy("multipleSuperlatives")) {
-      // Prune if there are more than arg{max|min} appearing in the formula (don't need to be adjacent)
-      List<LispTree> stack = new ArrayList<>();
-      int count = 0;
-      stack.add(deriv.formula.toLispTree());
-      while (!stack.isEmpty()) {
-        LispTree tree = stack.remove(stack.size() - 1);
-        if (tree.isLeaf()) {
-          if ("argmax".equals(tree.value) || "argmin".equals(tree.value)) {
-            count++;
-            if (count >= 2) {
-              if (opts.pruningVerbosity >= 2)
-                LogInfo.logs("PRUNED [multipleSuperlatives] %s", deriv.formula);
-              return true;
-            }
-          }
-        } else {
-          for (LispTree subtree : tree.children)
-            stack.add(subtree);
-        }
-      }
-    }
-    return false;
-  }
-
-  // ============================================================
-  // Denotation-based Pruning
-  // ============================================================
-
-  /**
-   * Pruning based on denotations.
-   */
-  private boolean pruneDenotation(Derivation deriv) {
-    return pruneFinalDenotation(deriv);
-  }
-
-  private boolean pruneFinalDenotation(Derivation deriv) {
-    Formula formula = deriv.formula;
-    // Prune if the denotation is an empty list
-    if (containsStrategy("emptyDenotation")) {
-      deriv.ensureExecuted(parser.executor, ex.context);
-      if (deriv.value instanceof ListValue) {
-        if (((ListValue) deriv.value).values.isEmpty()) {
-          if (opts.pruningVerbosity >= 3)
-            LogInfo.logs("PRUNED [emptyDenotation] %s", formula);
-          return true;
-        }
-      }
-    }
-    // Prune if the denotation has too many values
-    if (containsStrategy("tooManyValues") && deriv.isRoot(ex.numTokens())) {
-      deriv.ensureExecuted(parser.executor, ex.context);
-      if (deriv.value instanceof ListValue) {
-        if (((ListValue) deriv.value).values.size() > opts.maxNumValues) {
-          if (opts.pruningVerbosity >= 3)
-            LogInfo.logs("PRUNED [tooManyValues] %s", formula);
-          return true;
-        }
-      }
     }
     return false;
   }

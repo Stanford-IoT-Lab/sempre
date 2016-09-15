@@ -52,7 +52,7 @@ public class CallFn extends SemanticFn {
 
         return new Derivation.Builder()
             .withCallable(c)
-            .formula(new ValueFormula<>((Value) o))
+            .value((Value) o)
             .createDerivation();
       }
     };

@@ -28,7 +28,6 @@ public class SystemSanityTest {
 
     Builder b = new Builder();
     b.grammar = g;
-    b.executor = new DumbExecutor();
     b.buildUnspecified();
     return b;
   }

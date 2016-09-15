@@ -1,10 +1,13 @@
 package edu.stanford.nlp.sempre;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import fig.basic.*;
 import fig.exec.Execution;
-
-import java.io.*;
-import java.util.*;
 
 /**
  * Output examples in various forms.
@@ -64,7 +67,6 @@ public final class ExampleUtils {
           LispTree description = p.newList();
           if (deriv.canonicalUtterance != null)
             description.addChild(p.L("canonicalUtterance", deriv.canonicalUtterance));
-          description.addChild(p.L("formula", deriv.formula.toLispTree()));
           description.addChild(p.L("value", deriv.value.toLispTree()));
           buf.append("\t" + description);
           buf.append("\t" + deriv.compatibility);
@@ -98,7 +100,8 @@ public final class ExampleUtils {
       int i = 0;
       for (Derivation deriv : ex.predDerivations) {
         if (deriv.canonicalUtterance != null)
-          out.println("Pred@" + i + ":\t" + ex.utterance + "\t" + deriv.canonicalUtterance + "\t" + deriv.compatibility + "\t" + deriv.formula + "\t" + deriv.prob);
+          out.println("Pred@" + i + ":\t" + ex.utterance + "\t" + deriv.canonicalUtterance + "\t" + deriv.compatibility
+              + "\t" + deriv.value + "\t" + deriv.prob);
         i++;
       }
     }

@@ -26,7 +26,7 @@ public class AddValueFn extends SemanticFn {
         ParametricValue newInvocation = ipv.where.clone();
         newInvocation.add(pv2);
         
-        return new Derivation.Builder().withCallable(c).formula(new ValueFormula<>(newInvocation))
+        return new Derivation.Builder().withCallable(c).value(newInvocation)
             .createDerivation();
       }
     };

@@ -14,16 +14,16 @@ public class TimeDurationFn extends SemanticFn {
         String value = ex.languageInfo.getNormalizedNerSpan("SET", c.getStart(), c.getEnd());
         if (value == null)
           value = ex.languageInfo.getNormalizedNerSpan("DURATION", c.getStart(), c.getEnd());
-          if(value == null)
-            return null;
+        if (value == null)
+          return null;
         NumberValue numValue = NumberValue.parseDurationValue(value);
         if (numValue == null)
           return null;
         return new Derivation.Builder()
-                .withCallable(c)
-                .formula(new ValueFormula<>(numValue))
-				.meetCache(Derivation.Cacheability.CACHEABLE)
-                .createDerivation();
+            .withCallable(c)
+            .value(numValue)
+            .meetCache(Derivation.Cacheability.CACHEABLE)
+            .createDerivation();
       }
     };
   }

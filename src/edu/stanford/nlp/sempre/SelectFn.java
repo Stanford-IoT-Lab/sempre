@@ -1,10 +1,10 @@
 package edu.stanford.nlp.sempre;
 
+import java.util.List;
+
 import fig.basic.LispTree;
 import fig.basic.LogInfo;
 import fig.basic.Option;
-
-import java.util.List;
 
 /**
  * Given a particular position i, return the ith element on the RHS of the
@@ -28,11 +28,13 @@ public class SelectFn extends SemanticFn {
     init(LispTree.proto.newList("SelectFn", position + ""));
   }
 
+  @Override
   public void init(LispTree tree) {
     super.init(tree);
     this.position = Integer.valueOf(tree.child(1).value);
   }
 
+  @Override
   public DerivationStream call(final Example ex, final Callable c) {
     return new SingleDerivationStream() {
       @Override
@@ -48,18 +50,18 @@ public class SelectFn extends SemanticFn {
                 features.add("skipPos", posTags.get(index));
                 if (opts.verbose > 0) {
                   LogInfo.logs(
-                          "SelectFn: adding pos-skipping feature, pos: %s, word: %s",
-                          posTags.get(index), ex.languageInfo.tokens.get(index));
+                      "SelectFn: adding pos-skipping feature, pos: %s, word: %s",
+                      posTags.get(index), ex.languageInfo.tokens.get(index));
                 }
               }
             }
           }
         }
         return new Derivation.Builder()
-                .withCallable(c)
-                .withFormulaFrom(c.child(position))
-                .localFeatureVector(features)
-                .createDerivation();
+            .withCallable(c)
+            .withValueFrom(c.child(position))
+            .localFeatureVector(features)
+            .createDerivation();
       }
     };
   }

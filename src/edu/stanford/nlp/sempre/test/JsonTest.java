@@ -1,8 +1,9 @@
 package edu.stanford.nlp.sempre.test;
 
+import org.testng.annotations.Test;
+
 import edu.stanford.nlp.sempre.*;
 import fig.basic.LogInfo;
-import org.testng.annotations.Test;
 
 /**
  * Test JSON serialization and deserialization.
@@ -25,9 +26,6 @@ public class JsonTest {
     if (!a.utterance.equals(b.utterance)) return false;
     if (a.context != b.context &&
         !a.context.equals(b.context))
-      return false;
-    if (a.targetFormula != b.targetFormula &&
-        !a.targetFormula.toString().equals(b.targetFormula.toString()))
       return false;
     if (a.targetValue != b.targetValue &&
         !a.targetValue.equals(b.targetValue))

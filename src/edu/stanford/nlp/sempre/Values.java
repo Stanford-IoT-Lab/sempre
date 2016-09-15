@@ -53,5 +53,15 @@ public final class Values {
     return value;
   }
 
+  public static String getString(Value value) {
+    if (value instanceof StringValue)
+      return ((StringValue) value).value;
+    if (value instanceof NameValue)
+      return ((NameValue) value).id;
+    if (value instanceof NumberValue)
+      return ((NumberValue) value).value + "";
+    return null;
+  }
+
   public static Value fromString(String s) { return fromLispTree(LispTree.proto.parseFromString(s)); }
 }

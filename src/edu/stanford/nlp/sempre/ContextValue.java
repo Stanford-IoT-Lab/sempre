@@ -18,23 +18,20 @@ public class ContextValue extends Value {
   // Note: we are not storing the entire derivation right now.
   public static class Exchange {
     public final String utterance;
-    public final Formula formula;
     public final Value value;
-    public Exchange(String utterance, Formula formula, Value value) {
+
+    public Exchange(String utterance, Value value) {
       this.utterance = utterance;
-      this.formula = formula;
       this.value = value;
     }
     public Exchange(LispTree tree) {
       utterance = tree.child(1).value;
-      formula = Formulas.fromLispTree(tree.child(2));
       value = Values.fromLispTree(tree.child(3));
     }
     public LispTree toLispTree() {
       LispTree tree = LispTree.proto.newList();
       tree.addChild("exchange");
       tree.addChild(utterance);
-      tree.addChild(formula.toLispTree());
       tree.addChild(value.toLispTree());
       return tree;
     }

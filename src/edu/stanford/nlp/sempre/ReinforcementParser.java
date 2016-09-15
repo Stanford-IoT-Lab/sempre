@@ -243,8 +243,8 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
     agenda.add(new PrioritizedDerivationStream(derivationStream, priority, probSum), priority); // when adding to agenda probsum is 0
 
     if (parser.verbose(3)) {
-      LogInfo.logs("ReinforcementParser: adding to agenda: size=%s, priority=%s, deriv=%s(%s,%s), formula=%s,|pushed|=%s",
-              agenda.size(), priority, deriv.cat, deriv.start, deriv.end, deriv.formula, completeDerivationsPushed);
+      LogInfo.logs("ReinforcementParser: adding to agenda: size=%s, priority=%s, deriv=%s(%s,%s), value=%s,|pushed|=%s",
+          agenda.size(), priority, deriv.cat, deriv.start, deriv.end, deriv.value, completeDerivationsPushed);
     }
   }
 
@@ -351,8 +351,8 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
       // only after update of params we can change the chart and the agenda
       if (addToBoundedChart(sampledDerivation)) {
         if (parser.verbose(5))
-          LogInfo.logs("ReinforcementParserState.infer: adding to chart %s(%s,%s) formula=%s",
-                  sampledDerivation.cat, sampledDerivation.start, sampledDerivation.end, sampledDerivation.formula);
+          LogInfo.logs("ReinforcementParserState.infer: adding to chart %s(%s,%s) value=%s",
+              sampledDerivation.cat, sampledDerivation.start, sampledDerivation.end, sampledDerivation.value);
         combineWithChartDerivations(sampledDerivation);
       }
       addToAgenda(sampledDerivations);
@@ -402,7 +402,7 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
         if (parser.verbose(3) && derivStream.hasNext()) {
           Derivation deriv  = derivStream.peek();
           LogInfo.logs("unrollIllegalStreams(): add deriv=%s(%s,%s) [%s] score=%s, |stream|=%s",
-                  deriv.cat, deriv.start, deriv.end, deriv.formula, deriv.score, pds.derivStream.estimatedSize());
+              deriv.cat, deriv.start, deriv.end, deriv.value, deriv.score, pds.derivStream.estimatedSize());
         }
         derivsToAdd.add(Pair.newPair(derivStream, pds.probSum));
         //update lb
@@ -441,7 +441,8 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
 
     if (parser.verbose(3))
       LogInfo.logs("IllegalStream(): score=%s, logsum=%s, |stream|=%s, |hiddenstreams|=%s, deriv=%s(%s,%s) %s, sum=%s",
-              deriv.score, logSum, estimatedSize, numOfHiddenStreams, deriv.cat, deriv.start, deriv.end, deriv.formula, firstItemLogProb+upperBound);
+          deriv.score, logSum, estimatedSize, numOfHiddenStreams, deriv.cat, deriv.start, deriv.end, deriv.value,
+          firstItemLogProb + upperBound);
 
     return (firstItemLogProb+upperBound) > LOG_SMALL_PROB;
   }
@@ -452,7 +453,7 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
     double threshold = LOG_SMALL_PROB - Math.log(estimatedSize);
     if (parser.verbose(3))
       LogInfo.logs("isHighProbStream(): gapFromMax=%s, threshold=%s, deriv=%s(%s,%s) %s |stream|=%s", gapFromMax, threshold,
-              deriv.cat, deriv.start, deriv.end, deriv.formula, derivStream.estimatedSize());
+          deriv.cat, deriv.start, deriv.end, deriv.value, derivStream.estimatedSize());
 
     return gapFromMax > threshold;
   }
@@ -572,7 +573,6 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
   private void handleRootDerivation(Example ex, int numItemsSampled, Derivation sampledDerivation) {
     if (!sampledDerivation.isRoot(ex.numTokens())) return;
 
-    sampledDerivation.ensureExecuted(parser.executor, ex.context);
     if (ex.targetValue != null)
       sampledDerivation.compatibility = parser.valueEvaluator.getCompatibility(ex.targetValue, sampledDerivation.value);
     if (Parser.opts.partialReward ? (sampledDerivation.compatibility > 0) : (sampledDerivation.compatibility == 1)) {
@@ -711,12 +711,13 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
           Derivation deriv = listAndIndex.getFirst().get(i);
           if (parser.verbose(4))
             LogInfo.logs("populateCorrectDerivations(): necessary deriv: %s", deriv);
-          DerivInfo derivInfo = new DerivInfo(deriv.cat, deriv.start, deriv.end, deriv.formula, deriv.rule);
+          DerivInfo derivInfo = new DerivInfo(deriv.cat, deriv.start, deriv.end, deriv.value, deriv.rule);
           if (!necessaryDerivInfos.contains(derivInfo))
             necessaryDerivInfos.add(derivInfo);
         }
       }
-      DerivInfo derivInfo = new DerivInfo(oracleDeriv.cat, oracleDeriv.start, oracleDeriv.end, oracleDeriv.formula, oracleDeriv.rule);
+      DerivInfo derivInfo = new DerivInfo(oracleDeriv.cat, oracleDeriv.start, oracleDeriv.end, oracleDeriv.value,
+          oracleDeriv.rule);
       if (!oracleDerivInfos.contains(derivInfo)) {
         necessaryDerivInfos.add(derivInfo);
         oracleDerivInfos.add(derivInfo);
@@ -740,14 +741,15 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
       if (index < 0) throw new RuntimeException("Negative index - correct index larger than deriv number");
       if (index >= 200000) {
         LogInfo.warnings("isNecessaryDeriv(): index larger than 200000: %s", index);
-        return necessaryDerivInfos.contains(new DerivInfo(deriv.cat, deriv.start, deriv.end, deriv.formula, deriv.rule));
+        return necessaryDerivInfos.contains(new DerivInfo(deriv.cat, deriv.start, deriv.end, deriv.value, deriv.rule));
       }
       if (necessaryDerivsCache[index] == NecessaryDeriv.UNNECESSARY_DERIV)
         return false;
       if (necessaryDerivsCache[index] == NecessaryDeriv.NECESSARY_DERIV)
         return true;
       // unknown
-      boolean res = necessaryDerivInfos.contains(new DerivInfo(deriv.cat, deriv.start, deriv.end, deriv.formula, deriv.rule));
+      boolean res = necessaryDerivInfos
+          .contains(new DerivInfo(deriv.cat, deriv.start, deriv.end, deriv.value, deriv.rule));
       necessaryDerivsCache[index] = res ? NecessaryDeriv.NECESSARY_DERIV : NecessaryDeriv.UNNECESSARY_DERIV;
       return res;
     }
@@ -778,7 +780,8 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
 
       if (parser.verbose(3)) {
         Derivation deriv = pds.derivStream.peek();
-        if (oracleInfo.oracleDerivInfos.contains(new DerivInfo(deriv.cat, deriv.start, deriv.end, deriv.formula, deriv.rule)))
+        if (oracleInfo.oracleDerivInfos
+            .contains(new DerivInfo(deriv.cat, deriv.start, deriv.end, deriv.value, deriv.rule)))
           LogInfo.logs("MultiplicativeProposalSampler.sample(): Sampled from correct!, prob=%s", prob);
         else
           LogInfo.logs("MultiplicativeProposalSampler.sample(): Sampled from incorrect!, prob=%s", prob);
@@ -788,7 +791,7 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
       // whether to update only for correct moves or not hack
       if (computeExpectedCounts && ReinforcementParser.opts.updateGradientForCorrectMovesOnly) {
         Derivation deriv = pds.derivStream.peek();
-        DerivInfo derivInfo = new DerivInfo(deriv.cat, deriv.start, deriv.end, deriv.formula, deriv.rule);
+        DerivInfo derivInfo = new DerivInfo(deriv.cat, deriv.start, deriv.end, deriv.value, deriv.rule);
         if (oracleInfo.oracleDerivInfos.contains(derivInfo))
           updateProbSum(modelProbs);
         else returnProb = false;
@@ -827,7 +830,8 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
           if (parser.verbose(3) && newDerivStream.hasNext()) {
             Derivation deriv  = newDerivStream.peek();
             LogInfo.logs("MultiplicativeSampler.unroll(): add necessary deriv=%s(%s,%s) [%s] score=%s, |stream|=%s, creationIndex=%s",
-                    deriv.cat, deriv.start, deriv.end, deriv.formula, deriv.score, pds.derivStream.estimatedSize(), deriv.creationIndex);
+                deriv.cat, deriv.start, deriv.end, deriv.value, deriv.score, pds.derivStream.estimatedSize(),
+                deriv.creationIndex);
           }
           derivsToAdd.add(Pair.newPair(newDerivStream, pds.probSum));
           if (pds.derivStream.hasNext())
@@ -854,7 +858,7 @@ final class ReinforcementParserState extends AbstractReinforcementParserState {
         Derivation d = agenda.get(i).derivStream.peek();
         probs[i] = d.score;
         // we assume all necessary things have been unrolled already so no need to handle that
-        if (oracleInfo.oracleDerivInfos.contains(new DerivInfo(d.cat, d.start, d.end, d.formula, d.rule))) {
+        if (oracleInfo.oracleDerivInfos.contains(new DerivInfo(d.cat, d.start, d.end, d.value, d.rule))) {
           probs[i] += bonus;
         }
       }
@@ -919,14 +923,14 @@ class DerivInfo {
   public final String cat;
   public final int start;
   public final int end;
-  public final Formula formula;
+  public final Value value;
   public final Rule rule;
 
-  DerivInfo(String cat, int start, int end, Formula formula, Rule rule) {
+  DerivInfo(String cat, int start, int end, Value value, Rule rule) {
     this.cat = cat;
     this.start = start;
     this.end = end;
-    this.formula = formula;
+    this.value = value;
     this.rule = rule;
   }
 
@@ -940,7 +944,8 @@ class DerivInfo {
     if (end != derivInfo.end) return false;
     if (start != derivInfo.start) return false;
     if (cat != null ? !cat.equals(derivInfo.cat) : derivInfo.cat != null) return false;
-    if (formula != null ? !formula.equals(derivInfo.formula) : derivInfo.formula != null) return false;
+    if (value != null ? !value.equals(derivInfo.value) : derivInfo.value != null)
+      return false;
     return !(rule != null ? !rule.equals(derivInfo.rule) : derivInfo.rule != null);
 
   }
@@ -950,14 +955,14 @@ class DerivInfo {
     int result = cat != null ? cat.hashCode() : 0;
     result = 31 * result + start;
     result = 31 * result + end;
-    result = 31 * result + (formula != null ? formula.hashCode() : 0);
+    result = 31 * result + (value != null ? value.hashCode() : 0);
     result = 31 * result + (rule != null ? rule.hashCode() : 0);
     return result;
   }
 
   @Override
   public String toString() {
-    return cat + "(" + start + "," + end + ") " + formula.toString();
+    return cat + "(" + start + "," + end + ") " + value.toString();
   }
 }
 

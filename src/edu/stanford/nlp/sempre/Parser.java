@@ -66,13 +66,11 @@ public abstract class Parser {
   public static class Spec {
     public final Grammar grammar;
     public final FeatureExtractor extractor;
-    public final Executor executor;
     public final ValueEvaluator valueEvaluator;
 
-    public Spec(Grammar grammar, FeatureExtractor extractor, Executor executor, ValueEvaluator valueEvaluator) {
+    public Spec(Grammar grammar, FeatureExtractor extractor, ValueEvaluator valueEvaluator) {
       this.grammar = grammar;
       this.extractor = extractor;
-      this.executor = executor;
       this.valueEvaluator = valueEvaluator;
     }
   }
@@ -80,7 +78,6 @@ public abstract class Parser {
   // Inputs to the parser
   public final Grammar grammar;
   public final FeatureExtractor extractor;
-  public final Executor executor;
   public final ValueEvaluator valueEvaluator;
 
   // Precomputations to make looking up grammar rules faster.
@@ -93,7 +90,6 @@ public abstract class Parser {
   public Parser(Spec spec) {
     this.grammar = spec.grammar;
     this.extractor = spec.extractor;
-    this.executor = spec.executor;
     this.valueEvaluator = spec.valueEvaluator;
 
     computeCatUnaryRules();
@@ -147,10 +143,6 @@ public abstract class Parser {
    * |ex| is modified in place.
    */
   public ParserState parse(Params params, Example ex, boolean computeExpectedCounts) {
-    // Execute target formula (if applicable).
-    if (ex.targetFormula != null && ex.targetValue == null)
-      ex.targetValue = executor.execute(ex.targetFormula, ex.context).value;
-
     // Parse
     ParserState state;
     StopWatch watch = new StopWatch();

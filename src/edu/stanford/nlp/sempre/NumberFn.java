@@ -49,9 +49,9 @@ public class NumberFn extends SemanticFn {
             try {
               NumberValue numberValue = new NumberValue(Double.parseDouble(value));
               return new Derivation.Builder()
-                      .withCallable(c)
-                      .formula(new ValueFormula<>(numberValue))
-                      .createDerivation();
+                  .withCallable(c)
+                  .value(numberValue)
+                  .createDerivation();
             } catch (NumberFormatException e) {
               LogInfo.warnings("NumberFn: Cannot convert NerSpan \"%s\" to a number", value);
             }
@@ -67,9 +67,9 @@ public class NumberFn extends SemanticFn {
                   new NumberValue(Double.parseDouble(value)) :
                     new NumberValue(Double.parseDouble(value), "fb:en.ordinal_number"));
               return new Derivation.Builder()
-                      .withCallable(c)
-                      .formula(new ValueFormula<>(numberValue))
-                      .createDerivation();
+                  .withCallable(c)
+                  .value(numberValue)
+                  .createDerivation();
             } catch (NumberFormatException e) {
               LogInfo.warnings("NumberFn: Cannot convert NerSpan \"%s\" to a number", value);
             }
@@ -85,9 +85,9 @@ public class NumberFn extends SemanticFn {
                   new NumberValue(Double.parseDouble(value.substring(1))) :
                     new NumberValue(0.01 * Double.parseDouble(value.substring(1))));
               return new Derivation.Builder()
-                      .withCallable(c)
-                      .formula(new ValueFormula<>(numberValue))
-                      .createDerivation();
+                  .withCallable(c)
+                  .value(numberValue)
+                  .createDerivation();
             } catch (NumberFormatException e) {
               LogInfo.warnings("NumberFn: Cannot convert NerSpan \"%s\" to a number", value);
             }
@@ -103,9 +103,9 @@ public class NumberFn extends SemanticFn {
                   new NumberValue(Double.parseDouble(value.substring(1))) :
                     new NumberValue(Double.parseDouble(value.substring(1)), "fb:en.dollar"));
               return new Derivation.Builder()
-                      .withCallable(c)
-                      .formula(new ValueFormula<>(numberValue))
-                      .createDerivation();
+                  .withCallable(c)
+                  .value(numberValue)
+                  .createDerivation();
             } catch (NumberFormatException e) {
               LogInfo.warnings("NumberFn: Cannot convert NerSpan \"%s\" to a number", value);
             }
@@ -119,9 +119,9 @@ public class NumberFn extends SemanticFn {
             try {
               NumberValue numberValue = new NumberValue(Double.parseDouble(value));
               return new Derivation.Builder()
-                      .withCallable(c)
-                      .formula(new ValueFormula<>(numberValue))
-                      .createDerivation();
+                  .withCallable(c)
+                  .value(numberValue)
+                  .createDerivation();
             } catch (NumberFormatException e) {
               // Don't issue warnings; most spans are not numbers
             }

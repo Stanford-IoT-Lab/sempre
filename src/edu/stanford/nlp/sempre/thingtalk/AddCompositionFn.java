@@ -143,7 +143,7 @@ public class AddCompositionFn extends SemanticFn {
         else
           clone.query.add(nextPv);
 
-        Derivation deriv = new Derivation.Builder().withCallable(callable).formula(new ValueFormula<>(clone))
+        Derivation deriv = new Derivation.Builder().withCallable(callable).value(clone)
             .canonicalUtterance(callable.child(0).canonicalUtterance + " " + actionArgCanonical + " "
                 + isToken + " " + triggerArgCanonical)
             .createDerivation();

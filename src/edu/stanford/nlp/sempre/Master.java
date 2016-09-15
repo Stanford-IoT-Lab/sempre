@@ -59,7 +59,7 @@ public class Master {
         return "(no answer)";
       else {
         Derivation deriv = getDerivation();
-        return deriv.getFormula() + " => " + deriv.getValue();
+        return deriv.getValue().toString();
       }
     }
     public String getAnswer() {
@@ -67,7 +67,6 @@ public class Master {
         return "(no answer)";
       else {
         Derivation deriv = getDerivation();
-        deriv.ensureExecuted(builder.executor, ex.context);
         return deriv.getValue().toString();
       }
     }
@@ -250,15 +249,12 @@ public class Master {
     FeatureVector.logChoices("Pred", choices);
 
     // Print denotation
-    LogInfo.begin_track("Top formula");
-    LogInfo.logs("%s", deriv.formula);
-    LogInfo.end_track();
     if (deriv.value != null) {
       LogInfo.begin_track("Top value");
       deriv.value.log();
       LogInfo.end_track();
     }
-		LogInfo.logs("Derivation is %s", deriv.cache);
+    LogInfo.logs("Derivation is %s", deriv.cache);
   }
 
   private void handleCommand(Session session, String line, Response response) {
@@ -338,7 +334,6 @@ public class Master {
       // We always save the logical form and the denotation (but not the entire
       // derivation) in the example.
       if (command.equals("accept") || command.equals("a")) {
-        ex.setTargetFormula(response.getDerivation().getFormula());
         ex.setTargetValue(response.getDerivation().getValue());
         ex.setContext(session.getContextExcludingLast());
         addNewExample(ex);
@@ -364,11 +359,6 @@ public class Master {
       // Need to update the parser given that the grammar has changed.
       builder.parser = null;
       builder.buildUnspecified();
-    } else if (command.equals("execute")) {
-      Example ex = session.getLastExample();
-      ContextValue context = (ex != null ? ex.context : session.context);
-      Executor.Response execResponse = builder.executor.execute(Formulas.fromLispTree(tree.child(1)), context);
-      LogInfo.logs("%s", execResponse.value);
     } else if (command.equals("def")) {
       builder.grammar.interpretMacroDef(tree);
     } else if (command.equals("context")) {
@@ -388,7 +378,6 @@ public class Master {
         .setId(origEx.id)
         .setUtterance(origEx.utterance)
         .setContext(origEx.context)
-        .setTargetFormula(origEx.targetFormula)
         .setTargetValue(origEx.targetValue)
         .createExample();
 
