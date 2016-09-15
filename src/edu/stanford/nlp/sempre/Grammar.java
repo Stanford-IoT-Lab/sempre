@@ -317,43 +317,6 @@ public class Grammar {
   private List<Rule> binarizeRule(Rule rule, List<Boolean> isOptionals) {
     List<Rule> newRules = new ArrayList<>();
 
-    // Special case: JoinFn with an arg0Fn but with multiple non-optional categories.
-    // In this case, we need to use arg0Fn on just the first such category, and
-    // then use function application on the rest.
-    // Old: (rule $A (a ($Z optional) $B $C $D) (JoinFn (arg0 (lambda b (lambda c (lambda d ...))))))
-    // New rules to binarize ($B is the first non-optional category):
-    // 1. (rule $I1 (a ($Z optional) $B) (JoinFn (arg0 (lambda b (lambda c (lambda d ...))))))
-    // 2. (rule $A ($I1 $C $D) (JoinFn forward betaReduce))
-    if (rule.sem instanceof JoinFn && ((JoinFn) rule.sem).getArg0Fn() != null) {
-      // Find the first non-optional category
-      int i = 0;
-      while (i < rule.rhs.size() && !(Rule.isCat(rule.rhs.get(i)) && !isOptionals.get(i)))
-        i++;
-      // Find the next non-optional category
-      int j = i + 1;
-      while (j < rule.rhs.size() && !(Rule.isCat(rule.rhs.get(j)) && !isOptionals.get(j)))
-        j++;
-      // If one exists, then we have to invoke special binarization
-      if (j < rule.rhs.size()) {
-        // Create an intermediate category
-        String intCat = generateFreshCat();
-
-        // Add rule 1
-        List<String> rhs1 = new ArrayList<>(rule.rhs.subList(0, i + 1));
-        newRules.addAll(binarizeRule(new Rule(intCat, rhs1, rule.sem).setInfo(rule), isOptionals.subList(0, i + 1)));
-
-        // Add rule 2
-        List<String> rhs2 = new ArrayList<>();
-        rhs2.add(intCat);
-        rhs2.addAll(rule.rhs.subList(i + 1, rule.rhs.size()));
-        SemanticFn forwardBetaReduce = new JoinFn();
-        forwardBetaReduce.init(LispTree.proto.parseFromString("(JoinFn forward betaReduce)"));
-        newRules.addAll(binarizeRule(new Rule(rule.lhs, rhs2, forwardBetaReduce).setInfo(rule), isOptionals.subList(i, isOptionals.size())));
-
-        return newRules;
-      }
-    }
-
     // Don't binarize: do same as before
     if (!opts.binarizeRules) {
       if (isOptionals.contains(true))
@@ -472,21 +435,6 @@ public class Grammar {
     }
 
     String name = tree.child(0).value;
-
-    // Syntactic sugar: (lambda x (var x)) => (JoinFn betaReduce forward (arg0 (lambda x (var x))))
-    if (name.equals("lambda")) {
-      LispTree newTree = LispTree.proto.newList();
-      newTree.addChild("JoinFn");
-      newTree.addChild("betaReduce");
-      newTree.addChild("forward");
-      newTree.addChild(LispTree.proto.newList("arg0", tree));
-      tree = newTree;
-      name = tree.child(0).value;
-    }
-
-    // For backward compatibility: SemanticFn which have moved.
-    if (name.equals("LexiconFn") || name.equals("BridgeFn"))
-      name = "freebase." + name;
 
     SemanticFn fn;
     fn = (SemanticFn) Utils.newInstanceHard(SempreUtils.resolveClassName(name));
