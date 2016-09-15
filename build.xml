@@ -58,16 +58,6 @@
     <jar destfile="${libsempre}/sempre-corenlp.jar" basedir="${classes}/corenlp"/>
   </target>
 
-  <!-- Compile freebase -->
-  <target name="freebase" depends="init,core,cache">
-    <echo message="Compiling ${ant.project.name}: freebase"/>
-    <mkdir dir="${classes}/freebase"/>
-    <javac srcdir="${src}" destdir="${classes}/freebase" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">
-      <include name="edu/stanford/nlp/sempre/freebase/"/>
-    </javac>
-    <jar destfile="${libsempre}/sempre-freebase.jar" basedir="${classes}/freebase"/>
-  </target>
-
   <!-- Compile tables -->
   <target name="tables" depends="init,core,corenlp">
     <echo message="Compiling ${ant.project.name}: tables"/>
