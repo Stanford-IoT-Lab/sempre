@@ -57,10 +57,10 @@
 
 # recognize email addresses and phone numbers as strings
 (rule $PhoneNumber ($PHRASE) (NerValueFn PHONE_NUMBER) (anchored 1))
-(rule $PhoneNumberValue ($PhoneNumber) (lambda v (call @phoneNumberCast (var v))))
+(rule $PhoneNumberValue ($PhoneNumber) (thingtalk.CallFn @phoneNumberCast))
 # optimization: email addresses are always single token
 (rule $EmailAddress ($TOKEN) (NerValueFn EMAIL_ADDRESS) (anchored 1))
-(rule $EmailAddressValue ($EmailAddress) (lambda v (call @emailAddressCast (var v))))
+(rule $EmailAddressValue ($EmailAddress) (thingtalk.CallFn @emailAddressCast))
 
 (rule $PeriodicTimeValue ($PHRASE) (thingtalk.TimeDurationFn) (anchored 1))
 (rule $PeriodicTimeValue (@every $TimeIntervalValue) (SelectFn 0))
@@ -97,7 +97,7 @@ $PhoneNumberValue $EmailAddressValue))
 
 # Action Handling
 (rule $ActionName ($TOKEN) (thingtalk.ThingpediaLexiconFn @language_tag action) (anchored 1))
-(rule $Action ($ActionName) (lambda act (call @actParam (var act))))
+(rule $Action ($ActionName) (thingtalk.CallFn @actParam))
 (rule $ActionWithArg ($Action $WithArg) (thingtalk.ApplyFn action))
 (rule $ActionIntermediate ($ActionWithArg $Op) (thingtalk.AddOperatorFn action))
 (for @v @all_values
@@ -105,7 +105,7 @@ $PhoneNumberValue $EmailAddressValue))
 )
 
 (rule $TriggerName ($TOKEN) (thingtalk.ThingpediaLexiconFn @language_tag trigger) (anchored 1))
-(rule $Trigger ($TriggerName) (lambda trig (call @trigParam (var trig))))
+(rule $Trigger ($TriggerName) (thingtalk.CallFn @trigParam))
 (rule $TriggerWithArg ($Trigger $WithArg) (thingtalk.ApplyFn trigger))
 (rule $TriggerIntermediate ($TriggerWithArg $Op) (thingtalk.AddOperatorFn trigger))
 (for @v @all_values
@@ -113,7 +113,7 @@ $PhoneNumberValue $EmailAddressValue))
 )
 
 (rule $QueryName ($TOKEN) (thingtalk.ThingpediaLexiconFn @language_tag query) (anchored 1))
-(rule $Query ($QueryName) (lambda query (call @queryParam (var query))))
+(rule $Query ($QueryName) (thingtalk.CallFn @queryParam))
 (rule $QueryWithArg ($Query $WithArg) (thingtalk.ApplyFn query))
 (rule $QueryIntermediate ($QueryWithArg $Op) (thingtalk.AddOperatorFn query))
 (for @v @all_values
@@ -155,14 +155,14 @@ $PhoneNumberValue $EmailAddressValue))
 (rule $Device ($TOKEN) (thingtalk.ThingpediaLexiconFn @language_tag kind) (anchored 1))
 
 # Command handling
-(rule $Command (@discover)          (ConstantFn (call @cmdForm (string "discover") (string generic))))
-(rule $Command (@help)              (ConstantFn (call @cmdForm (string "help") (string generic))))
-(rule $Command (@help $Device)      (lambda value (call @cmdForm (string "help") (var value))))
-(rule $Command (@list)              (ConstantFn (call @cmdForm (string "list") (string generic))))
-(rule $Command (@list @devices)     (ConstantFn (call @cmdForm (string "list") (string device))))
-(rule $Command (@list @commands)    (ConstantFn (call @cmdForm (string "list") (string command))))
-(rule $Command (@configure)         (ConstantFn (call @cmdForm (string "configure") (string generic))))
-(rule $Command (@configure $Device) (lambda value (call @cmdForm (string "configure") (var value))))
+(rule $Command (@discover)          (thingtalk.CommandFn discover))
+(rule $Command (@help)              (thingtalk.CommandFn help))
+(rule $Command (@help $Device)      (thingtalk.CommandFn help withDevice))
+(rule $Command (@list)              (thingtalk.CommandFn list))
+(rule $Command (@list @devices)     (thingtalk.CommandFn list device))
+(rule $Command (@list @commands)    (thingtalk.CommandFn list command))
+(rule $Command (@configure)         (thingtalk.CommandFn configure))
+(rule $Command (@configure $Device) (thingtalk.CommandFn configure withDevice))
 
 # special handling
 # this used to be in SimpleLexicon but we moved it here for two reasons:
@@ -186,10 +186,10 @@ $PhoneNumberValue $EmailAddressValue))
 (rule $Special (failuretoparse) (ConstantFn tt:root.special.failed))
 
 (for @v @answer_values
-	(rule $Answer (@v) (lambda value (call @ansForm (var value))))
+	(rule $Answer (@v) (thingtalk.CallFn @ansForm))
 )
 
 (for @v ($Command $Action $Notify $Query $Answer $TimeQueryRule $TimeActionRule $IftttActionRule $IftttQueryRule $IftttChain)
-	(rule $ROOT (@v) (lambda cmd (call @jsonOut (var cmd))))
+	(rule $ROOT (@v) (thingtalk.CallFn @jsonOut))
 )
-(rule $ROOT ($Special) (lambda spl (call @special (var spl))))
+(rule $ROOT ($Special) (thingtalk.CallFn @special))
