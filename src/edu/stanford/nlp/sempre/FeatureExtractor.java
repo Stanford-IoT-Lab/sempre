@@ -33,8 +33,6 @@ public class FeatureExtractor {
     public Set<String> featureDomains = new HashSet<>();
     @Option(gloss = "Set of feature computer classes to load")
     public Set<String> featureComputers = Sets.newHashSet("DerivOpCountFeatureComputer");
-    @Option(gloss = "Disable denotation features")
-    public boolean disableDenotationFeatures = false;
     @Option(gloss = "Use all possible features, regardless of what featureDomains says")
     public boolean useAllFeatures = false;
     @Option(gloss = "For bigram features in paraphrased utterances, maximum distance to consider")
@@ -72,7 +70,6 @@ public class FeatureExtractor {
   }
 
   public static boolean containsDomain(String domain) {
-    if (opts.disableDenotationFeatures && domain.equals("denotation")) return false;
     return opts.useAllFeatures || opts.featureDomains.contains(domain);
   }
 
@@ -82,7 +79,6 @@ public class FeatureExtractor {
     StopWatchSet.begin("FeatureExtractor.extractLocal");
     extractRuleFeatures(ex, deriv);
     extractSpanFeatures(ex, deriv);
-    extractDenotationFeatures(ex, deriv);
     extractDependencyFeatures(ex, deriv);
     extractBigramFeatures(ex, deriv);
     for (FeatureComputer featureComputer : featureComputers)
@@ -105,38 +101,6 @@ public class FeatureExtractor {
     if (!containsDomain("span") || deriv.start == -1) return;
     deriv.addFeature("span", "cat=" + deriv.cat + ",#tokens=" + (deriv.end - deriv.start));
     deriv.addFeature("span", "cat=" + deriv.cat + ",POS=" + ex.posTag(deriv.start) + "..." + ex.posTag(deriv.end - 1));
-  }
-
-  // Extract features on the denotation of the logical form produced.
-  // (For example, number of items in the list)
-  void extractDenotationFeatures(Example ex, Derivation deriv) {
-    if (!containsDomain("denotation")) return;
-    if (!deriv.isRoot(ex.numTokens())) return;
-
-    if (deriv.value instanceof ErrorValue) {
-      deriv.addFeature("denotation", "error");
-      return;
-    }
-
-    if (deriv.value instanceof StringValue) {
-      if (((StringValue) deriv.value).value.equals("[]") || ((StringValue) deriv.value).value.equals("[null]"))
-        deriv.addFeature("denotation", "empty");
-      return;
-    }
-
-    if (deriv.value instanceof ListValue) {
-      ListValue list = (ListValue) deriv.value;
-
-      if (list.values.size() == 1 && list.values.get(0) instanceof NumberValue) {
-        int count = getNumber(list.values.get(0));
-        deriv.addFeature("denotation", "count-size" + (count <= 1 ? "=" + count : ">1"));
-      }
-      else {
-        int size = list.values.size();
-        deriv.addFeature("denotation", "size" + (size < 3 ? "=" + size : ">=" + 3));
-      }
-
-    }
   }
 
   int getNumber(Value value) {

@@ -24,7 +24,6 @@ public final class Values {
     if ("number".equals(type)) return new NumberValue(tree);
     if ("string".equals(type)) return new StringValue(tree);
     if ("list".equals(type)) return new ListValue(tree);
-    if ("table".equals(type)) return new TableValue(tree);
     if ("description".equals(type)) return new DescriptionValue(tree);
     if ("url".equals(type)) return new UriValue(tree);
     if ("context".equals(type)) return new ContextValue(tree);

@@ -182,28 +182,6 @@ public class Server {
         return H.span().child(dateValue.year + (dateValue.month == -1 ? "" : "-" + dateValue.month + (dateValue.day == -1 ? "" : "-" + dateValue.day)));
       } else if (value instanceof StringValue) {
         return H.span().child(((StringValue) value).value);
-      } else if (value instanceof TableValue) {
-        HtmlElement table = H.table().cls("valueTable");
-        HtmlElement header = H.tr();
-        boolean first = true;
-        for (String item : ((TableValue) value).header) {
-          if (!first) header.child(H.td("&nbsp;&nbsp;&nbsp;"));
-          first = false;
-          header.child(H.td(H.b(item)));
-        }
-        table.child(header);
-        for (List<Value> rowValues : ((TableValue) value).rows) {
-          HtmlElement row = H.tr();
-          first = true;
-          for (Value x : rowValues) {
-            // TODO(pliang): add horizontal spacing only using CSS
-            if (!first) row.child(H.td("&nbsp;&nbsp;&nbsp;"));
-            first = false;
-            row.child(H.td(valueToElem(x)));
-          }
-          table.child(row);
-        }
-        return table;
       } else {
         // Default rendering
         return H.span().child(value.toString());
@@ -470,17 +448,6 @@ public class Server {
         Value value = deriv.getValue();
         if (value instanceof UriValue) {
           item.put("url", ((UriValue) value).value);
-        } else if (value instanceof TableValue) {
-          TableValue tableValue = (TableValue) value;
-          item.put("header", tableValue.header);
-          List<List<String>> rowsObj = new ArrayList<>();
-          item.put("rows", rowsObj);
-          for (List<Value> row : tableValue.rows) {
-            List<String> rowObj = new ArrayList<>();
-            for (Value v : row)
-              rowObj.add(v.toString());
-            rowsObj.add(rowObj);
-          }
         } else {
           item.put("value", value.toString());
         }
