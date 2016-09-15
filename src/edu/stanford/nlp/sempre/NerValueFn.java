@@ -29,7 +29,6 @@ public class NerValueFn extends SemanticFn {
         return new Derivation.Builder()
             .withCallable(c)
             .formula(new ValueFormula<>(new StringValue(value)))
-            .type(SemType.entityType)
             .createDerivation();
       }
     };

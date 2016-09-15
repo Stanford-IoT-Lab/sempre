@@ -62,7 +62,7 @@ public class ApplyFn extends SemanticFn {
           LambdaFormula l1 = new LambdaFormula("value", cf);
           LambdaFormula l2 = new LambdaFormula("op", l1);
 
-          Derivation.Builder bld = new Derivation.Builder().withCallable(c).formula(l2).type(SemType.anyAnyAnyFunc)
+          Derivation.Builder bld = new Derivation.Builder().withCallable(c).formula(l2)
               .canonicalUtterance(left.canonicalUtterance + " " + right.canonicalUtterance);
           return bld.createDerivation();
         }

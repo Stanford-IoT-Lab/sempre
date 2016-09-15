@@ -63,7 +63,6 @@ public class Derivation implements SemanticFn.Callable, HasScore {
   // be more flexible.
 
   public final Formula formula; // Logical form produced by this derivation
-  public final SemType type; // Type corresponding to that logical form
 
 	// Cacheability of this derivation (ie, will replaying the derivation later
 	// give the same value?)
@@ -124,7 +123,6 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     private Rule rule;
     private List<Derivation> children;
     private Formula formula;
-    private SemType type;
     private FeatureVector localFeatureVector = new FeatureVector();
     private double score = Double.NaN;
     private Value value;
@@ -146,7 +144,6 @@ public class Derivation implements SemanticFn.Callable, HasScore {
 			return this;
 		}
     public Builder formula(Formula formula) { this.formula = formula; return this; }
-    public Builder type(SemType type) { this.type = type; return this; }
     public Builder localFeatureVector(FeatureVector localFeatureVector) { this.localFeatureVector = localFeatureVector; return this; }
     public Builder score(double score) { this.score = score; return this; }
     public Builder value(Value value) { this.value = value; return this; }
@@ -162,12 +159,10 @@ public class Derivation implements SemanticFn.Callable, HasScore {
 
     public Builder withStringFormulaFrom(String value) {
       this.formula = new ValueFormula<>(new StringValue(value));
-      this.type = SemType.stringType;
       return this;
     }
     public Builder withFormulaFrom(Derivation deriv) {
       this.formula = deriv.formula;
-      this.type = deriv.type;
       return this;
     }
 
@@ -182,13 +177,13 @@ public class Derivation implements SemanticFn.Callable, HasScore {
 
     public Derivation createDerivation() {
       return new Derivation(
-          cat, start, end, rule, children, formula, type,
+          cat, start, end, rule, children, formula,
           localFeatureVector, score, value, executorStats, compatibility, prob,
 					canonicalUtterance, cache);
     }
   }
 
-  Derivation(String cat, int start, int end, Rule rule, List<Derivation> children, Formula formula, SemType type,
+  Derivation(String cat, int start, int end, Rule rule, List<Derivation> children, Formula formula,
       FeatureVector localFeatureVector, double score, Value value, Evaluation executorStats, double compatibility, double prob,
 			String canonicalUtterance, Cacheability cache) {
     this.cat = cat;
@@ -197,7 +192,6 @@ public class Derivation implements SemanticFn.Callable, HasScore {
     this.rule = rule;
     this.children = children;
     this.formula = formula;
-    this.type = type;
     this.localFeatureVector = localFeatureVector;
     this.score = score;
     this.value = value;
@@ -319,8 +313,6 @@ public String childStringValue(int i) {
       }
 
     }
-    if (type != null && opts.showTypes)
-      tree.addChild(LispTree.proto.newList("type", type.toLispTree()));
     if (opts.showRules) {
       if (rule != null) tree.addChild(getRuleLispTree());
     }

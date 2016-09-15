@@ -24,7 +24,6 @@ public class AddValueFn extends SemanticFn {
           return null;
 
         return new Derivation.Builder().withCallable(c).formula(Formulas.lambdaApply(lf, right.formula))
-            .type(SemType.anyType)
             .createDerivation();
       }
     };

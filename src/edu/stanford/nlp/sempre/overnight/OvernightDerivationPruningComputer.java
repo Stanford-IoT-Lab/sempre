@@ -1,11 +1,9 @@
 package edu.stanford.nlp.sempre.overnight;
 
-import java.util.*;
-import java.util.regex.Pattern;
+import java.util.List;
 
 import edu.stanford.nlp.sempre.*;
 import fig.basic.Option;
-import fig.basic.MapUtils;
 
 /**
  * Hard-coded hacks for pruning derivations in floating parser for overnight domains.
@@ -45,10 +43,6 @@ public class OvernightDerivationPruningComputer extends DerivationPruningCompute
         if (values.size() == 1 && values.get(0) instanceof NumberValue) {
           if (Double.isNaN(((NumberValue) values.get(0)).value)) return true;
         }
-        // If we are supposed to get a number but we get a string (some sparql weirdness)
-        if (deriv.type.equals(SemType.numberType) &&
-                values.size() == 1 &&
-                !(values.get(0) instanceof NumberValue)) return true;
       }
     }
     return false;

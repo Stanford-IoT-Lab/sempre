@@ -145,30 +145,30 @@ class FloatingParserState extends ParserState {
       }
     }
 
-		DerivationStream results = rule.sem.call(ex,
-				new SemanticFn.CallInfo(rule.lhs, start, end, rule, children));
-		while (results.hasNext()) {
-			Derivation newDeriv = results.next();
-			// only overwrite canonical utterance if it's missing
-			// this handles derivations produced by thingtalk.ThingpediaLexiconFn,
-			// where the canonical is already set (and we don't want to mess it up)
-			if (newDeriv.canonicalUtterance == null || newDeriv.canonicalUtterance.length() == 0)
-				newDeriv.canonicalUtterance = canonicalUtterance;
+    DerivationStream results = rule.sem.call(ex,
+        new SemanticFn.CallInfo(rule.lhs, start, end, rule, children));
+    while (results.hasNext()) {
+      Derivation newDeriv = results.next();
+      // only overwrite canonical utterance if it's missing
+      // this handles derivations produced by thingtalk.ThingpediaLexiconFn,
+      // where the canonical is already set (and we don't want to mess it up)
+      if (newDeriv.canonicalUtterance == null || newDeriv.canonicalUtterance.length() == 0)
+        newDeriv.canonicalUtterance = canonicalUtterance;
 
-			// make sure we execute
-			if (FloatingParser.opts.executeAllDerivations && !(newDeriv.type instanceof FuncSemType))
-				newDeriv.ensureExecuted(parser.executor, ex.context);
+      // make sure we execute
+      if (FloatingParser.opts.executeAllDerivations && !(newDeriv.formula instanceof LambdaFormula))
+        newDeriv.ensureExecuted(parser.executor, ex.context);
 
-			if (pruner.isPruned(newDeriv))
-				continue;
-			// Avoid repetitive floating cells
-			addToChart(cell(rule.lhs, start, end, depth), newDeriv);
-			if (depth == -1) {
-				// In addition, anchored cells become floating
-				// at level 0
-				addToChart(floatingCell(rule.lhs, 0), newDeriv);
-			}
-		}
+      if (pruner.isPruned(newDeriv))
+        continue;
+      // Avoid repetitive floating cells
+      addToChart(cell(rule.lhs, start, end, depth), newDeriv);
+      if (depth == -1) {
+        // In addition, anchored cells become floating
+        // at level 0
+        addToChart(floatingCell(rule.lhs, 0), newDeriv);
+      }
+    }
   }
 
   private void applyAnchoredRule(Rule rule, int start, int end, Derivation child1, Derivation child2, String canonicalUtterance) {

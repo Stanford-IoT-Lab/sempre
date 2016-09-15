@@ -1,10 +1,10 @@
 package edu.stanford.nlp.sempre;
 
-import fig.basic.*;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.*;
+
+import fig.basic.*;
 
 /**
  * A Lexicon maps phrases (e.g., born) to lexical entries, which contain a
@@ -26,25 +26,22 @@ import java.util.*;
 public final class SimpleLexicon {
   public static class Entry {
     // rawPhrase was the original phrase in the Lexicon
-    public Entry(String rawPhrase, Formula formula, SemType type, StringDoubleVec features) {
+    public Entry(String rawPhrase, Formula formula, StringDoubleVec features) {
       this.rawPhrase = rawPhrase;
       this.formula = formula;
-      this.type = type;
       this.features = features;
     }
     public final String rawPhrase;
     public final Formula formula;
-    public final SemType type;
     public final StringDoubleVec features;
 
     @Override public String toString() {
-      return "[" + rawPhrase + " => " + formula + " : " + type + "]";
+      return "[" + rawPhrase + " => " + formula + "]";
     }
   }
 
   public static class Options {
     @Option(gloss = "Path to load lexicon files from") public List<String> inPaths;
-    @Option(gloss = "Types to allow suffix (last word) matche (for people names") public List<String> matchSuffixTypes;
   }
   public static Options opts = new Options();
 
@@ -60,7 +57,7 @@ public final class SimpleLexicon {
   }
 
   // Mapping from phrase
-  Map<String, List<Entry>> entries = new HashMap<String, List<Entry>>();
+  Map<String, List<Entry>> entries = new HashMap<>();
 
   public void read(String path) {
     LogInfo.begin_track("SimpleLexicon.read(%s)", path);
@@ -79,10 +76,6 @@ public final class SimpleLexicon {
         String rawPhrase = (String) map.get("lexeme");
         Formula formula = Formula.fromString((String) map.get("formula"));
 
-        // Type
-        String typeStr = (String) map.get("type");
-        SemType type = typeStr != null ? SemType.fromString(typeStr) : TypeInference.inferType(formula);
-
         // Features
         StringDoubleVec features = null;
         Map<String, Double> featureMap = (Map<String, Double>) map.get("features");
@@ -94,23 +87,10 @@ public final class SimpleLexicon {
         }
 
         // Add verbatim feature
-        Entry entry = new Entry(rawPhrase, formula, type, features);
+        Entry entry = new Entry(rawPhrase, formula, features);
         String phrase = entry.rawPhrase.toLowerCase();
         MapUtils.addToList(entries, phrase, entry);
 
-        // For last names
-        String[] parts = phrase.split(" ");
-        if (opts.matchSuffixTypes != null && opts.matchSuffixTypes.contains(typeStr) && parts.length > 1) {
-          StringDoubleVec newFeatures = new StringDoubleVec();
-          if (features != null) {  // Copy over features
-            for (StringDoubleVec.Entry e : features)
-              newFeatures.add(e.getFirst(), e.getSecond());
-          }
-          newFeatures.add("isSuffix", 1);
-          newFeatures.trimToSize();
-          Entry newEntry = new Entry(rawPhrase, formula, type, newFeatures);
-          MapUtils.addToList(entries, parts[parts.length - 1], newEntry);
-        }
         // In the future, add other mechanisms for lemmatization.
       }
       LogInfo.logs("Read %s lines, generated %d entries (now %d total)", numLines, entries.size() - oldNumEntries, entries.size());

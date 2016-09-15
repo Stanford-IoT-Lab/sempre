@@ -2,7 +2,10 @@ package edu.stanford.nlp.sempre;
 
 import java.util.ArrayList;
 import java.util.List;
-import fig.basic.*;
+
+import fig.basic.LispTree;
+import fig.basic.LogInfo;
+import fig.basic.Option;
 
 /**
  * Maps a string to a number (double).
@@ -23,18 +26,21 @@ public class NumberFn extends SemanticFn {
     return requests == null || requests.contains(req);
   }
 
+  @Override
   public void init(LispTree tree) {
     super.init(tree);
     if (tree.children.size() > 1) {
-      requests = new ArrayList<String>();
+      requests = new ArrayList<>();
       for (int i = 1; i < tree.children.size(); i++)
         requests.add(tree.child(1).value);
     }
   }
 
   // TODO(pliang): handle measurements too (e.g., 3cm)
+  @Override
   public DerivationStream call(final Example ex, final Callable c) {
     return new SingleDerivationStream() {
+      @Override
       public Derivation createDerivation() {
         // Numbers: If it is an integer, set its type to integer.  Otherwise, use float.
         if (request("NUMBER")) {
@@ -42,11 +48,9 @@ public class NumberFn extends SemanticFn {
           if (value != null) {
             try {
               NumberValue numberValue = new NumberValue(Double.parseDouble(value));
-              SemType type = numberValue.value == (int) numberValue.value ? SemType.intType : SemType.floatType;
               return new Derivation.Builder()
                       .withCallable(c)
                       .formula(new ValueFormula<>(numberValue))
-                      .type(type)
                       .createDerivation();
             } catch (NumberFormatException e) {
               LogInfo.warnings("NumberFn: Cannot convert NerSpan \"%s\" to a number", value);
@@ -62,11 +66,9 @@ public class NumberFn extends SemanticFn {
               NumberValue numberValue = (opts.unitless ?
                   new NumberValue(Double.parseDouble(value)) :
                     new NumberValue(Double.parseDouble(value), "fb:en.ordinal_number"));
-              SemType type = SemType.intType;
               return new Derivation.Builder()
                       .withCallable(c)
                       .formula(new ValueFormula<>(numberValue))
-                      .type(type)
                       .createDerivation();
             } catch (NumberFormatException e) {
               LogInfo.warnings("NumberFn: Cannot convert NerSpan \"%s\" to a number", value);
@@ -82,11 +84,9 @@ public class NumberFn extends SemanticFn {
               NumberValue numberValue = (opts.unitless ?
                   new NumberValue(Double.parseDouble(value.substring(1))) :
                     new NumberValue(0.01 * Double.parseDouble(value.substring(1))));
-              SemType type = SemType.floatType;
               return new Derivation.Builder()
                       .withCallable(c)
                       .formula(new ValueFormula<>(numberValue))
-                      .type(type)
                       .createDerivation();
             } catch (NumberFormatException e) {
               LogInfo.warnings("NumberFn: Cannot convert NerSpan \"%s\" to a number", value);
@@ -102,11 +102,9 @@ public class NumberFn extends SemanticFn {
               NumberValue numberValue = (opts.unitless ?
                   new NumberValue(Double.parseDouble(value.substring(1))) :
                     new NumberValue(Double.parseDouble(value.substring(1)), "fb:en.dollar"));
-              SemType type = SemType.floatType;
               return new Derivation.Builder()
                       .withCallable(c)
                       .formula(new ValueFormula<>(numberValue))
-                      .type(type)
                       .createDerivation();
             } catch (NumberFormatException e) {
               LogInfo.warnings("NumberFn: Cannot convert NerSpan \"%s\" to a number", value);
@@ -120,11 +118,9 @@ public class NumberFn extends SemanticFn {
           if (value != null) {
             try {
               NumberValue numberValue = new NumberValue(Double.parseDouble(value));
-              SemType type = numberValue.value == (int) numberValue.value ? SemType.intType : SemType.floatType;
               return new Derivation.Builder()
                       .withCallable(c)
                       .formula(new ValueFormula<>(numberValue))
-                      .type(type)
                       .createDerivation();
             } catch (NumberFormatException e) {
               // Don't issue warnings; most spans are not numbers

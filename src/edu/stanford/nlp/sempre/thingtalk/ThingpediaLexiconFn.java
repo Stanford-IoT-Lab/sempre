@@ -115,7 +115,7 @@ public class ThingpediaLexiconFn extends SemanticFn {
       FeatureVector features = new FeatureVector();
       entry.addFeatures(features);
       Derivation deriv = new Derivation.Builder().withCallable(callable).formula(entry.toFormula())
-          .localFeatureVector(features).canonicalUtterance(entry.getRawPhrase()).type(SemType.entityType)
+          .localFeatureVector(features).canonicalUtterance(entry.getRawPhrase())
           .meetCache(Cacheability.LEXICON_DEPENDENT)
           .createDerivation();
 

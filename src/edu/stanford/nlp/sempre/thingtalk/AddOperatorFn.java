@@ -55,7 +55,6 @@ public class AddOperatorFn extends SemanticFn {
         }
 
         return new Derivation.Builder().withCallable(c).formula(Formulas.lambdaApply(lf2, right.formula))
-            .type(SemType.anyAnyFunc)
             .createDerivation();
       }
     };

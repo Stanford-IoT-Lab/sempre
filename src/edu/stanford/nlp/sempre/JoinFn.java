@@ -1,13 +1,12 @@
 package edu.stanford.nlp.sempre;
 
-import fig.basic.LispTree;
-import fig.basic.LogInfo;
-import fig.basic.Option;
-
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import fig.basic.LispTree;
+import fig.basic.LogInfo;
+import fig.basic.Option;
 
 /**
  * Input: two children (a binary and a unary in some order).
@@ -22,11 +21,6 @@ import java.util.List;
 public class JoinFn extends SemanticFn {
   public static class Options {
     @Option(gloss = "Verbose") public int verbose = 0;
-    @Option public boolean showTypeCheckFailures = false;
-    @Option public boolean typeInference = false;
-    // TODO(joberant): this flag is for backward compatibility.  If we don't
-    // need it for the new results, get rid of it.
-    @Option public boolean specializedTypeCheck = true;
   }
 
   public static Options opts = new Options();
@@ -64,6 +58,7 @@ public class JoinFn extends SemanticFn {
   private ConstantFn arg0Fn = null;
   public ConstantFn getArg0Fn() { return arg0Fn; }
 
+  @Override
   public void init(LispTree tree) {
     super.init(tree);
     for (int j = 1; j < tree.children.size(); j++) {
@@ -110,6 +105,7 @@ public class JoinFn extends SemanticFn {
       throw new RuntimeException("At least one of unaryCanBeArg0 and unaryCanBeArg1 must be set");
   }
 
+  @Override
   public DerivationStream call(Example ex, Callable c) {
     return new LazyJoinFnDerivs(ex, c);
   }
@@ -165,44 +161,10 @@ public class JoinFn extends SemanticFn {
       return derivations.get(currIndex++);
     }
 
-    SemType specializedTypeCheck(SemType binaryType, SemType unaryType) {
-      // Ugly special case for Free917/WebQuestions: when |that| is a
-      // UnionSemType corresponding to an entity (e.g.,
-      // fb:en.the_washington_post) and we are joining with a relation (e.g.,
-      // fb:cvg.game_version.publisher), then we end up calling this function
-      // with:
-      // - that: (union fb:business.employer ...)
-      // - argType: fb:cvg.cvg_publisher
-      // The meet here is fb:cvg.cvg_publisher, but we actually want to return bottom (to be more stringent).
-      SemType argType = binaryType.getArgType();
-      if (unaryType instanceof TopSemType)  // Happens when we don't know the type of the unary
-        return SemType.bottomType;
-      if (unaryType instanceof AtomicSemType)  // Make things uniform
-        unaryType = new UnionSemType(unaryType);
-      if (unaryType instanceof UnionSemType && argType instanceof AtomicSemType) {
-        for (SemType t : ((UnionSemType) unaryType).baseTypes)
-          if (t instanceof AtomicSemType &&
-              SemTypeHierarchy.singleton.getSupertypes(((AtomicSemType) t).name).contains(((AtomicSemType) argType).name))
-            return binaryType.getRetType();
-        return SemType.bottomType;
-      }
-      return binaryType.apply(unaryType);  // Default
-    }
-
     // Return null if unable to join.
-    private Derivation doJoin(Derivation binaryDeriv, Formula binaryFormula, SemType binaryType,
-                              Derivation unaryDeriv, Formula unaryFormula, SemType unaryType,
+    private Derivation doJoin(Derivation binaryDeriv, Formula binaryFormula,
+        Derivation unaryDeriv, Formula unaryFormula,
                               String featureDesc) {
-      // Do a coarse type check.
-      SemType type = opts.specializedTypeCheck ? specializedTypeCheck(binaryType, unaryType) : binaryType.apply(unaryType);
-      if (!type.isValid()) {
-        if (opts.showTypeCheckFailures)
-          LogInfo.warnings("JoinFn: type check failed: [%s : %s] JOIN [%s : %s]",
-              binaryFormula, binaryType,
-              unaryFormula, unaryType);
-        return null;
-      }
-
       Formula f;
       if (betaReduce) {
         if (!(binaryFormula instanceof LambdaFormula))
@@ -212,19 +174,10 @@ public class JoinFn extends SemanticFn {
         f = new JoinFormula(binaryFormula, unaryFormula);
       }
 
-      // Do full type inference.
-      if (opts.typeInference) {
-        SemType fullType = TypeInference.inferType(f);
-        if (opts.verbose >= 2)
-          LogInfo.logs("JoinFn.typeInference: %s => %s [coarse type = %s]", f, fullType, type);
-        if (!fullType.isValid()) return null;  // Rule out logical form
-        type = fullType;  // Use the more specific type
-      }
-
       if (opts.verbose >= 3) {
         LogInfo.logs(
-                "JoinFn: binary: %s [%s], unary: %s [%s], result: %s [%s]",
-                binaryFormula, binaryType, unaryFormula, unaryType, f, type);
+            "JoinFn: binary: %s, unary: %s, result: %s",
+            binaryFormula, unaryFormula, f);
       }
 
       // Add features
@@ -236,7 +189,6 @@ public class JoinFn extends SemanticFn {
       Derivation newDeriv = new Derivation.Builder()
               .withCallable(callable)
               .formula(f)
-              .type(type)
               .localFeatureVector(features)
               .createDerivation();
 
@@ -255,15 +207,15 @@ public class JoinFn extends SemanticFn {
       String unaryPos = ex.languageInfo.getCanonicalPos(unaryDeriv.start);
       if (unaryCanBeArg0) {
         Derivation deriv = doJoin(
-            binaryDeriv, Formulas.reverseFormula(binaryDeriv.formula), binaryDeriv.type.reverse(),
-            unaryDeriv, unaryDeriv.formula, unaryDeriv.type,
+            binaryDeriv, Formulas.reverseFormula(binaryDeriv.formula),
+            unaryDeriv, unaryDeriv.formula,
             "binary=" + binaryPos + ",unary=" + unaryPos + "_reverse");
         if (deriv != null) derivations.add(deriv);
       }
       if (unaryCanBeArg1) {
         Derivation deriv = doJoin(
-            binaryDeriv, binaryDeriv.formula, binaryDeriv.type,
-            unaryDeriv, unaryDeriv.formula, unaryDeriv.type,
+            binaryDeriv, binaryDeriv.formula,
+            unaryDeriv, unaryDeriv.formula,
             "binary=" + binaryPos + ",unary=" + unaryPos);
         if (deriv != null) derivations.add(deriv);
       }

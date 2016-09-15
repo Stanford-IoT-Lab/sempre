@@ -1,7 +1,9 @@
 package edu.stanford.nlp.sempre;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import fig.basic.*;
-import java.util.*;
 
 /**
  * Uses the SimpleLexicon.
@@ -23,34 +25,29 @@ public class SimpleLexiconFn extends SemanticFn {
 
   private static SimpleLexicon lexicon;
 
-  // Only return entries whose type matches this
-  private SemType restrictType = SemType.topType;
-
   public SimpleLexiconFn() {
     lexicon = SimpleLexicon.getSingleton();
   }
 
+  @Override
   public void init(LispTree tree) {
     super.init(tree);
     for (int i = 1; i < tree.children.size(); i++) {
       // (type fb:people.person): allow us to restrict the type
       LispTree arg = tree.child(i);
-      if ("type".equals(arg.child(0).value)) {
-        restrictType = SemType.fromLispTree(arg.child(1));
-      }
     }
   }
 
+  @Override
   public DerivationStream call(Example ex, Callable c) {
     String phrase = c.childStringValue(0);
     List<SimpleLexicon.Entry> entries = lexicon.lookup(phrase);
 
     // Filter by type
-    List<SimpleLexicon.Entry> newEntries = new ArrayList<SimpleLexicon.Entry>();
+    List<SimpleLexicon.Entry> newEntries = new ArrayList<>();
     for (SimpleLexicon.Entry e : entries) {
       if (opts.verbose >= 3)
-        LogInfo.logs("SimpleLexiconFn: %s => %s [type = %s meet-> %s]", phrase, e.formula, e.type, restrictType.meet(e.type));
-      if (!restrictType.meet(e.type).isValid()) continue;
+        LogInfo.logs("SimpleLexiconFn: %s => %s", phrase, e.formula);
       newEntries.add(e);
     }
     entries = newEntries;
@@ -83,7 +80,6 @@ public class SimpleLexiconFn extends SemanticFn {
       Derivation deriv =  new Derivation.Builder()
               .withCallable(callable)
               .formula(entry.formula)
-              .type(entry.type)
               .localFeatureVector(features)
               .createDerivation();
 

@@ -1,8 +1,8 @@
 package edu.stanford.nlp.sempre;
 
 import fig.basic.LispTree;
-import fig.basic.Option;
 import fig.basic.LogInfo;
+import fig.basic.Option;
 
 /**
  * Takes two unaries and merges (takes the intersection) of them.
@@ -23,6 +23,7 @@ public class MergeFn extends SemanticFn {
   MergeFormula.Mode mode;  // How to merge
   Formula formula;  // Optional: merge with this if exists
 
+  @Override
   public void init(LispTree tree) {
     super.init(tree);
     mode = MergeFormula.parseMode(tree.child(1).value);
@@ -31,6 +32,7 @@ public class MergeFn extends SemanticFn {
     }
   }
 
+  @Override
   public DerivationStream call(final Example ex, final Callable c) {
     return new SingleDerivationStream() {
       @Override
@@ -46,18 +48,9 @@ public class MergeFn extends SemanticFn {
         // Compute resulting type
         Derivation child0 = c.child(0);
         Derivation child1 = c.child(1);
-        SemType type = child0.type.meet(child1.type);
         FeatureVector features = new FeatureVector();
         if (opts.verbose >= 5)
-          LogInfo.logs("MergeFn: %s | %s | %s", child0, child1, type);
-
-        if (!type.isValid()) {
-          if (opts.hardTypeCheck) {
-            if (opts.showTypeCheckFailures)
-              LogInfo.warnings("MergeFn: type check failed: [%s : %s] AND [%s : %s]", child0.formula, child0.type, child1.formula, child1.type);
-            return null;
-          }
-        }
+          LogInfo.logs("MergeFn: %s | %s", child0, child1);
 
         if (formula != null)
           result = new MergeFormula(mode, formula, result);
@@ -65,7 +58,6 @@ public class MergeFn extends SemanticFn {
         Derivation deriv = new Derivation.Builder()
                 .withCallable(c)
                 .formula(result)
-                .type(type)
                 .localFeatureVector(features)
                 .createDerivation();
 

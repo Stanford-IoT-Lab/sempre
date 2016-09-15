@@ -6,6 +6,7 @@ package edu.stanford.nlp.sempre;
  * @author Percy Liang, Giovanni Campagna
  */
 public class TimeFn extends SemanticFn {
+  @Override
   public DerivationStream call(final Example ex, final Callable c) {
     return new SingleDerivationStream() {
       @Override
@@ -19,7 +20,6 @@ public class TimeFn extends SemanticFn {
         return new Derivation.Builder()
                 .withCallable(c)
                 .formula(new ValueFormula<>(dateValue))
-                .type(SemType.dateType)
                 .createDerivation();
       }
     };

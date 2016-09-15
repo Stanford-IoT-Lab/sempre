@@ -364,8 +364,6 @@ public class Master {
       // Need to update the parser given that the grammar has changed.
       builder.parser = null;
       builder.buildUnspecified();
-    } else if (command.equals("type")) {
-      LogInfo.logs("%s", TypeInference.inferType(Formulas.fromLispTree(tree.child(1))));
     } else if (command.equals("execute")) {
       Example ex = session.getLastExample();
       ContextValue context = (ex != null ? ex.context : session.context);

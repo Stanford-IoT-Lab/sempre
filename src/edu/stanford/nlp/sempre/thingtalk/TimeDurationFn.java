@@ -22,7 +22,6 @@ public class TimeDurationFn extends SemanticFn {
         return new Derivation.Builder()
                 .withCallable(c)
                 .formula(new ValueFormula<>(numValue))
-                .type(SemType.numberType)
 				.meetCache(Derivation.Cacheability.CACHEABLE)
                 .createDerivation();
       }

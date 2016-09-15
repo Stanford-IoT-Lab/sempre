@@ -9,7 +9,6 @@ import fig.basic.LispTree;
  */
 public class ConstantFn extends SemanticFn {
   Formula formula;  // Formula to return
-  SemType type;
 
   public ConstantFn() { }
 
@@ -17,18 +16,13 @@ public class ConstantFn extends SemanticFn {
     init(LispTree.proto.newList("ConstantFn", formula.toLispTree()));
   }
 
+  @Override
   public void init(LispTree tree) {
     super.init(tree);
     this.formula = Formulas.fromLispTree(tree.child(1));
-    if (2 < tree.children.size())
-      this.type = SemType.fromLispTree(tree.child(2));
-    else {
-      this.type = TypeInference.inferType(formula);
-    }
-    if (!this.type.isValid())
-      throw new RuntimeException("ConstantFn: " + formula + " does not type check");
   }
 
+  @Override
   public DerivationStream call(final Example ex, final Callable c) {
     return new SingleDerivationStream() {
       @Override
@@ -36,7 +30,6 @@ public class ConstantFn extends SemanticFn {
         Derivation res = new Derivation.Builder()
                 .withCallable(c)
                 .formula(formula)
-                .type(type)
                 .createDerivation();
         // don't generate feature if it is not grounded to a string
         if (FeatureExtractor.containsDomain("constant") && c.getStart() != -1)

@@ -1,8 +1,11 @@
 package edu.stanford.nlp.sempre;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import fig.basic.*;
+import fig.basic.LispTree;
+import fig.basic.LogInfo;
+import fig.basic.Option;
 
 /**
  * Prune derivations during parsing.
@@ -197,16 +200,6 @@ public class DerivationPruner {
             LogInfo.logs("PRUNED [badSuperlativeHead] %s", formula);
           return true;
         }
-      }
-    }
-    if (containsStrategy("mistypedMerge") && formula instanceof MergeFormula) {
-      MergeFormula merge = (MergeFormula) formula;
-      SemType type1 = TypeInference.inferType(merge.child1);
-      SemType type2 = TypeInference.inferType(merge.child2);
-      if (!type1.meet(type2).isValid()) {
-        if (opts.pruningVerbosity >= 2)
-          LogInfo.logs("PRUNED [mistypedMerge] %s", deriv.formula);
-        return true;
       }
     }
     return false;

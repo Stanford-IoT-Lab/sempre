@@ -87,7 +87,6 @@ public class FeatureExtractor {
     extractSpanFeatures(ex, deriv);
     extractDenotationFeatures(ex, deriv);
     extractDependencyFeatures(ex, deriv);
-    extractWhTypeFeatures(ex, deriv);
     conjoinLemmaAndBinary(ex, deriv);
     extractBigramFeatures(ex, deriv);
     for (FeatureComputer featureComputer : featureComputers)
@@ -195,34 +194,9 @@ public class FeatureExtractor {
     }
   }
 
-  // Conjunction of wh-question word and type
-  // (For example, "who" should go with PERSON and not DATE)
-  void extractWhTypeFeatures(Example ex, Derivation deriv) {
-    if (!containsDomain("whType")) return;
-    if (!deriv.isRoot(ex.numTokens())) return;
-
-    if (ex.posTag(0).startsWith("W")) {
-      deriv.addFeature("whType",
-              "token0=" + ex.token(0) + "," +
-                      "type=" + coarseType(deriv.type.toString()));
-    }
-  }
-
   public static final String PERSON = "fb:people.person";
   public static final String LOC = "fb:location.location";
   public static final String ORG = "fb:organization.organization";
-
-  public static String coarseType(String type) {
-    Set<String> superTypes = SemTypeHierarchy.singleton.getSupertypes(type);
-    if (superTypes != null) {
-      if (superTypes.contains(PERSON)) return PERSON;
-      if (superTypes.contains(LOC)) return LOC;
-      if (superTypes.contains(ORG)) return ORG;
-      if (superTypes.contains(CanonicalNames.NUMBER)) return CanonicalNames.NUMBER;
-      if (superTypes.contains(CanonicalNames.DATE)) return CanonicalNames.DATE;
-    }
-    return "OTHER";
-  }
 
 
   //used in Berant et al., 2013 and in the RL parser

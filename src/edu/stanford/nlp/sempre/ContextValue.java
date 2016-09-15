@@ -1,9 +1,11 @@
 package edu.stanford.nlp.sempre;
 
+import java.util.*;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+
 import fig.basic.LispTree;
-import java.util.*;
 
 /**
  * Represents the discourse context (time, place, history of exchanges).
@@ -42,33 +44,19 @@ public class ContextValue extends Value {
   public final String user;
   public final DateValue date;
   public final List<Exchange> exchanges;  // List of recent exchanges with the user
-  public final KnowledgeGraph graph;  // Mini-knowledge graph that captures the context
 
   public ContextValue withDate(DateValue newDate) {
-    return new ContextValue(user, newDate, exchanges, graph);
+    return new ContextValue(user, newDate, exchanges);
   }
 
   public ContextValue withNewExchange(List<Exchange> newExchanges) {
-    return new ContextValue(user, date, newExchanges, graph);
-  }
-
-  public ContextValue withGraph(KnowledgeGraph newGraph) {
-    return new ContextValue(user, date, exchanges, newGraph);
-  }
-
-  public ContextValue(String user, DateValue date, List<Exchange> exchanges, KnowledgeGraph graph) {
-    this.user = user;
-    this.date = date;
-    this.exchanges = exchanges;
-    this.graph = graph;
+    return new ContextValue(user, date, newExchanges);
   }
 
   public ContextValue(String user, DateValue date, List<Exchange> exchanges) {
-    this(user, date, exchanges, null);
-  }
-
-  public ContextValue(KnowledgeGraph graph) {
-    this(null, null, null, graph);
+    this.user = user;
+    this.date = date;
+    this.exchanges = exchanges;
   }
 
   // Example:
@@ -79,16 +67,13 @@ public class ContextValue extends Value {
   public ContextValue(LispTree tree) {
     String user = null;
     DateValue date = null;
-    KnowledgeGraph graph = null;
-    exchanges = new ArrayList<Exchange>();
+    exchanges = new ArrayList<>();
     for (int i = 1; i < tree.children.size(); i++) {
       String key = tree.child(i).child(0).value;
       if (key.equals("user")) {
         user = tree.child(i).child(1).value;
       } else if (key.equals("date")) {
         date = new DateValue(tree.child(i));
-      } else if (key.equals("graph")) {
-        graph = KnowledgeGraph.fromLispTree(tree.child(i));
       } else if (key.equals("exchange")) {
         exchanges.add(new Exchange(tree.child(i)));
       } else {
@@ -97,9 +82,9 @@ public class ContextValue extends Value {
     }
     this.user = user;
     this.date = date;
-    this.graph = graph;
   }
 
+  @Override
   public LispTree toLispTree() {
     LispTree tree = LispTree.proto.newList();
     tree.addChild("context");
@@ -107,22 +92,19 @@ public class ContextValue extends Value {
       tree.addChild(LispTree.proto.newList("user", user));
     if (date != null)
       tree.addChild(date.toLispTree());
-    if (graph != null)
-      tree.addChild(graph.toLispTree());
     for (Exchange e : exchanges)
       tree.addChild(LispTree.proto.newList("exchange", e.toLispTree()));
     return tree;
   }
 
+  @Override
   public Map<String,Object> toJson() {
-    Map<String,Object> json = new HashMap<String,Object>();
+    Map<String,Object> json = new HashMap<>();
     if(user != null)
       json.put("user", user);
     if(date != null)
       json.put("date", date.toJson());
-    if(graph != null)
-      json.put("graph", graph.toLispTree()); // May be buggy!
-    List<Object> exchangeJson = new ArrayList<Object>();
+    List<Object> exchangeJson = new ArrayList<>();
     json.put("exchange", exchangeJson);
     for (Exchange e : exchanges)
       exchangeJson.add(e.toLispTree());
@@ -134,7 +116,6 @@ public class ContextValue extends Value {
     hash = hash * 0xd3a2646c + user.hashCode();
     hash = hash * 0xd3a2646c + date.hashCode();
     hash = hash * 0xd3a2646c + exchanges.hashCode();
-    hash = hash * 0xd3a2646c + graph.hashCode();
     return hash;
   }
 
@@ -145,10 +126,10 @@ public class ContextValue extends Value {
     if (!this.user.equals(that.user)) return false;
     if (!this.date.equals(that.date)) return false;
     if (!this.exchanges.equals(that.exchanges)) return false;
-    if (!this.graph.equals(that.graph)) return false;
     return true;
   }
 
+  @Override
   @JsonValue
   public String toString() { return toLispTree().toString(); }
 
