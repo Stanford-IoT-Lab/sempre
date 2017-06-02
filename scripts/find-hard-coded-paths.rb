@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/local/bin/ruby
 
 # Heuristically find all hard-coded paths in the source code.
 # There should be no absolute paths.

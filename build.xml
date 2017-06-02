@@ -14,8 +14,13 @@
   </path>
 
   <!-- Create directories -->
+  <record name="./output.log" loglevel="verbose" action="start"/>
   <target name="init">
-    <exec executable="${root}/scripts/extract-module-classes.rb"/>
+    <loadfile property="filename" srcFile="${root}/scripts/extract-module-classes.rb"/>
+    <echo>${filename}</echo>
+    <exec executable="/usr/local/bin/ruby">
+        <arg value="${root}/scripts/extract-module-classes.rb"/>
+    </exec>
     <mkdir dir="${classes}"/>
     <mkdir dir="${libsempre}"/>
   </target>

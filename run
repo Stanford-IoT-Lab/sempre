@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/local/bin/ruby
 
 # This is the main entry point for running all SEMPRE programs.  See
 # fig/lib/execrunner.rb for more documentation for how commands are generated.
@@ -140,10 +140,10 @@ def freebaseOpts
 
     # Lexicon
     o('LexiconFn.lexiconClassName', 'edu.stanford.nlp.sempre.fbalignment.lexicons.Lexicon'),
-    l( # binary
-      o('BinaryLexicon.binaryLexiconFilesPath', 'lib/fb_data/7/binaryInfoStringAndAlignment.txt'),
-      o('BinaryLexicon.keyToSortBy', 'Intersection_size_typed'),
-    nil),
+    #l( # binary
+      #o('BinaryLexicon.binaryLexiconFilesPath', 'lib/fb_data/7/binaryInfoStringAndAlignment.txt'),
+      #o('BinaryLexicon.keyToSortBy', 'Intersection_size_typed'),
+    #nil),
     o('UnaryLexicon.unaryLexiconFilePath','lib/fb_data/7/unaryInfoStringAndAlignment.txt'), # unary
     o('EntityLexicon.entityPopularityPath','lib/fb_data/7/entityPopularity.txt'), # entity
     #Jonathan - added this 3/5/2015
@@ -475,7 +475,7 @@ addMode('simple-freebase', 'Simple shell for using Freebase', lambda { |e| l(
   o('Parser.coarsePrune'),
   o('JoinFn.typeInference'),
   o('UnaryLexicon.unaryLexiconFilePath', '/dev/null'),
-  o('BinaryLexicon.binaryLexiconFilesPath', '/dev/null'),
+  #o('BinaryLexicon.binaryLexiconFilesPath', '/dev/null'),
   #o('JoinFn.showTypeCheckFailures'),  # Use this to debug
   o('Grammar.inPaths', 'freebase/data/demo1.grammar'),  # Override with your own custom grammar
   o('SparqlExecutor.returnTable'),
@@ -483,6 +483,40 @@ addMode('simple-freebase', 'Simple shell for using Freebase', lambda { |e| l(
   o('Main.interactive'),
 nil) })
 
+addMode('simple-freebase-nocache', 'Simple shell for using Freebase (without a cache server)', lambda { |e| l(
+  'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  o('executor', 'freebase.SparqlExecutor'),
+  letDefault(:sparqlserver, 'freebase.cloudapp.net:3093'),
+  sparqlOpts,
+  o('FeatureExtractor.featureDomains', 'rule'),
+  o('Parser.coarsePrune'),
+  o('JoinFn.typeInference'),
+  o('UnaryLexicon.unaryLexiconFilePath', '/dev/null'),
+  #o('BinaryLexicon.binaryLexiconFilesPath', '/dev/null'),
+  #o('JoinFn.showTypeCheckFailures'),  # Use this to debug
+  o('Grammar.inPaths', 'freebase/data/demo1.grammar'),  # Override with your own custom grammar
+  #o('SparqlExecutor.includeSupportingInfo'),  # Show full information
+  o('Main.interactive'),
+nil) })
+
+# New mode for bike market
+addMode('market', 'Simple shell for using Freebase (without a cache server)', lambda { |e| l(
+  'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  o('executor', 'freebase.SparqlConverter'),
+  letDefault(:sparqlserver, 'freebase.cloudapp.net:3093'),
+  sparqlOpts,
+  o('FeatureExtractor.featureDomains', 'rule'),
+  o('Parser.coarsePrune'),
+  o('JoinFn.typeInference'),
+  o('UnaryLexicon.unaryLexiconFilePath', '/dev/null'),
+  o('Builder.parser', 'FloatingParser'),
+  o('FloatingParser.executeAllDerivations', 'true'),
+  #o('BinaryLexicon.binaryLexiconFilesPath', '/dev/null'),
+  #o('JoinFn.showTypeCheckFailures'),  # Use this to debug
+  o('Grammar.inPaths', 'freebase/data/demo1.grammar'),  # Override with your own custom grammar
+  #o('SparqlExecutor.includeSupportingInfo'),  # Show full information
+  o('Main.interactive'),
+nil) })
 
 ############################################################
 # {2014-12-27} [Percy]: Overnight semantic parsing
