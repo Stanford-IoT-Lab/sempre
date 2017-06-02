@@ -36,6 +36,7 @@ def header(modules='core', codalabDependencies=nil)
     # Run the Java command...
     'java',
     '-ea',
+    '-Djava.library.path=jni',
     '-Dmodules='+modules,
     # Memory size
     letDefault(:memsize, 'default'),
@@ -501,7 +502,7 @@ nil) })
 
 # New mode for bike market
 addMode('market', 'Simple shell for using Freebase (without a cache server)', lambda { |e| l(
-  'java', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  'java', '-Djava.library.path=jni', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
   o('executor', 'freebase.SparqlConverter'),
   letDefault(:sparqlserver, 'freebase.cloudapp.net:3093'),
   sparqlOpts,
@@ -511,6 +512,7 @@ addMode('market', 'Simple shell for using Freebase (without a cache server)', la
   o('UnaryLexicon.unaryLexiconFilePath', '/dev/null'),
   o('Builder.parser', 'FloatingParser'),
   o('FloatingParser.executeAllDerivations', 'true'),
+  o('Parser.beamSize', '14'),
   #o('BinaryLexicon.binaryLexiconFilesPath', '/dev/null'),
   #o('JoinFn.showTypeCheckFailures'),  # Use this to debug
   o('Grammar.inPaths', 'freebase/data/demo1.grammar'),  # Override with your own custom grammar
