@@ -36,6 +36,7 @@ def header(modules='core', codalabDependencies=nil)
     # Run the Java command...
     'java',
     '-ea',
+    '-Djava.library.path=jni',
     '-Dmodules='+modules,
     # Memory size
     letDefault(:memsize, 'default'),
@@ -839,7 +840,7 @@ addMode('genovernight', 'Generate utterances for overnight semantic parsing', la
   'fig/bin/qcreate',
   letDefault(:gen, 0),
   sel(:gen, rlwrap, l()),
-  'java', '-Dmodules=core,overnight', '-Xmx10g', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.overnight.GenerationMain',
+  'java', '-Djava.library.path=jni', '-Dmodules=core,overnight', '-Xmx10g', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.overnight.GenerationMain',
   figOpts,
   o('JoinFn.typeInference', true),
   o('JoinFn.specializedTypeCheck', false),
