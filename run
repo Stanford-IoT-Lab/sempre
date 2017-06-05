@@ -506,6 +506,7 @@ addMode('overnight', 'Overnight semantic parsing', l(
   header('core,freebase,overnight'),
   'edu.stanford.nlp.sempre.Main',
   figOpts,
+  #o('Main.interactive'),
   o('JavaExecutor.convertNumberValues', false),
   o('useAnchorsOnce', true),
   o('trackLocalChoices'),
@@ -838,7 +839,9 @@ end
 # {2015-01-18} Generate utterances [Percy]
 addMode('genovernight', 'Generate utterances for overnight semantic parsing', lambda { |e| l(
   'fig/bin/qcreate',
-  letDefault(:gen, 0),
+  letDefault(:gen, 1),
+  letDefault(:pooldir, 1),
+  letDefault(:parse, 0),
   sel(:gen, rlwrap, l()),
   'java', '-Djava.library.path=jni', '-Dmodules=core,overnight', '-Xmx10g', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.overnight.GenerationMain',
   figOpts,
@@ -856,6 +859,9 @@ addMode('genovernight', 'Generate utterances for overnight semantic parsing', la
   o('FeatureExtractor.featureComputers','overnight.OvernightFeatureComputer'),
   o('OvernightFeatureComputer.featureDomains', ''),
   o('OvernightFeatureComputer.itemAnalysis',false),
+  o('OvernightFeatureComputer.languageTag', 'en'),
+  o('wordAlignmentPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '.word_alignments.berkeley' }),
+  o('phraseAlignmentPath', lambda { |e| 'lib/data/overnight/' + e[:domain] + '.phrase_alignments' }),
   sel(:gen,
     l( # For debugging the grammar
       o('FeatureExtractor.featureDomains', 'denotation'),
@@ -872,7 +878,7 @@ addMode('genovernight', 'Generate utterances for overnight semantic parsing', la
       o('FeatureExtractor.featureDomains', 'denotation'),
       o('printAllPredictions'),
       o('printPredictedUtterances'),
-      o('executeAllDerivations'),
+      o('FloatingParser.executeAllDerivations'),
       o('Parser.pruneErrorValues', true),
       o('Grammar.tags', 'generate'),
     nil),

@@ -56,6 +56,8 @@ public final class OvernightFeatureComputer implements FeatureComputer {
     public String phraseAlignmentPath;
     @Option(gloss = "Threshold for phrase table co-occurrence")
     public int phraseTableThreshold = 3;
+    @Option
+    public String languageTag = "en";
   }
 
   public static Options opts = new Options();
