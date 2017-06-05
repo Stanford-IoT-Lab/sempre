@@ -7,6 +7,7 @@ usage() {
 }
 
 SEMPREDIR=`dirname $0`
+MODULE=${MODULE:-sabrina}
 
 MODE=$1
 shift
@@ -19,15 +20,15 @@ BASE_ARGS="-ea $JAVA_ARGS -Djava.library.path=${SEMPREDIR}/jni -Dmodules=core,co
 case $MODE in
 	interactive)
 		TARGET=edu.stanford.nlp.sempre.Main
-		MODE_ARGS="++sabrina/sabrina.interactive.conf"
+		MODE_ARGS="++${MODULE}/${MODULE}.interactive.conf"
 		;;
 	training)
 		TARGET=edu.stanford.nlp.sempre.Main
-		MODE_ARGS="++sabrina/sabrina.training.conf"
+		MODE_ARGS="++${MODULE}/${MODULE}.training.conf"
 		;;
 	server)
 		TARGET=edu.stanford.nlp.sempre.api.APIServer
-		MODE_ARGS="++sabrina/sabrina.server.conf"
+		MODE_ARGS="++${MODULE}/${MODULE}.server.conf"
 		;;
 	interactive)
 		usage

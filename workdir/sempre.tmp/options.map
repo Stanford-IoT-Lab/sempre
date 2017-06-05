@@ -1,0 +1,213 @@
+FeatureVector.ignoreZeroWeight	false
+FeatureVector.logFeaturesLimit	2147483647
+OnlineLearnExchangeState.testProbability	0.1
+FloatingParser.maxDepth	10
+FloatingParser.defaultIsFloating	true
+FloatingParser.useAnchorsOnce	true
+FloatingParser.consecutiveRules	true
+FloatingParser.executeAllDerivations	false
+FloatingParser.printPredictedUtterances	false
+FloatingParser.useSizeInsteadOfDepth	false
+FloatingParser.trainBeamSize	-1
+ParserState.customExpectedCounts	NONE
+ParserState.pruneByProbDiff	false
+ParserState.probDiffPruningThresh	100.0
+ParserState.collapseIdentical	true
+Server.port	8400
+Server.numThreads	4
+Server.title	SEMPRE Demo
+Server.headerPath	
+Server.basePath	demo-www
+Server.verbose	1
+Server.htmlVerbose	1
+SimpleWorld.numOfValueSamples	60
+SimpleWorld.domain	
+SimpleWorld.verbose	0
+SimpleWorld.dbPath	
+SimpleWorld.joinDedup	true
+Builder.inParamsPath	
+Builder.executor	JavaExecutor
+Builder.valueEvaluator	ExactValueEvaluator
+Builder.parser	FloatingParser
+Builder.dataset	Dataset
+Builder.languageInParamsPath	
+MergeFn.hardTypeCheck	true
+MergeFn.showTypeCheckFailures	false
+MergeFn.verbose	0
+APIServer.port	8400
+APIServer.ssl_port	-1
+APIServer.numThreads	4
+APIServer.verbose	1
+APIServer.chuid	
+APIServer.languages	[en, it, es, zh]
+APIServer.accessToken	
+APIServer.utteranceLogFile	
+TypeInference.verbose	1
+TypeInference.typeLookup	NullTypeLookup
+BeamParser.maxNewTreesPerSpan	2147483647
+BeamParser.executeAllDerivations	false
+ThingpediaDataset.languageTag	en
+ThingpediaDataset.includeCanonical	true
+ThingpediaDataset.includeTest	true
+ThingpediaDataset.testTypes	[test]
+ThingpediaDataset.trainTypes	[online, turking, thingpedia, generated]
+ThingpediaDataset.trainWeights	[]
+LanguageAnalyzer.languageAnalyzer	corenlp.CoreNLPAnalyzer
+LanguageAnalyzer.lowerCaseTokens	true
+ThingTalkFeatureComputer.featureDomains	thingtalk_root thingtalk_params thingtalk_composition thingtalk_params_leftword
+ThingTalkFeatureComputer.logicalFormFeatures	true
+OvernightFeatureComputer.featureDomains	match ppdb skip-bigram skip-ppdb root alignment lexical root_lexical
+OvernightFeatureComputer.countIntermediate	true
+OvernightFeatureComputer.itemAnalysis	true
+OvernightFeatureComputer.learnParaphrase	true
+OvernightFeatureComputer.verbose	0
+OvernightFeatureComputer.wordAlignmentPath	/home/silei/Workspace/sempre/workdir/market/market.word_alignments.berkeley
+OvernightFeatureComputer.phraseAlignmentPath	/home/silei/Workspace/sempre/workdir/market/market.phrase_alignments
+OvernightFeatureComputer.phraseTableThreshold	3
+ExtractSeq2Seq.languageTag	en
+ExtractSeq2Seq.types	
+ExtractSeq2Seq.output	
+JoinFn.verbose	0
+JoinFn.showTypeCheckFailures	false
+JoinFn.typeInference	false
+JoinFn.specializedTypeCheck	true
+TargetValuePreprocessor.targetValuePreprocessor	
+Params.defaultWeight	0.0
+Params.initWeightsRandomly	false
+Params.initRandom	1
+Params.initStepSize	1.0
+Params.stepSizeReduction	0.0
+Params.adaptiveStepSize	true
+Params.dualAveraging	false
+Params.l1Reg	nonlazy
+Params.l1RegCoeff	0.0001
+Params.lazyL1FullUpdateFreq	5000
+ThingpediaLexiconBuilder.languageTag	en
+Parser.printAllPredictions	false
+Parser.maxPrintedPredictions	2147483647
+Parser.maxPrintedTrue	2147483647
+Parser.coarsePrune	false
+Parser.verbose	0
+Parser.executeTopFormulaOnly	false
+Parser.visualizeChartFilling	false
+Parser.beamSize	14
+Parser.partialReward	true
+Parser.unrollStream	false
+Parser.derivationScoreNoise	0.0
+Parser.derivationScoreRandom	1
+Parser.pruneErrorValues	false
+Parser.dumpAllFeatures	false
+PPDBModel.ppdbModelPath	/home/silei/Workspace/sempre/sabrina/sabrina-ppdb.txt
+PPDBModel.ppdb	false
+OvernightDerivationPruningComputer.applyHardConstraints	false
+SimpleLexiconFn.maxEntityEntries	100
+SimpleLexiconFn.verbose	0
+exec.monitor	true
+exec.execDir	/home/silei/Workspace/sempre/workdir/sempre.tmp
+exec.execPoolDir	
+exec.overwriteExecDir	false
+exec.printOptionsAndExit	false
+exec.miscOptions	
+exec.addToView	
+exec.charEncoding	
+exec.jarFiles	
+exec.startMainTrack	true
+LocationLexiconFn.filterNerTag	true
+log.maxIndLevel	2147483647
+log.msPerLine	0
+log.file	/home/silei/Workspace/sempre/workdir/sempre.tmp/log
+log.stdout	true
+log.note	
+log.maxPrintErrors	10000
+log.maxPrintWarnings	10000
+Derivation.showValues	true
+Derivation.showFirstValue	false
+Derivation.showTypes	true
+Derivation.showRules	false
+Derivation.showUtterance	false
+Derivation.showExecutions	false
+ReinforcementParser.efficientCoarsePrune	true
+ReinforcementParser.multiplicativeBonus	1000.0
+ReinforcementParser.numOfSamplesPerExample	1
+ReinforcementParser.updateGradientForCorrectMovesOnly	true
+ReinforcementParser.lowProb	0.01
+ReinforcementParser.simulateNonRlObjective	false
+ReinforcementParser.alwaysUnroll	false
+FeatureExtractor.featureDomains	[]
+FeatureExtractor.featureComputers	overnight.OvernightFeatureComputer
+FeatureExtractor.disableDenotationFeatures	false
+FeatureExtractor.useAllFeatures	false
+FeatureExtractor.maxBigramDistance	3
+FeatureExtractor.lexicalBigramParaphrase	true
+FeatureExtractor.languageTag	en
+ThingpediaLexiconFn.verbose	0
+AbstractLexicon.verbose	0
+CoreNLPAnalyzer.annotators	ssplit pos lemma ner
+CoreNLPAnalyzer.caseSensitive	false
+CoreNLPAnalyzer.languageTag	en
+CoreNLPAnalyzer.entityRecognizers	corenlp.PhoneNumberEntityRecognizer corenlp.EmailEntityRecognizer corenlp.QuotedStringEntityRecognizer corenlp.URLEntityRecognizer
+CoreNLPAnalyzer.regularExpressions	USERNAME:[@](.+) HASHTAG:[#](.+)
+CoreNLPAnalyzer.yearsAsNumbers	true
+CoreNLPAnalyzer.splitHyphens	false
+FuzzyMatchFn.verbose	0
+DerivOpCountFeatureComputer.countBasicOnly	true
+JavaExecutor.convertNumberValues	true
+JavaExecutor.unpackValues	true
+JavaExecutor.printStackTrace	false
+SelectFn.verbose	0
+Dataset.inPaths	
+Dataset.maxExamples	
+Dataset.trainFrac	0.9
+Dataset.devFrac	0.1
+Dataset.splitRandom	1
+Dataset.splitDevFromTrain	false
+Dataset.maxTokens	2147483647
+ThingpediaLexiconEvaluator.languageTag	en
+SimpleLexicon.inPaths	
+SimpleLexicon.matchSuffixTypes	
+Grammar.inPaths	/home/silei/Workspace/sempre/market/market.en.grammar
+Grammar.languageInPaths	
+Grammar.tags	parse general
+Grammar.binarizeRules	true
+SemTypeHierarchy.failOnUnknownTypes	false
+Learner.maxTrainIters	2
+Learner.numThreads	8
+Learner.batchSize	75
+Learner.outputPredDerivations	false
+Learner.dumpFeaturesAndCompatibility	false
+Learner.addFeedback	false
+Learner.sortOnFeedback	true
+Learner.verbose	0
+Learner.initialization	
+Learner.updateWeights	true
+Learner.checkGradient	false
+Learner.reduceParserScoreNoise	false
+Master.scriptPaths	
+Master.commands	
+Master.logPath	
+Master.printHelp	true
+Master.contextMaxExchanges	0
+Master.onlineLearnExamples	true
+Master.newExamplesPath	
+Master.newParamsPath	
+Master.newGrammarPath	
+ThingpediaDatabase.dbUrl	jdbc:mysql://localhost/thingengine
+ThingpediaDatabase.dbUser	thingengine
+ThingpediaDatabase.dbPw	thingengine
+LocationLexicon.email	
+LocationLexicon.verbose	0
+NumberFn.unitless	true
+NumberFn.alsoTestByConversion	false
+ThingpediaLexicon.verbose	0
+SemanticFn.trackLocalChoices	false
+PrepareSeq2Seq.languageTag	en
+PrepareSeq2Seq.trainFile	deep/train.tsv
+PrepareSeq2Seq.testFile	deep/test.tsv
+PrepareSeq2Seq.devFile	deep/dev.tsv
+DerivationPruner.pruningStrategies	
+DerivationPruner.pruningComputers	
+DerivationPruner.pruningVerbosity	0
+DerivationPruner.maxNumValues	10
+Main.interactive	false
+Main.server	false
+Main.streamapi	false

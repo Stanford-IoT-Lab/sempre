@@ -1,0 +1,28 @@
+main() {
+  Execution directory: /home/silei/Workspace/sempre/workdir/sempre.tmp
+  Grammar.read {
+    WARNING: Category not defined in the grammar: $Rel0NP; used in rule: $Intermediate215 -> $Rel0NP (JoinFn betaReduce forward (arg0 (lambda r0 (lambda e (call edu.stanford.nlp.sempre.overnight.SimpleWorld.getProperty (var e) (call edu.stanford.nlp.sempre.overnight.SimpleWorld.reverse (var r0)))))))
+    WARNING: Category not defined in the grammar: $Rel0NP; used in rule: $Intermediate219 -> $Rel0NP (JoinFn betaReduce forward (arg0 (lambda r (lambda cp (call edu.stanford.nlp.sempre.overnight.SimpleWorld.getProperty ((var cp) (call edu.stanford.nlp.sempre.overnight.SimpleWorld.domain (var r))) (var r))))))
+    WARNING: Category not defined in the grammar: $BinaryOp; used in rule: $BinaryOpRight -> $BinaryOp $NP (JoinFn betaReduce forward)
+    346 rules
+  }
+  Loading ppdb model {
+    IOException loading ppdb model: Unable to open "/home/silei/Workspace/sempre/sabrina/sabrina-ppdb.txt" as class path, filename or URL
+    ParaphraseUtils.loadPhraseTable: number of entries=0
+  }
+  Number of entries=0
+  Parser: 71 catUnaryRules (sorted), 275 nonCatUnaryRules (in trie)
+  Dataset.read 
+  Learner.learn() {
+    Iteration 0/2 {
+      Params.write(/home/silei/Workspace/sempre/workdir/sempre.tmp/params.0) 
+    }
+    Iteration 1/2 {
+      Params.write(/home/silei/Workspace/sempre/workdir/sempre.tmp/params.1) 
+    }
+    Iteration 2/2 {
+      Params.write(/home/silei/Workspace/sempre/workdir/sempre.tmp/params.2) 
+    }
+  }
+  Execution directory: /home/silei/Workspace/sempre/workdir/sempre.tmp
+}
