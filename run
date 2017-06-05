@@ -904,6 +904,27 @@ addMode('genovernight-wrapper', 'Generate utterances for overnight semantic pars
   lambda { |e| system 'mkdir -p genovernight.out'; o('execDir', 'genovernight.out/' + e[:domain]) },
 nil) })
 
+addMode('market', 'Simple shell for using Freebase (without a cache server)', lambda { |e| l(
+  'java', '-Djava.library.path=jni', '-Dmodules=core,freebase', '-cp', 'libsempre/*:lib/*', '-ea', 'edu.stanford.nlp.sempre.Main',
+  o('executor', 'freebase.SparqlConverter'),
+  letDefault(:sparqlserver, 'freebase.cloudapp.net:3093'),
+  sparqlOpts,
+  o('FeatureExtractor.featureDomains', 'rule'),
+  o('Parser.coarsePrune'),
+  o('JoinFn.typeInference'),
+  o('UnaryLexicon.unaryLexiconFilePath', '/dev/null'),
+  o('Builder.parser', 'FloatingParser'),
+  o('FloatingParser.executeAllDerivations', 'true'),
+  o('Parser.beamSize', '14'),
+  #o('BinaryLexicon.binaryLexiconFilesPath', '/dev/null'),
+  #o('JoinFn.showTypeCheckFailures'),  # Use this to debug
+  o('Grammar.inPaths', 'freebase/data/demo1.grammar'),  # Override with your own custom grammar
+  #o('SparqlExecutor.includeSupportingInfo'),  # Show full information
+  o('Main.interactive'),
+nil) })
+
+
+
 
 ############################################################
 
