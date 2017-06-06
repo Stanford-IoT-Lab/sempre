@@ -4,14 +4,14 @@ set -e
 set -x
 
 LANGUAGE_TAG=${LANGUAGE_TAG:-en}
-WORKDIR=`pwd`
+WORKDIR=`pwd`/workdir
 export WORKDIR
 SEMPREDIR=$(realpath $(dirname $0))
 export SEMPREDIR
 MODULE=${MODULE:-sabrina}
 
 rm -fr ${WORKDIR}/sempre.tmp
-test ${SEMPREDIR} != "." && cp ${SEMPREDIR}/module-classes.txt .
+test ${SEMPREDIR} != "." && cp ${SEMPREDIR}/module-classes.txt ${WORKDIR}
 
 cat > ${WORKDIR}/${MODULE}/${MODULE}.training.conf <<EOF
 !include ${SEMPREDIR}/${MODULE}/${MODULE}.conf
