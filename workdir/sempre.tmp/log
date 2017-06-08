@@ -1,28 +1,760 @@
 main() {
   Execution directory: /home/silei/Workspace/sempre/workdir/sempre.tmp
   Grammar.read {
-    WARNING: Category not defined in the grammar: $Rel0NP; used in rule: $Intermediate215 -> $Rel0NP (JoinFn betaReduce forward (arg0 (lambda r0 (lambda e (call edu.stanford.nlp.sempre.overnight.SimpleWorld.getProperty (var e) (call edu.stanford.nlp.sempre.overnight.SimpleWorld.reverse (var r0)))))))
-    WARNING: Category not defined in the grammar: $Rel0NP; used in rule: $Intermediate219 -> $Rel0NP (JoinFn betaReduce forward (arg0 (lambda r (lambda cp (call edu.stanford.nlp.sempre.overnight.SimpleWorld.getProperty ((var cp) (call edu.stanford.nlp.sempre.overnight.SimpleWorld.domain (var r))) (var r))))))
-    WARNING: Category not defined in the grammar: $BinaryOp; used in rule: $BinaryOpRight -> $BinaryOp $NP (JoinFn betaReduce forward)
-    346 rules
+    19 rules
+  }
+  Loading Freebase schema: lib/fb_data/93.exec/schema2.ttl {
+    1163 CVTs, (19337,19282) property types, 858 property units
   }
   Loading ppdb model {
     IOException loading ppdb model: Unable to open "/home/silei/Workspace/sempre/sabrina/sabrina-ppdb.txt" as class path, filename or URL
     ParaphraseUtils.loadPhraseTable: number of entries=0
   }
   Number of entries=0
-  Parser: 71 catUnaryRules (sorted), 275 nonCatUnaryRules (in trie)
-  Dataset.read 
+  Parser: 4 catUnaryRules (sorted), 15 nonCatUnaryRules (in trie)
+  Dataset.read {
+    Reading ./workdir/market.examples {
+      Example ./workdir/market.examples:0 (0): [bicycles] => null
+      Example ./workdir/market.examples:1 (1): [bikes] => null
+      Example ./workdir/market.examples:2 (2): [show, me, all, bikes] => null
+      Example ./workdir/market.examples:3 (3): [what, 's, the, color, of, the, bike] => null
+      Example ./workdir/market.examples:4 (4): [what, 's, the, price, of, the, bike] => null
+      Example ./workdir/market.examples:5 (5): [how, much, is, the, bike] => null
+    } [4.3s, cum. 4.3s]
+  } [4.3s, cum. 4.9s]
   Learner.learn() {
     Iteration 0/2 {
+      Processing iter=0.train: 6 examples {
+        Examples {
+          iter=0.train: minibatch 0/1 {
+            iter=0.train: example ./workdir/market.examples:0 {
+              Example: bicycles {
+                Tokens: [bicycles]
+                Lemmatized tokens: [bicycle]
+                POS tags: [NNS]
+                NER tags: [O]
+                NER values: [null]
+                targetFormula: (string "(fb:type.object.type fb:object.bike)")
+                Dependency children: []
+              }
+              ERROR: Unit mis-match for (var ?x1): old is 'fb:type.text', new is 'fb:common.topic'
+              Parser.parse: parse {
+                FloatingParser.infer() {
+                  input bicycles, items [ [UNIGRAM:bicycles], [], [] ]
+                  Parser.ensureExecuted 
+                }
+              }
+              Parser.setEvaluation: 13 candidates {
+                Pred@0000: bike => (fb:type.object.type fb:object.bike) [score=0, prob=0.077, comp=0]
+                Pred@0001: price of bike => ((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0002: id of bike => ((reverse fb:object.bike.id) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0003: color of bike => ((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0004: size of bike => ((reverse fb:object.bike.size) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0005: bike with the largest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0006: bike with the largest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0007: bike with the largest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0008: bike with the largest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+                Pred@0009: bike with the smallest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0010: bike with the smallest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0011: bike with the smallest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0012: bike with the smallest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+              }
+              Current: correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=1 parseTime=15 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=42 numCells=24
+            }
+            iter=0.train: example ./workdir/market.examples:1 {
+              Example: bikes {
+                Tokens: [bikes]
+                Lemmatized tokens: [bike]
+                POS tags: [NNS]
+                NER tags: [O]
+                NER values: [null]
+                targetFormula: (string "(fb:type.object.type fb:object.bike)")
+                Dependency children: []
+              }
+              ERROR: Unit mis-match for (var ?x1): old is 'fb:type.text', new is 'fb:common.topic'
+              Parser.parse: parse {
+                FloatingParser.infer() {
+                  input bikes, items [ [UNIGRAM:bikes], [], [] ]
+                  Parser.ensureExecuted 
+                }
+              }
+              Parser.setEvaluation: 13 candidates {
+                Pred@0000: bike => (fb:type.object.type fb:object.bike) [score=0, prob=0.077, comp=0]
+                Pred@0001: price of bike => ((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0002: id of bike => ((reverse fb:object.bike.id) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0003: color of bike => ((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0004: size of bike => ((reverse fb:object.bike.size) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0005: bike with the largest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0006: bike with the largest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0007: bike with the largest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0008: bike with the largest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+                Pred@0009: bike with the smallest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0010: bike with the smallest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0011: bike with the smallest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0012: bike with the smallest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+              }
+              Current: correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=1 parseTime=8 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=42 numCells=24
+            }
+            iter=0.train: example ./workdir/market.examples:2 {
+              Example: show me all bikes {
+                Tokens: [show, me, all, bikes]
+                Lemmatized tokens: [show, I, all, bike]
+                POS tags: [VB, PRP, DT, NNS]
+                NER tags: [O, O, O, O]
+                NER values: [null, null, null, null]
+                targetFormula: (string "(fb:type.object.type fb:object.bike)")
+                Dependency children: []
+              }
+              ERROR: Unit mis-match for (var ?x1): old is 'fb:type.text', new is 'fb:common.topic'
+              Parser.parse: parse {
+                FloatingParser.infer() {
+                  input show me all bikes, items [ [UNIGRAM:show, UNIGRAM:me, UNIGRAM:all, UNIGRAM:bikes], [BIGRAM:show me, BIGRAM:me all, BIGRAM:all bikes], [SKIP_BIGRAM:show me, SKIP_BIGRAM:me all, SKIP_BIGRAM:all bikes] ]
+                  Parser.ensureExecuted 
+                }
+              }
+              Parser.setEvaluation: 13 candidates {
+                Pred@0000: bike => (fb:type.object.type fb:object.bike) [score=0, prob=0.077, comp=0]
+                Pred@0001: price of bike => ((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0002: id of bike => ((reverse fb:object.bike.id) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0003: color of bike => ((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0004: size of bike => ((reverse fb:object.bike.size) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0005: bike with the largest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0006: bike with the largest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0007: bike with the largest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0008: bike with the largest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+                Pred@0009: bike with the smallest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0010: bike with the smallest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0011: bike with the smallest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0012: bike with the smallest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+              }
+              Current: correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=4 parseTime=9 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=66 numCells=48
+            }
+            iter=0.train: example ./workdir/market.examples:3 {
+              Example: what's the color of the bike {
+                Tokens: [what, 's, the, color, of, the, bike]
+                Lemmatized tokens: [what, be, the, color, of, the, bike]
+                POS tags: [WP, VBZ, DT, NN, IN, DT, NN]
+                NER tags: [O, O, O, O, O, O, O]
+                NER values: [null, null, null, null, null, null, null]
+                targetFormula: (string "((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike))")
+                Dependency children: []
+              }
+              ERROR: Unit mis-match for (var ?x1): old is 'fb:type.text', new is 'fb:common.topic'
+              Parser.parse: parse {
+                FloatingParser.infer() {
+                  input what's the color of the bike, items [ [UNIGRAM:what, UNIGRAM:'s, UNIGRAM:the, UNIGRAM:color, UNIGRAM:of, UNIGRAM:the, UNIGRAM:bike], [BIGRAM:what 's, BIGRAM:'s the, BIGRAM:the color, BIGRAM:color of, BIGRAM:of the, BIGRAM:the bike], [SKIP_BIGRAM:'s color, SKIP_BIGRAM:color of, SKIP_BIGRAM:of bike] ]
+                  Parser.ensureExecuted 
+                }
+              }
+              Parser.setEvaluation: 13 candidates {
+                Pred@0000: bike => (fb:type.object.type fb:object.bike) [score=0, prob=0.077, comp=0]
+                Pred@0001: price of bike => ((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0002: id of bike => ((reverse fb:object.bike.id) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0003: color of bike => ((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0004: size of bike => ((reverse fb:object.bike.size) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0005: bike with the largest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0006: bike with the largest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0007: bike with the largest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0008: bike with the largest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+                Pred@0009: bike with the smallest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0010: bike with the smallest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0011: bike with the smallest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0012: bike with the smallest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+              }
+              Current: correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=7 parseTime=12 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=108 numCells=90
+            }
+            iter=0.train: example ./workdir/market.examples:4 {
+              Example: what's the price of the bike {
+                Tokens: [what, 's, the, price, of, the, bike]
+                Lemmatized tokens: [what, be, the, price, of, the, bike]
+                POS tags: [WP, VBZ, DT, NN, IN, DT, NN]
+                NER tags: [O, O, O, O, O, O, O]
+                NER values: [null, null, null, null, null, null, null]
+                targetFormula: (string "((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike))")
+                Dependency children: []
+              }
+              ERROR: Unit mis-match for (var ?x1): old is 'fb:type.text', new is 'fb:common.topic'
+              Parser.parse: parse {
+                FloatingParser.infer() {
+                  input what's the price of the bike, items [ [UNIGRAM:what, UNIGRAM:'s, UNIGRAM:the, UNIGRAM:price, UNIGRAM:of, UNIGRAM:the, UNIGRAM:bike], [BIGRAM:what 's, BIGRAM:'s the, BIGRAM:the price, BIGRAM:price of, BIGRAM:of the, BIGRAM:the bike], [SKIP_BIGRAM:'s price, SKIP_BIGRAM:price of, SKIP_BIGRAM:of bike] ]
+                  Parser.ensureExecuted 
+                }
+              }
+              Parser.setEvaluation: 13 candidates {
+                Pred@0000: bike => (fb:type.object.type fb:object.bike) [score=0, prob=0.077, comp=0]
+                Pred@0001: price of bike => ((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0002: id of bike => ((reverse fb:object.bike.id) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0003: color of bike => ((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0004: size of bike => ((reverse fb:object.bike.size) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0005: bike with the largest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0006: bike with the largest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0007: bike with the largest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0008: bike with the largest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+                Pred@0009: bike with the smallest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0010: bike with the smallest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0011: bike with the smallest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0012: bike with the smallest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+              }
+              Current: correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=7 parseTime=9 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=108 numCells=90
+            }
+            iter=0.train: example ./workdir/market.examples:5 {
+              Example: how much is the bike {
+                Tokens: [how, much, is, the, bike]
+                Lemmatized tokens: [how, much, be, the, bike]
+                POS tags: [WRB, JJ, VBD-AUX, DT, NN]
+                NER tags: [O, O, O, O, O]
+                NER values: [null, null, null, null, null]
+                targetFormula: (string "((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike))")
+                Dependency children: []
+              }
+              ERROR: Unit mis-match for (var ?x1): old is 'fb:type.text', new is 'fb:common.topic'
+              Parser.parse: parse {
+                FloatingParser.infer() {
+                  input how much is the bike, items [ [UNIGRAM:how, UNIGRAM:much, UNIGRAM:is, UNIGRAM:the, UNIGRAM:bike], [BIGRAM:how much, BIGRAM:much is, BIGRAM:is the, BIGRAM:the bike], [SKIP_BIGRAM:how much, SKIP_BIGRAM:much is, SKIP_BIGRAM:is bike] ]
+                  Parser.ensureExecuted 
+                }
+              }
+              Parser.setEvaluation: 13 candidates {
+                Pred@0000: bike => (fb:type.object.type fb:object.bike) [score=0, prob=0.077, comp=0]
+                Pred@0001: price of bike => ((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0002: id of bike => ((reverse fb:object.bike.id) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0003: color of bike => ((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0004: size of bike => ((reverse fb:object.bike.size) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0005: bike with the largest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0006: bike with the largest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0007: bike with the largest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0008: bike with the largest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+                Pred@0009: bike with the smallest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0010: bike with the smallest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0011: bike with the smallest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0012: bike with the smallest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+              }
+              Current: correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=5 parseTime=7 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=78 numCells=60
+            }
+            Updating learner weights {
+              L2 norm: 0.0
+            }
+            Cumulative(iter=0.train): correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=4.167 parseTime=10 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=74 numCells=56
+          }
+        }
+        Stats for iter=0.train: correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=4.167 parseTime=10 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=74 numCells=56
+        Evaluation stats for iter=0.train {
+          correct = 0/ << 0 ~ 0 >> /0 (6)
+          oracle = 0/ << 0 ~ 0 >> /0 (6)
+          partCorrect = 0/ << 0 ~ 0 >> /0 (6)
+          partOracle = 0/ << 0 ~ 0 >> /0 (6)
+          parsed = 1/ << 1 ~ 0 >> /1 (6)
+          numCandidates = 13/ << 13 ~ 0 >> /13 (6)
+          parsedNumCandidates = 13/ << 13 ~ 0 >> /13 (6)
+          numTokens = 1/ << 4.167 ~ 2.478 >> /7 (6)
+          parseTime = 7/ << 10 ~ 2.708 >> /15 (6)
+          maxCellSize = 8@$ROOT:6/ << 8 ~ 0 >> /8@$ROOT:6 (6)
+          fallOffBeam = 0/ << 0 ~ 0 >> /0 (6)
+          totalDerivs = 0/ << 0 ~ 0 >> /0 (6)
+          numOfFeaturizedDerivs = 42/ << 74 ~ 27.203 >> /108 (6)
+          numCells = 24/ << 56 ~ 27.203 >> /90 (6)
+        }
+      }
+      StopWatchSet {
+        FeatureExtractor.extractLocal	0.027s (0.0s x 444)
+        Executor.execute	0.002s (0.0s x 78)
+        Parser.parse	0.077s (0.012s x 6)
+        Learner.updateWeights	0.002s (0.002s x 1)
+      }
       Params.write(/home/silei/Workspace/sempre/workdir/sempre.tmp/params.0) 
     }
     Iteration 1/2 {
+      Processing iter=1.train: 6 examples {
+        Examples {
+          iter=1.train: minibatch 0/1 {
+            iter=1.train: example ./workdir/market.examples:0 {
+              Example: bicycles {
+                Tokens: [bicycles]
+                Lemmatized tokens: [bicycle]
+                POS tags: [NNS]
+                NER tags: [O]
+                NER values: [null]
+                targetFormula: (string "(fb:type.object.type fb:object.bike)")
+                targetValue: (string "PREFIX fb: <http://rdf.freebase.com/ns/> SELECT DISTINCT ?x1 WHERE { FILTER (?x1 = \"(fb:type.object.type fb:object.bike)\"@en) . ?x1 fb:type.object.type ?x2 } LIMIT 10")
+                Dependency children: []
+              }
+              Parser.parse: parse {
+                FloatingParser.infer() {
+                  input bicycles, items [ [UNIGRAM:bicycles], [], [] ]
+                  Parser.ensureExecuted 
+                }
+              }
+              Parser.setEvaluation: 13 candidates {
+                Pred@0000: bike => (fb:type.object.type fb:object.bike) [score=0, prob=0.077, comp=0]
+                Pred@0001: price of bike => ((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0002: id of bike => ((reverse fb:object.bike.id) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0003: color of bike => ((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0004: size of bike => ((reverse fb:object.bike.size) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0005: bike with the largest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0006: bike with the largest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0007: bike with the largest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0008: bike with the largest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+                Pred@0009: bike with the smallest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0010: bike with the smallest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0011: bike with the smallest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0012: bike with the smallest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+              }
+              Current: correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=1 parseTime=5 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=42 numCells=24
+            }
+            iter=1.train: example ./workdir/market.examples:1 {
+              Example: bikes {
+                Tokens: [bikes]
+                Lemmatized tokens: [bike]
+                POS tags: [NNS]
+                NER tags: [O]
+                NER values: [null]
+                targetFormula: (string "(fb:type.object.type fb:object.bike)")
+                targetValue: (string "PREFIX fb: <http://rdf.freebase.com/ns/> SELECT DISTINCT ?x1 WHERE { FILTER (?x1 = \"(fb:type.object.type fb:object.bike)\"@en) . ?x1 fb:type.object.type ?x2 } LIMIT 10")
+                Dependency children: []
+              }
+              Parser.parse: parse {
+                FloatingParser.infer() {
+                  input bikes, items [ [UNIGRAM:bikes], [], [] ]
+                  Parser.ensureExecuted 
+                }
+              }
+              Parser.setEvaluation: 13 candidates {
+                Pred@0000: bike => (fb:type.object.type fb:object.bike) [score=0, prob=0.077, comp=0]
+                Pred@0001: price of bike => ((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0002: id of bike => ((reverse fb:object.bike.id) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0003: color of bike => ((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0004: size of bike => ((reverse fb:object.bike.size) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0005: bike with the largest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0006: bike with the largest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0007: bike with the largest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0008: bike with the largest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+                Pred@0009: bike with the smallest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0010: bike with the smallest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0011: bike with the smallest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0012: bike with the smallest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+              }
+              Current: correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=1 parseTime=5 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=42 numCells=24
+            }
+            iter=1.train: example ./workdir/market.examples:2 {
+              Example: show me all bikes {
+                Tokens: [show, me, all, bikes]
+                Lemmatized tokens: [show, I, all, bike]
+                POS tags: [VB, PRP, DT, NNS]
+                NER tags: [O, O, O, O]
+                NER values: [null, null, null, null]
+                targetFormula: (string "(fb:type.object.type fb:object.bike)")
+                targetValue: (string "PREFIX fb: <http://rdf.freebase.com/ns/> SELECT DISTINCT ?x1 WHERE { FILTER (?x1 = \"(fb:type.object.type fb:object.bike)\"@en) . ?x1 fb:type.object.type ?x2 } LIMIT 10")
+                Dependency children: []
+              }
+              Parser.parse: parse {
+                FloatingParser.infer() {
+                  input show me all bikes, items [ [UNIGRAM:show, UNIGRAM:me, UNIGRAM:all, UNIGRAM:bikes], [BIGRAM:show me, BIGRAM:me all, BIGRAM:all bikes], [SKIP_BIGRAM:show me, SKIP_BIGRAM:me all, SKIP_BIGRAM:all bikes] ]
+                  Parser.ensureExecuted 
+                }
+              }
+              Parser.setEvaluation: 13 candidates {
+                Pred@0000: bike => (fb:type.object.type fb:object.bike) [score=0, prob=0.077, comp=0]
+                Pred@0001: price of bike => ((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0002: id of bike => ((reverse fb:object.bike.id) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0003: color of bike => ((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0004: size of bike => ((reverse fb:object.bike.size) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0005: bike with the largest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0006: bike with the largest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0007: bike with the largest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0008: bike with the largest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+                Pred@0009: bike with the smallest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0010: bike with the smallest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0011: bike with the smallest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0012: bike with the smallest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+              }
+              Current: correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=4 parseTime=5 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=66 numCells=48
+            }
+            iter=1.train: example ./workdir/market.examples:3 {
+              Example: what's the color of the bike {
+                Tokens: [what, 's, the, color, of, the, bike]
+                Lemmatized tokens: [what, be, the, color, of, the, bike]
+                POS tags: [WP, VBZ, DT, NN, IN, DT, NN]
+                NER tags: [O, O, O, O, O, O, O]
+                NER values: [null, null, null, null, null, null, null]
+                targetFormula: (string "((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike))")
+                targetValue: (string "PREFIX fb: <http://rdf.freebase.com/ns/> SELECT DISTINCT ?x1 WHERE { FILTER (?x1 = \"((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike))\"@en) . ?x1 fb:type.object.type ?x2 } LIMIT 10")
+                Dependency children: []
+              }
+              Parser.parse: parse {
+                FloatingParser.infer() {
+                  input what's the color of the bike, items [ [UNIGRAM:what, UNIGRAM:'s, UNIGRAM:the, UNIGRAM:color, UNIGRAM:of, UNIGRAM:the, UNIGRAM:bike], [BIGRAM:what 's, BIGRAM:'s the, BIGRAM:the color, BIGRAM:color of, BIGRAM:of the, BIGRAM:the bike], [SKIP_BIGRAM:'s color, SKIP_BIGRAM:color of, SKIP_BIGRAM:of bike] ]
+                  Parser.ensureExecuted 
+                }
+              }
+              Parser.setEvaluation: 13 candidates {
+                Pred@0000: bike => (fb:type.object.type fb:object.bike) [score=0, prob=0.077, comp=0]
+                Pred@0001: price of bike => ((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0002: id of bike => ((reverse fb:object.bike.id) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0003: color of bike => ((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0004: size of bike => ((reverse fb:object.bike.size) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0005: bike with the largest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0006: bike with the largest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0007: bike with the largest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0008: bike with the largest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+                Pred@0009: bike with the smallest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0010: bike with the smallest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0011: bike with the smallest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0012: bike with the smallest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+              }
+              Current: correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=7 parseTime=6 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=108 numCells=90
+            }
+            iter=1.train: example ./workdir/market.examples:4 {
+              Example: what's the price of the bike {
+                Tokens: [what, 's, the, price, of, the, bike]
+                Lemmatized tokens: [what, be, the, price, of, the, bike]
+                POS tags: [WP, VBZ, DT, NN, IN, DT, NN]
+                NER tags: [O, O, O, O, O, O, O]
+                NER values: [null, null, null, null, null, null, null]
+                targetFormula: (string "((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike))")
+                targetValue: (string "PREFIX fb: <http://rdf.freebase.com/ns/> SELECT DISTINCT ?x1 WHERE { FILTER (?x1 = \"((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike))\"@en) . ?x1 fb:type.object.type ?x2 } LIMIT 10")
+                Dependency children: []
+              }
+              Parser.parse: parse {
+                FloatingParser.infer() {
+                  input what's the price of the bike, items [ [UNIGRAM:what, UNIGRAM:'s, UNIGRAM:the, UNIGRAM:price, UNIGRAM:of, UNIGRAM:the, UNIGRAM:bike], [BIGRAM:what 's, BIGRAM:'s the, BIGRAM:the price, BIGRAM:price of, BIGRAM:of the, BIGRAM:the bike], [SKIP_BIGRAM:'s price, SKIP_BIGRAM:price of, SKIP_BIGRAM:of bike] ]
+                  Parser.ensureExecuted 
+                }
+              }
+              Parser.setEvaluation: 13 candidates {
+                Pred@0000: bike => (fb:type.object.type fb:object.bike) [score=0, prob=0.077, comp=0]
+                Pred@0001: price of bike => ((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0002: id of bike => ((reverse fb:object.bike.id) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0003: color of bike => ((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0004: size of bike => ((reverse fb:object.bike.size) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0005: bike with the largest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0006: bike with the largest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0007: bike with the largest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0008: bike with the largest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+                Pred@0009: bike with the smallest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0010: bike with the smallest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0011: bike with the smallest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0012: bike with the smallest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+              }
+              Current: correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=7 parseTime=6 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=108 numCells=90
+            }
+            iter=1.train: example ./workdir/market.examples:5 {
+              Example: how much is the bike {
+                Tokens: [how, much, is, the, bike]
+                Lemmatized tokens: [how, much, be, the, bike]
+                POS tags: [WRB, JJ, VBD-AUX, DT, NN]
+                NER tags: [O, O, O, O, O]
+                NER values: [null, null, null, null, null]
+                targetFormula: (string "((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike))")
+                targetValue: (string "PREFIX fb: <http://rdf.freebase.com/ns/> SELECT DISTINCT ?x1 WHERE { FILTER (?x1 = \"((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike))\"@en) . ?x1 fb:type.object.type ?x2 } LIMIT 10")
+                Dependency children: []
+              }
+              Parser.parse: parse {
+                FloatingParser.infer() {
+                  input how much is the bike, items [ [UNIGRAM:how, UNIGRAM:much, UNIGRAM:is, UNIGRAM:the, UNIGRAM:bike], [BIGRAM:how much, BIGRAM:much is, BIGRAM:is the, BIGRAM:the bike], [SKIP_BIGRAM:how much, SKIP_BIGRAM:much is, SKIP_BIGRAM:is bike] ]
+                  Parser.ensureExecuted 
+                }
+              }
+              Parser.setEvaluation: 13 candidates {
+                Pred@0000: bike => (fb:type.object.type fb:object.bike) [score=0, prob=0.077, comp=0]
+                Pred@0001: price of bike => ((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0002: id of bike => ((reverse fb:object.bike.id) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0003: color of bike => ((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0004: size of bike => ((reverse fb:object.bike.size) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0005: bike with the largest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0006: bike with the largest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0007: bike with the largest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0008: bike with the largest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+                Pred@0009: bike with the smallest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0010: bike with the smallest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0011: bike with the smallest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0012: bike with the smallest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+              }
+              Current: correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=5 parseTime=5 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=78 numCells=60
+            }
+            Updating learner weights {
+              L2 norm: 0.0
+            }
+            Cumulative(iter=1.train): correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=4.167 parseTime=5.333 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=74 numCells=56
+          }
+        }
+        Stats for iter=1.train: correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=4.167 parseTime=5.333 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=74 numCells=56
+        Evaluation stats for iter=1.train {
+          correct = 0/ << 0 ~ 0 >> /0 (6)
+          oracle = 0/ << 0 ~ 0 >> /0 (6)
+          partCorrect = 0/ << 0 ~ 0 >> /0 (6)
+          partOracle = 0/ << 0 ~ 0 >> /0 (6)
+          parsed = 1/ << 1 ~ 0 >> /1 (6)
+          numCandidates = 13/ << 13 ~ 0 >> /13 (6)
+          parsedNumCandidates = 13/ << 13 ~ 0 >> /13 (6)
+          numTokens = 1/ << 4.167 ~ 2.478 >> /7 (6)
+          parseTime = 5/ << 5.333 ~ 0.471 >> /6 (6)
+          maxCellSize = 8@$ROOT:6/ << 8 ~ 0 >> /8@$ROOT:6 (6)
+          fallOffBeam = 0/ << 0 ~ 0 >> /0 (6)
+          totalDerivs = 0/ << 0 ~ 0 >> /0 (6)
+          numOfFeaturizedDerivs = 42/ << 74 ~ 27.203 >> /108 (6)
+          numCells = 24/ << 56 ~ 27.203 >> /90 (6)
+        }
+      }
+      StopWatchSet {
+        FeatureExtractor.extractLocal	0.041s (0.0s x 888)
+        Executor.execute	0.007s (0.0s x 156)
+        Parser.parse	0.116s (0.009s x 12)
+        Learner.updateWeights	0.002s (0.001s x 2)
+      }
       Params.write(/home/silei/Workspace/sempre/workdir/sempre.tmp/params.1) 
     }
     Iteration 2/2 {
+      Processing iter=2.train: 6 examples {
+        Examples {
+          iter=2.train: minibatch 1/6 {
+            iter=2.train: example ./workdir/market.examples:1 {
+              Example: bikes {
+                Tokens: [bikes]
+                Lemmatized tokens: [bike]
+                POS tags: [NNS]
+                NER tags: [O]
+                NER values: [null]
+                targetFormula: (string "(fb:type.object.type fb:object.bike)")
+                targetValue: (string "PREFIX fb: <http://rdf.freebase.com/ns/> SELECT DISTINCT ?x1 WHERE { FILTER (?x1 = \"(fb:type.object.type fb:object.bike)\"@en) . ?x1 fb:type.object.type ?x2 } LIMIT 10")
+                Dependency children: []
+              }
+              Parser.parse: parse {
+                FloatingParser.infer() {
+                  input bikes, items [ [UNIGRAM:bikes], [], [] ]
+                  Parser.ensureExecuted 
+                }
+              }
+              Parser.setEvaluation: 13 candidates {
+                Pred@0000: bike => (fb:type.object.type fb:object.bike) [score=0, prob=0.077, comp=0]
+                Pred@0001: price of bike => ((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0002: id of bike => ((reverse fb:object.bike.id) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0003: color of bike => ((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0004: size of bike => ((reverse fb:object.bike.size) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0005: bike with the largest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0006: bike with the largest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0007: bike with the largest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0008: bike with the largest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+                Pred@0009: bike with the smallest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0010: bike with the smallest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0011: bike with the smallest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0012: bike with the smallest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+              }
+              Current: correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=1 parseTime=4 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=42 numCells=24
+            }
+            Cumulative(iter=2.train): correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=1 parseTime=4 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=42 numCells=24
+          }
+          iter=2.train: minibatch 5/6 {
+            iter=2.train: example ./workdir/market.examples:5 {
+              Example: how much is the bike {
+                Tokens: [how, much, is, the, bike]
+                Lemmatized tokens: [how, much, be, the, bike]
+                POS tags: [WRB, JJ, VBD-AUX, DT, NN]
+                NER tags: [O, O, O, O, O]
+                NER values: [null, null, null, null, null]
+                targetFormula: (string "((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike))")
+                targetValue: (string "PREFIX fb: <http://rdf.freebase.com/ns/> SELECT DISTINCT ?x1 WHERE { FILTER (?x1 = \"((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike))\"@en) . ?x1 fb:type.object.type ?x2 } LIMIT 10")
+                Dependency children: []
+              }
+              Parser.parse: parse {
+                FloatingParser.infer() {
+                  input how much is the bike, items [ [UNIGRAM:how, UNIGRAM:much, UNIGRAM:is, UNIGRAM:the, UNIGRAM:bike], [BIGRAM:how much, BIGRAM:much is, BIGRAM:is the, BIGRAM:the bike], [SKIP_BIGRAM:how much, SKIP_BIGRAM:much is, SKIP_BIGRAM:is bike] ]
+                  Parser.ensureExecuted 
+                }
+              }
+              Parser.setEvaluation: 13 candidates {
+                Pred@0000: bike => (fb:type.object.type fb:object.bike) [score=0, prob=0.077, comp=0]
+                Pred@0001: price of bike => ((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0002: id of bike => ((reverse fb:object.bike.id) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0003: color of bike => ((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0004: size of bike => ((reverse fb:object.bike.size) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0005: bike with the largest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0006: bike with the largest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0007: bike with the largest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0008: bike with the largest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+                Pred@0009: bike with the smallest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0010: bike with the smallest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0011: bike with the smallest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0012: bike with the smallest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+              }
+              Current: correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=5 parseTime=4 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=78 numCells=60
+            }
+            Cumulative(iter=2.train): correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=3 parseTime=4 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=60 numCells=42
+          }
+          iter=2.train: minibatch 2/6 {
+            iter=2.train: example ./workdir/market.examples:2 {
+              Example: show me all bikes {
+                Tokens: [show, me, all, bikes]
+                Lemmatized tokens: [show, I, all, bike]
+                POS tags: [VB, PRP, DT, NNS]
+                NER tags: [O, O, O, O]
+                NER values: [null, null, null, null]
+                targetFormula: (string "(fb:type.object.type fb:object.bike)")
+                targetValue: (string "PREFIX fb: <http://rdf.freebase.com/ns/> SELECT DISTINCT ?x1 WHERE { FILTER (?x1 = \"(fb:type.object.type fb:object.bike)\"@en) . ?x1 fb:type.object.type ?x2 } LIMIT 10")
+                Dependency children: []
+              }
+              Parser.parse: parse {
+                FloatingParser.infer() {
+                  input show me all bikes, items [ [UNIGRAM:show, UNIGRAM:me, UNIGRAM:all, UNIGRAM:bikes], [BIGRAM:show me, BIGRAM:me all, BIGRAM:all bikes], [SKIP_BIGRAM:show me, SKIP_BIGRAM:me all, SKIP_BIGRAM:all bikes] ]
+                  Parser.ensureExecuted 
+                }
+              }
+              Parser.setEvaluation: 13 candidates {
+                Pred@0000: bike => (fb:type.object.type fb:object.bike) [score=0, prob=0.077, comp=0]
+                Pred@0001: price of bike => ((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0002: id of bike => ((reverse fb:object.bike.id) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0003: color of bike => ((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0004: size of bike => ((reverse fb:object.bike.size) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0005: bike with the largest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0006: bike with the largest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0007: bike with the largest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0008: bike with the largest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+                Pred@0009: bike with the smallest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0010: bike with the smallest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0011: bike with the smallest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0012: bike with the smallest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+              }
+              Current: correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=4 parseTime=17 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=66 numCells=48
+            }
+            Cumulative(iter=2.train): correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=3.333 parseTime=8.333 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=62 numCells=44
+          }
+          iter=2.train: minibatch 3/6 {
+            iter=2.train: example ./workdir/market.examples:3 {
+              Example: what's the color of the bike {
+                Tokens: [what, 's, the, color, of, the, bike]
+                Lemmatized tokens: [what, be, the, color, of, the, bike]
+                POS tags: [WP, VBZ, DT, NN, IN, DT, NN]
+                NER tags: [O, O, O, O, O, O, O]
+                NER values: [null, null, null, null, null, null, null]
+                targetFormula: (string "((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike))")
+                targetValue: (string "PREFIX fb: <http://rdf.freebase.com/ns/> SELECT DISTINCT ?x1 WHERE { FILTER (?x1 = \"((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike))\"@en) . ?x1 fb:type.object.type ?x2 } LIMIT 10")
+                Dependency children: []
+              }
+              Parser.parse: parse {
+                FloatingParser.infer() {
+                  input what's the color of the bike, items [ [UNIGRAM:what, UNIGRAM:'s, UNIGRAM:the, UNIGRAM:color, UNIGRAM:of, UNIGRAM:the, UNIGRAM:bike], [BIGRAM:what 's, BIGRAM:'s the, BIGRAM:the color, BIGRAM:color of, BIGRAM:of the, BIGRAM:the bike], [SKIP_BIGRAM:'s color, SKIP_BIGRAM:color of, SKIP_BIGRAM:of bike] ]
+                  Parser.ensureExecuted 
+                }
+              }
+              Parser.setEvaluation: 13 candidates {
+                Pred@0000: bike => (fb:type.object.type fb:object.bike) [score=0, prob=0.077, comp=0]
+                Pred@0001: price of bike => ((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0002: id of bike => ((reverse fb:object.bike.id) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0003: color of bike => ((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0004: size of bike => ((reverse fb:object.bike.size) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0005: bike with the largest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0006: bike with the largest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0007: bike with the largest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0008: bike with the largest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+                Pred@0009: bike with the smallest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0010: bike with the smallest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0011: bike with the smallest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0012: bike with the smallest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+              }
+              Current: correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=7 parseTime=12 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=108 numCells=90
+            }
+            Cumulative(iter=2.train): correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=4.250 parseTime=9.250 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=73.500 numCells=55.500
+          }
+          iter=2.train: minibatch 4/6 {
+            iter=2.train: example ./workdir/market.examples:4 {
+              Example: what's the price of the bike {
+                Tokens: [what, 's, the, price, of, the, bike]
+                Lemmatized tokens: [what, be, the, price, of, the, bike]
+                POS tags: [WP, VBZ, DT, NN, IN, DT, NN]
+                NER tags: [O, O, O, O, O, O, O]
+                NER values: [null, null, null, null, null, null, null]
+                targetFormula: (string "((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike))")
+                targetValue: (string "PREFIX fb: <http://rdf.freebase.com/ns/> SELECT DISTINCT ?x1 WHERE { FILTER (?x1 = \"((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike))\"@en) . ?x1 fb:type.object.type ?x2 } LIMIT 10")
+                Dependency children: []
+              }
+              Parser.parse: parse {
+                FloatingParser.infer() {
+                  input what's the price of the bike, items [ [UNIGRAM:what, UNIGRAM:'s, UNIGRAM:the, UNIGRAM:price, UNIGRAM:of, UNIGRAM:the, UNIGRAM:bike], [BIGRAM:what 's, BIGRAM:'s the, BIGRAM:the price, BIGRAM:price of, BIGRAM:of the, BIGRAM:the bike], [SKIP_BIGRAM:'s price, SKIP_BIGRAM:price of, SKIP_BIGRAM:of bike] ]
+                  Parser.ensureExecuted 
+                }
+              }
+              Parser.setEvaluation: 13 candidates {
+                Pred@0000: bike => (fb:type.object.type fb:object.bike) [score=0, prob=0.077, comp=0]
+                Pred@0001: price of bike => ((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0002: id of bike => ((reverse fb:object.bike.id) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0003: color of bike => ((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0004: size of bike => ((reverse fb:object.bike.size) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0005: bike with the largest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0006: bike with the largest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0007: bike with the largest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0008: bike with the largest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+                Pred@0009: bike with the smallest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0010: bike with the smallest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0011: bike with the smallest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0012: bike with the smallest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+              }
+              Current: correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=7 parseTime=6 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=108 numCells=90
+            }
+            Cumulative(iter=2.train): correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=4.800 parseTime=8.600 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=80.400 numCells=62.400
+          }
+          iter=2.train: minibatch 0/6 {
+            iter=2.train: example ./workdir/market.examples:0 {
+              Example: bicycles {
+                Tokens: [bicycles]
+                Lemmatized tokens: [bicycle]
+                POS tags: [NNS]
+                NER tags: [O]
+                NER values: [null]
+                targetFormula: (string "(fb:type.object.type fb:object.bike)")
+                targetValue: (string "PREFIX fb: <http://rdf.freebase.com/ns/> SELECT DISTINCT ?x1 WHERE { FILTER (?x1 = \"(fb:type.object.type fb:object.bike)\"@en) . ?x1 fb:type.object.type ?x2 } LIMIT 10")
+                Dependency children: []
+              }
+              Parser.parse: parse {
+                FloatingParser.infer() {
+                  input bicycles, items [ [UNIGRAM:bicycles], [], [] ]
+                  Parser.ensureExecuted 
+                }
+              }
+              Parser.setEvaluation: 13 candidates {
+                Pred@0000: bike => (fb:type.object.type fb:object.bike) [score=0, prob=0.077, comp=0]
+                Pred@0001: price of bike => ((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0002: id of bike => ((reverse fb:object.bike.id) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0003: color of bike => ((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0004: size of bike => ((reverse fb:object.bike.size) (fb:type.object.type fb:object.bike)) [score=0, prob=0.077, comp=0]
+                Pred@0005: bike with the largest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0006: bike with the largest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0007: bike with the largest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0008: bike with the largest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+                Pred@0009: bike with the smallest price => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.price) [score=0, prob=0.077, comp=0]
+                Pred@0010: bike with the smallest id => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.id) [score=0, prob=0.077, comp=0]
+                Pred@0011: bike with the smallest color => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.color) [score=0, prob=0.077, comp=0]
+                Pred@0012: bike with the smallest size => (argmax (number 1) (number 5) (fb:type.object.type fb:object.bike) fb:object.bike.size) [score=0, prob=0.077, comp=0]
+              }
+              Current: correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=1 parseTime=3 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=42 numCells=24
+            }
+            Cumulative(iter=2.train): correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=4.167 parseTime=7.667 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=74 numCells=56
+          }
+        }
+        Stats for iter=2.train: correct=0 oracle=0 partCorrect=0 partOracle=0 parsed=1 numCandidates=13 parsedNumCandidates=13 numTokens=4.167 parseTime=7.667 maxCellSize=8 fallOffBeam=0 totalDerivs=0 numOfFeaturizedDerivs=74 numCells=56
+        Evaluation stats for iter=2.train {
+          correct = 0/ << 0 ~ 0 >> /0 (6)
+          oracle = 0/ << 0 ~ 0 >> /0 (6)
+          partCorrect = 0/ << 0 ~ 0 >> /0 (6)
+          partOracle = 0/ << 0 ~ 0 >> /0 (6)
+          parsed = 1/ << 1 ~ 0 >> /1 (6)
+          numCandidates = 13/ << 13 ~ 0 >> /13 (6)
+          parsedNumCandidates = 13/ << 13 ~ 0 >> /13 (6)
+          numTokens = 1/ << 4.167 ~ 2.478 >> /7 (6)
+          parseTime = 3/ << 7.667 ~ 5.121 >> /17 (6)
+          maxCellSize = 8@$ROOT:6/ << 8 ~ 0 >> /8@$ROOT:6 (6)
+          fallOffBeam = 0/ << 0 ~ 0 >> /0 (6)
+          totalDerivs = 0/ << 0 ~ 0 >> /0 (6)
+          numOfFeaturizedDerivs = 42/ << 74 ~ 27.203 >> /108 (6)
+          numCells = 24/ << 56 ~ 27.203 >> /90 (6)
+        }
+      }
+      StopWatchSet {
+        FeatureExtractor.extractLocal	0.074s (0.0s x 1332)
+        Executor.execute	0.011s (0.0s x 234)
+        Parser.parse	0.171s (0.009s x 18)
+        Learner.updateWeights	0.002s (0.001s x 2)
+      }
       Params.write(/home/silei/Workspace/sempre/workdir/sempre.tmp/params.2) 
     }
   }
   Execution directory: /home/silei/Workspace/sempre/workdir/sempre.tmp
-}
+} [5.1s]

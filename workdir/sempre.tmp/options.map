@@ -26,7 +26,7 @@ SimpleWorld.verbose	0
 SimpleWorld.dbPath	
 SimpleWorld.joinDedup	true
 Builder.inParamsPath	
-Builder.executor	JavaExecutor
+Builder.executor	freebase.SparqlConverter
 Builder.valueEvaluator	ExactValueEvaluator
 Builder.parser	FloatingParser
 Builder.dataset	Dataset
@@ -155,7 +155,7 @@ JavaExecutor.convertNumberValues	true
 JavaExecutor.unpackValues	true
 JavaExecutor.printStackTrace	false
 SelectFn.verbose	0
-Dataset.inPaths	
+Dataset.inPaths	train:./workdir/market.examples
 Dataset.maxExamples	
 Dataset.trainFrac	0.9
 Dataset.devFrac	0.1

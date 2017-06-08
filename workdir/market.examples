@@ -1,0 +1,7 @@
+(example (utterance "bicycles") (targetFormula (string "(fb:type.object.type fb:object.bike)")))
+(example (utterance "bikes") (targetFormula (string "(fb:type.object.type fb:object.bike)")))
+(example (utterance "show me all bikes") (targetFormula (string "(fb:type.object.type fb:object.bike)")))
+
+(example (utterance "what's the color of the bike") (targetFormula (string "((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike))")))
+(example (utterance "what's the price of the bike") (targetFormula (string "((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike))")))
+(example (utterance "how much is the bike") (targetFormula (string "((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike))")))

@@ -1,0 +1,4 @@
+FeatureExtractor.extractLocal	0.074s (0.0s x 1332)
+Executor.execute	0.011s (0.0s x 234)
+Parser.parse	0.171s (0.009s x 18)
+Learner.updateWeights	0.002s (0.001s x 2)
