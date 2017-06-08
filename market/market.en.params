@@ -1,0 +1,69 @@
+reorder :: correct	1.119407298755027
+lexical :: how--price of	1.0973342777840256
+lexical :: how--price	1.0973342777840256
+lexical :: bike--of bike	1.079268752000605
+paraphrase :: skip-ppdb	0.9553608203212937
+paraphrase :: skip-bigram	0.9553608203212937
+paraphrase :: match	0.8554425089620051
+lexical :: of--of bike	0.8105626878854805
+lexical :: price--price of	0.6783037818511226
+lexical :: color--color of	0.6782949707059561
+lexical :: of bike--price of	0.645838332458701
+lexical :: of--price of	0.645838332458701
+lexical :: of bike--color of	0.6458291801131799
+lexical :: of--color of	0.6458291801131799
+lexical :: price--largest price	-0.07649722802896765
+lexical :: price of--largest price	-0.07649722802896765
+lexical :: price of--smallest price	-0.07649722802896765
+lexical :: price--smallest price	-0.07649722802896765
+lexical :: color of--smallest color	-0.07649722803064729
+lexical :: color--largest color	-0.07649722803064729
+lexical :: color--smallest color	-0.07649722803064729
+lexical :: color of--largest color	-0.07649722803064729
+lexical :: 's--color	-0.07666493112455681
+lexical :: 's--color of	-0.07666493112455681
+lexical :: 's--price	-0.07666493313765813
+lexical :: 's--price of	-0.07666493313765813
+lexical :: show--color	-0.10962786892062597
+lexical :: show--color of	-0.10962786892062597
+lexical :: show--id of	-0.11226038398526814
+lexical :: show--id	-0.11226038398526814
+lexical :: show--size	-0.11226038398526814
+lexical :: show--size of	-0.11226038398526814
+reorder :: anyInversion	-0.11326742840397061
+reorder :: inversions	-0.11326742840397061
+lexical :: show--price of	-0.11731587986845543
+lexical :: show--price	-0.11731587986845543
+lexical :: how--color of	-0.14279828112870618
+lexical :: how--color	-0.14279828112870618
+lexical :: how--size of	-0.14804695512429814
+lexical :: how--id	-0.14804695512429814
+lexical :: how--id of	-0.14804695512429814
+lexical :: how--size	-0.14804695512429814
+lexical :: 's price--bike with	-0.15185978755799018
+lexical :: 's--with smallest	-0.1518597875596552
+lexical :: 's--with largest	-0.1518597875596552
+lexical :: 's color--bike with	-0.1518597875613202
+lexical :: 's--size	-0.15191625565046593
+lexical :: 's--id of	-0.15191625565046593
+lexical :: 's--size of	-0.15191625565046593
+lexical :: of bike--id of	-0.15191625565046593
+lexical :: of bike--size of	-0.15191625565046593
+lexical :: 's--id	-0.15191625565046593
+lexical :: of--id of	-0.15191625565046593
+lexical :: of--size of	-0.15191625565046593
+lexical :: 's--bike with	-0.2938952300149272
+lexical :: 's--with	-0.2938952300149272
+root_lexical :: deleted_token=price	-0.31660710061857716
+lexical :: bikes--of bike	-0.6951043903094116
+root_lexical :: deleted_token=of	-0.7866379277235659
+lexical :: bikes--bike with	-0.7907940393692154
+lexical :: bike--bike with	-0.8846666075841749
+root_lexical :: deleted_token=largest	-0.8935667400879879
+root_lexical :: deleted_token=smallest	-0.8935667400879879
+root_lexical :: deleted_token=id	-0.9037305136572187
+root_lexical :: deleted_token=size	-0.9037305136572187
+root :: unmatched_input	-0.9462458292484072
+root_lexical :: deleted_token=color	-0.9554206260380554
+root_lexical :: deleted_token=with	-0.9809481856509507
+root :: unmatched_deriv	-0.9912020345440266
