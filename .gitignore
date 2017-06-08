@@ -23,6 +23,7 @@ semparse.iml
 *.cache
 *.DS_Store
 java.hprof.txt
+output.log
 /bin/
 
 sabrina/sabrina.canonicals.tsv
@@ -42,3 +43,8 @@ ifttt/ifttt.phrase_alignments.en
 ifttt/ifttt.word_alignments.berkeley.en
 ifttt/test.tsv
 ifttt/train.tsv
+
+workdir/sempre.tmp/*.map
+workdir/sempre.tmp/*.examples
+workdir/sempre.tmp/log
+workdir/sempre.tmp/*.help
