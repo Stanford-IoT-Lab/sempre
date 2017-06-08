@@ -1,4 +1,4 @@
-#!/usr/local/bin/ruby
+#!/usr/bin/ruby
 
 # This script provides a convenient wrapper for the Virtuoso SPARQL server.
 

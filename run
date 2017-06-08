@@ -1,4 +1,4 @@
-#!/usr/local/bin/ruby
+#!/usr/bin/ruby
 
 # This is the main entry point for running all SEMPRE programs.  See
 # fig/lib/execrunner.rb for more documentation for how commands are generated.
