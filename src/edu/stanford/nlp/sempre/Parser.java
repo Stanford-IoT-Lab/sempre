@@ -281,7 +281,7 @@ public abstract class Parser {
         boolean print = printAllPredictions || (numPrintedSoFar < opts.maxPrintedTrue);
         if (print) {
           LogInfo.logs(
-              "True@%04d: %s [score=%s, prob=%s%s]", i, deriv.canonicalUtterance,
+              "True@%04d: %s => %s [score=%s, prob=%s%s]", i, deriv.canonicalUtterance, deriv.formula,
                   Fmt.D(deriv.score), Fmt.D(probs[i]), compatibilities != null ? ", comp=" + Fmt.D(compatibilities[i]) : "");
           numPrintedSoFar++;
           if (opts.dumpAllFeatures) FeatureVector.logFeatureWeights("Features", deriv.getAllFeatureVector(), state.params);
@@ -296,7 +296,7 @@ public abstract class Parser {
         boolean print = printAllPredictions || (numPrintedSoFar < opts.maxPrintedTrue);
         if (print) {
           LogInfo.logs(
-              "Part@%04d: %s [score=%s, prob=%s%s]", i, deriv.canonicalUtterance,
+              "Part@%04d: %s => %s [score=%s, prob=%s%s]", i, deriv.canonicalUtterance, deriv.formula,
                   Fmt.D(deriv.score), Fmt.D(probs[i]), compatibilities != null ? ", comp=" + Fmt.D(compatibilities[i]) : "");
           numPrintedSoFar++;
           if (opts.dumpAllFeatures) FeatureVector.logFeatureWeights("Features", deriv.getAllFeatureVector(), state.params);
@@ -311,7 +311,7 @@ public abstract class Parser {
       boolean print = printAllPredictions || ((probs[i] >= probs[0] / 2 || i < 10) && i < opts.maxPrintedPredictions);
       if (print) {
         LogInfo.logs(
-            "Pred@%04d: %s [score=%s, prob=%s%s]", i, deriv.canonicalUtterance,
+            "Pred@%04d: %s => %s [score=%s, prob=%s%s]", i, deriv.canonicalUtterance, deriv.formula,
                 Fmt.D(deriv.score), Fmt.D(probs[i]), compatibilities != null ? ", comp=" + Fmt.D(compatibilities[i]) : "");
         // LogInfo.logs("Derivation tree: %s", deriv.toRecursiveString());
         if (opts.dumpAllFeatures) FeatureVector.logFeatureWeights("Features", deriv.getAllFeatureVector(), state.params);
