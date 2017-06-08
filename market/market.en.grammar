@@ -1,29 +1,10 @@
-# Agile grammar for bikes
+(rule $NP (bike) (ConstantFn (fb:type.object.type fb:object.bike)))
+(rule $RelNP (price) (ConstantFn fb:object.bike.price))
+(rule $RelNP (id)    (ConstantFn fb:object.bike.id))
+(rule $RelNP (color) (ConstantFn fb:object.bike.color))
+(rule $RelNP (size)  (ConstantFn fb:object.bike.size))
 
-(include general.grammar)
-
-# Types
-(rule $TypeNP (bike id) (ConstantFn en.bike_id))
-(rule $EntityNP1 (bike 001) (ConstantFn en.bike_id.bike_001))
-(rule $EntityNP2 (bike 002) (ConstantFn en.bike_id.bike_002))
-
-# Properties
-(rule $RelNP (price) (ConstantFn (string price)))
-(rule $EntityNP1 (150 dollars) (ConstantFn (number 150 en.dollar)))
-(rule $EntityNP2 (200 dollars) (ConstantFn (number 200 en.dollar)))
-
-(rule $RelNP (size) (ConstantFn (string size)))
-(rule $EntityNP1 (26 inches) (ConstantFn (number 26 en.inches)))
-(rule $EntityNP2 (29 inches) (ConstantFn (number 29 en.inches)))
-
-(rule $RelNP (posting date) (ConstantFn (string posting_date)))
-(rule $EntityNP1 (jan 2) (ConstantFn (date 2015 1 2)))
-(rule $EntityNP2 (feb 3) (ConstantFn (date 2015 2 3)))
-
-(rule $RelNP (bike type) (ConstantFn (string bike_type)))
-(rule $TypeNP (bike type) (ConstantFn en.bike))
-(rule $EntityNP1 (road) (ConstantFn en.bike.road))
-(rule $EntityNP2 (cruise) (ConstantFn en.bike.cruise))
-
-# Unaries
-(rule $VP (has a basket) (ConstantFn (string has_basket)))
+(rule $NP ($RelNP of $NP) (lambda r (lambda x ((reverse (var r)) (var x)))))
+(rule $ROOT ($NP) (IdentityFn))
+(rule $ROOT ($NP with the largest $RelNP) (lambda x (lambda y (argmax 1 5 (var x) (var y)))))
+(rule $ROOT ($NP with the smallest $RelNP) (lambda x (lambda y (argmax 1 5 (var x) (var y)))))
