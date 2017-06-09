@@ -185,8 +185,8 @@ public class APIServer implements Runnable {
       if (opts.utteranceLogFile != null)
         new LogFlusherThread<>(logQueue, opts.utteranceLogFile).start();
 
-      for (LanguageContext lang : langs.values())
-        lang.exactMatch.load();
+      //for (LanguageContext lang : langs.values())
+      //  lang.exactMatch.load();
 
       String hostname = fig.basic.SysInfoUtils.getHostName();
       ExecutorService pool = Executors.newFixedThreadPool(opts.numThreads);
