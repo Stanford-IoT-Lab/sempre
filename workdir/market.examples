@@ -2,8 +2,40 @@
 (example (utterance "bikes") (targetFormula (fb:type.object.type fb:object.bike)))
 (example (utterance "show me all bikes") (targetFormula (fb:type.object.type fb:object.bike)))
 
-(example (utterance "what's the color of the bike") (targetFormula ((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike))))
+# price
 (example (utterance "what's the price of the bike") (targetFormula ((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike))))
 (example (utterance "how much is the bike") (targetFormula ((reverse fb:object.bike.price) (fb:type.object.type fb:object.bike))))
+(example (utterance "most expensive bike") (targetFormula (argmax (number 1) (number 1) (fb:type.object.type fb:object.bike) fb:object.bike.price)))
+(example (utterance "bike with highest price") (targetFormula (argmax (number 1) (number 1) (fb:type.object.type fb:object.bike) fb:object.bike.price)))
+(example (utterance "bike for rich people") (targetFormula (argmax (number 1) (number 1) (fb:type.object.type fb:object.bike) fb:object.bike.price)))
+(example (utterance "cheap bike") (targetFormula (argmin (number 1) (number 1) (fb:type.object.type fb:object.bike) fb:object.bike.price)))
+(example (utterance "cheapest bike") (targetFormula (argmin (number 1) (number 1) (fb:type.object.type fb:object.bike) fb:object.bike.price)))
+(example (utterance "bike with lowest price") (targetFormula (argmin (number 1) (number 1) (fb:type.object.type fb:object.bike) fb:object.bike.price)))
+(example (utterance "bike for poor people") (targetFormula (argmin (number 1) (number 1) (fb:type.object.type fb:object.bike) fb:object.bike.price)))
+
+# size
 (example (utterance "what's the size of the bike") (targetFormula ((reverse fb:object.bike.size) (fb:type.object.type fb:object.bike))))
 (example (utterance "how large is the bike") (targetFormula ((reverse fb:object.bike.size) (fb:type.object.type fb:object.bike))))
+(example (utterance "large bike") (targetFormula (argmax (number 1) (number 1) (fb:type.object.type fb:object.bike) fb:object.bike.size)))
+(example (utterance "largest bike") (targetFormula (argmax (number 1) (number 1) (fb:type.object.type fb:object.bike) fb:object.bike.size)))
+(example (utterance "bike with largest size") (targetFormula (argmax (number 1) (number 1) (fb:type.object.type fb:object.bike) fb:object.bike.size)))
+(example (utterance "small bike") (targetFormula (argmin (number 1) (number 1) (fb:type.object.type fb:object.bike) fb:object.bike.size)))
+(example (utterance "smallest bike") (targetFormula (argmin (number 1) (number 1) (fb:type.object.type fb:object.bike) fb:object.bike.size)))
+(example (utterance "bike with smallest size") (targetFormula (argmax (number 1) (number 1) (fb:type.object.type fb:object.bike) fb:object.bike.size)))
+
+# color
+(example (utterance "what color is it") (targetFormula ((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike))))
+(example (utterance "what's the color of the bike") (targetFormula ((reverse fb:object.bike.color) (fb:type.object.type fb:object.bike))))
+
+# brand
+(example (utterance "what's the brand") (targetFormula ((reverse fb:object.bike.brand) (fb:type.object.type fb:object.bike))))
+(example (utterance "what's the brand of the bike") (targetFormula ((reverse fb:object.bike.brand) (fb:type.object.type fb:object.bike))))
+
+# gender
+(example (utterance "which gender") (targetFormula ((reverse fb:object.bike.gender) (fb:type.object.type fb:object.bike))))
+(example (utterance "what's the gender of the bike") (targetFormula ((reverse fb:object.bike.gender) (fb:type.object.type fb:object.bike))))
+
+# type
+(example (utterance "what's the type") (targetFormula ((reverse fb:object.bike.type) (fb:type.object.type fb:object.bike))))
+(example (utterance "what's the type of the bike") (targetFormula ((reverse fb:object.bike.type) (fb:type.object.type fb:object.bike))))
+(example (utterance "which type is it") (targetFormula ((reverse fb:object.bike.type) (fb:type.object.type fb:object.bike))))

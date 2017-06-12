@@ -3,8 +3,10 @@
 (rule $RelNP (id)    (ConstantFn fb:object.bike.id))
 (rule $RelNP (color) (ConstantFn fb:object.bike.color))
 (rule $RelNP (size)  (ConstantFn fb:object.bike.size))
+(rule $RelNP (gender)  (ConstantFn fb:object.bike.gender))
+(rule $RelNP (type)  (ConstantFn fb:object.bike.type))
 
 (rule $NP ($RelNP of $NP) (lambda r (lambda x ((reverse (var r)) (var x)))))
 (rule $ROOT ($NP) (IdentityFn))
-(rule $ROOT ($NP with the largest $RelNP) (lambda x (lambda y (argmax 1 5 (var x) (var y)))))
-(rule $ROOT ($NP with the smallest $RelNP) (lambda x (lambda y (argmax 1 5 (var x) (var y)))))
+(rule $ROOT ($NP with the largest $RelNP) (lambda x (lambda y (argmax 1 1 (var x) (var y)))))
+(rule $ROOT ($NP with the smallest $RelNP) (lambda x (lambda y (argmin 1 1 (var x) (var y)))))
