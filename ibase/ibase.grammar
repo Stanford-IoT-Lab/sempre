@@ -1,0 +1,67 @@
+# JavaExecutor Functions
+(def @measureValueCast edu.stanford.nlp.sempre.thingtalk.ThingTalk.measureValueCast)
+
+(def @paramForm edu.stanford.nlp.sempre.thingtalk.ThingTalk.paramForm)
+
+(def @trigParam edu.stanford.nlp.sempre.thingtalk.ThingTalk.trigParam)
+(def @queryParam edu.stanford.nlp.sempre.thingtalk.ThingTalk.queryParam)
+(def @actParam edu.stanford.nlp.sempre.thingtalk.ThingTalk.actParam)
+
+(def @timeRule edu.stanford.nlp.sempre.thingtalk.ThingTalk.timeRule)
+(def @timeSpanRule edu.stanford.nlp.sempre.thingtalk.ThingTalk.timeSpanRule)
+(def @ifttt edu.stanford.nlp.sempre.thingtalk.ThingTalk.ifttt)
+
+(def @setupForm edu.stanford.nlp.sempre.thingtalk.ThingTalk.setupForm)
+(def @cmdForm edu.stanford.nlp.sempre.thingtalk.ThingTalk.cmdForm)
+(def @ansForm edu.stanford.nlp.sempre.thingtalk.ThingTalk.ansForm)
+(def @jsonOut edu.stanford.nlp.sempre.thingtalk.ThingTalk.jsonOut)
+(def @special edu.stanford.nlp.sempre.thingtalk.ThingTalk.special)
+
+# Value Parsing
+#(rule $NumValue (@one) (ConstantFn (number 1)))
+(rule $NumValue ($PHRASE) (NumberFn) (anchored 1))
+(rule $DateValue ($PHRASE) (DateFn) (anchored 1))
+(rule $TimeValue ($PHRASE) (TimeFn) (anchored 1))
+(for @unit (s min h day week mon year)
+	(rule $TimeUnit (@unit) (ConstantFn (string @unit)))
+)
+(rule $TimeIntervalValue ($NumValue $TimeUnit) (thingtalk.CallFn @measureValueCast))
+(for @unit (C F byte KB MB GB TB kg lb g oz mps kmph mph m km mm cm mi in kcal kJ)
+	(rule $Unit (@unit) (ConstantFn (string @unit)))
+)
+(rule $MeasureValue ($NumValue $Unit) (thingtalk.CallFn @measureValueCast))
+(rule $BooleanValue (@true) (ConstantFn (boolean true)))
+(rule $BooleanValue (@false) (ConstantFn (boolean false)))
+
+# one can choose to enable floating strings, which means full strings to be picked up
+# by anchors, or just single tokens, also picked up by anchors
+(when floatingstrings
+	(rule $StrValue ($PHRASE) (IdentityFn) (anchored 1))
+)
+
+(rule $StringValue ($PHRASE) (thingtalk.NerValueFn QUOTED_STRING String) (anchored 1))
+(rule $EntityValue ($TOKEN) (thingtalk.EntityLexiconFn @language_tag) (anchored 1))
+
+(rule $PersonValue (@of $UsernameValue) (SelectFn 0))
+
+(rule $LocationValue ($PHRASE) (thingtalk.LocationLexiconFn @language_tag) (anchored 1))
+(rule $LocationValue (@here) (ConstantFn (location rel_current_location -1 -1) fb:type.any))
+(rule $LocationValue @at_home (ConstantFn (location rel_home -1 -1) fb:type.any))
+(rule $LocationValue @at_work (ConstantFn (location rel_work -1 -1) fb:type.any))
+
+(rule $PeriodicTimeValue ($PHRASE) (thingtalk.TimeDurationFn) (anchored 1))
+(rule $PeriodicTimeValue (@every $TimeIntervalValue) (SelectFn 0))
+
+(def @all_values ($DateValue $TimeValue $NumValue
+$MeasureValue $TimeIntervalValue $BooleanValue $LocationValue
+$EntityValue $StringValue))
+
+(def @answer_values ($DateValue $TimeValue $NumValue
+$MeasureValue $TimeIntervalValue $LocationValue))
+
+(for @v @answer_values
+    (rule $Answer (@v) (lambda value (call @ansForm (var value))))
+)
+(rule $ROOT ($Answer) (lambda cmd (call @jsonOut (var cmd))))
+(rule $ROOT ($Command) (lambda cmd (call @jsonOut (var cmd))))
+
