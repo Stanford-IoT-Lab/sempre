@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.base.Joiner;
 
 import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.LanguageInfo.LanguageUtils;
@@ -20,6 +21,8 @@ public class ThingpediaLexicon {
   public static class Options {
     @Option
     public int verbose = 0;
+    @Option
+    public Set<String> subset = new HashSet<>();
   }
 
   public static Options opts = new Options();
@@ -57,8 +60,12 @@ public class ThingpediaLexicon {
       return rawPhrase;
     }
 
+    public ChannelNameValue toValue() {
+      return new ChannelNameValue(kind, name, argnames, argcanonicals, argtypes);
+    }
+
     public Formula toFormula() {
-      return new ValueFormula<>(new ChannelNameValue(kind, name, argnames, argcanonicals, argtypes));
+      return new ValueFormula<>(toValue());
     }
 
     public void addFeatures(FeatureVector vec) {
@@ -143,6 +150,45 @@ public class ThingpediaLexicon {
     cache.clear();
   }
 
+  public Entry lookupChannelByName(String kindName, Mode channel_type) {
+    List<Entry> entries = cache.hit(new LexiconKey(channel_type, kindName));
+    if (entries != null) {
+      if (opts.verbose >= 3)
+        LogInfo.logs("ThingpediaLexicon cacheHit");
+      return entries.get(0);
+    }
+    
+    String query = "select dscc.canonical,ds.kind,dsc.name,dsc.argnames,dscc.argcanonicals,dsc.types from "
+        + " device_schema_channels dsc, device_schema ds, device_schema_channel_canonicals dscc "
+        + " where dsc.schema_id = ds.id and dsc.version = ds.developer_version and dscc.schema_id = dsc.schema_id "
+        + " and dscc.version = dsc.version and dscc.name = dsc.name and dscc.language = ? and channel_type = ? and "
+        + " ds.kind = ? and dsc.name = ?";
+
+    String[] kindAndName = kindName.split("\\.");
+    String kind = Joiner.on('.').join(Arrays.asList(kindAndName).subList(0, kindAndName.length - 1));
+    String name = kindAndName[kindAndName.length - 1];
+
+    try (Connection con = dataSource.getConnection(); PreparedStatement stmt = con.prepareStatement(query)) {
+      stmt.setString(1, languageTag);
+      String channelType = channel_type.toString().toLowerCase();
+      stmt.setString(2, channelType);
+      stmt.setString(3, kind);
+      stmt.setString(4, name);
+      try (ResultSet rs = stmt.executeQuery()) {
+        if (!rs.next())
+          throw new RuntimeException("Invalid channel " + kindAndName);
+        Entry entry = new Entry(rs.getString(1), rs.getString(2), rs.getString(3),
+            rs.getString(4), rs.getString(5), rs.getString(6), null);
+        long now = System.currentTimeMillis();
+        cache.store(new LexiconKey(channel_type, kindName), Collections.singletonList(entry),
+            now + CACHE_AGE);
+        return entry;
+      }
+    } catch (SQLException | JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   public Iterator<Entry> lookupChannel(String phrase, Mode channel_type) throws SQLException {
     if (opts.verbose >= 2)
       LogInfo.logs("ThingpediaLexicon.lookupChannel(%s) %s", channel_type, phrase);
@@ -164,7 +210,7 @@ public class ThingpediaLexicon {
         + " device_schema_channels dsc, device_schema ds, device_schema_channel_canonicals dscc, lexicon2 lex "
         + " where dsc.schema_id = ds.id and dsc.version = ds.developer_version and dscc.schema_id = dsc.schema_id "
         + " and dscc.version = dsc.version and dscc.name = dsc.name and dscc.language = ? and channel_type = ? and "
-        + " lex.schema_id = ds.id and ds.kind_type <> 'primary' and lex.channel_name = dsc.name and lex.language = ? "
+        + " lex.schema_id = ds.id and ds.kind_type <> 'global' and lex.channel_name = dsc.name and lex.language = ? "
         + " and lex.token = ? limit "
         + (3 * Parser.opts.beamSize);
 
@@ -182,9 +228,12 @@ public class ThingpediaLexicon {
 
       entries = new LinkedList<>();
       try (ResultSet rs = stmt.executeQuery()) {
-        while (rs.next())
-          entries.add(new Entry(rs.getString(1), rs.getString(2), rs.getString(3),
-              rs.getString(4), rs.getString(5), rs.getString(6), key));
+        while (rs.next()) {
+          Entry entry = new Entry(rs.getString(1), rs.getString(2), rs.getString(3),
+              rs.getString(4), rs.getString(5), rs.getString(6), key);
+          if (maybeFilterSubset(entry))
+            entries.add(entry);
+        }
       } catch (SQLException | JsonProcessingException e) {
         if (opts.verbose > 0)
           LogInfo.logs("Exception during lexicon lookup: %s", e.getMessage());
@@ -193,5 +242,11 @@ public class ThingpediaLexicon {
           now + CACHE_AGE);
       return entries.iterator();
     }
+  }
+
+  private boolean maybeFilterSubset(Entry entry) {
+    if (opts.subset.isEmpty())
+      return true;
+    return opts.subset.contains(entry.kind);
   }
 }

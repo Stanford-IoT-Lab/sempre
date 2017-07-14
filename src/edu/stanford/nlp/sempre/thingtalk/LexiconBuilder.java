@@ -88,7 +88,7 @@ public class LexiconBuilder {
 
       try (Statement s = connection.createStatement()) {
         try (ResultSet rs = s
-            .executeQuery("select id,kind from device_schema where kind_type <> 'primary' lock in share mode")) {
+            .executeQuery("select id,kind from device_schema where kind_type <> 'global' lock in share mode")) {
           while (rs.next()) {
             schemaIdMap.put(rs.getString(2), rs.getInt(1));
           }
@@ -209,8 +209,9 @@ public class LexiconBuilder {
         }
 
         if (deletePrevious) {
-          try (Statement stmt = connection.createStatement()) {
-            stmt.execute("delete from lexicon2");
+          try (PreparedStatement stmt = connection.prepareStatement("delete from lexicon2 where language = ?")) {
+            stmt.setString(1, languageTag);
+            stmt.execute();
           }
         }
 

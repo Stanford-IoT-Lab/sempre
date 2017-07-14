@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javax.sql.DataSource;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 
 import edu.stanford.nlp.sempre.*;
@@ -26,7 +27,7 @@ public class ThingpediaDataset extends AbstractDataset {
     @Option
     public Set<String> testTypes = Sets.newHashSet("test");
     @Option
-    public Set<String> trainTypes = Sets.newHashSet("thingpedia", "online", "turking", "generated");
+    public Set<String> trainTypes = Sets.newHashSet("thingpedia", "online");
 
     @Option
     public List<Pair<String, Double>> trainWeights = Collections.emptyList();
@@ -37,9 +38,9 @@ public class ThingpediaDataset extends AbstractDataset {
   private final ThingpediaDatabase dataSource;
 
   private static final String CANONICAL_QUERY = "select dscc.canonical,ds.kind,dsc.name,dsc.channel_type,dsc.argnames,dscc.argcanonicals,dsc.types from device_schema_channels dsc, device_schema ds, "
-      + " device_schema_channel_canonicals dscc where dsc.schema_id = ds.id and dsc.version = ds.approved_version and "
+      + " device_schema_channel_canonicals dscc where dsc.schema_id = ds.id and dsc.version = ds.developer_version and "
       + " dscc.schema_id = dsc.schema_id and dscc.version = dsc.version and dscc.name = dsc.name and language = ? "
-      + " and canonical is not null and ds.kind_type <> 'primary'";
+      + " and canonical is not null and ds.kind_type <> 'global'";
   private static final String FULL_EXAMPLE_QUERY = "select id, type, utterance, target_json from example_utterances where not is_base and language = ?";
   private static final String RAW_EXAMPLE_QUERY = "select id, type, utterance, target_json from example_utterances where not is_base and language = ? "
       + "and type in ('online', 'test')";
@@ -63,6 +64,9 @@ public class ThingpediaDataset extends AbstractDataset {
         while (set.next() && examples.size() < maxExamples) {
           String canonical = set.getString(1);
           String kind = set.getString(2);
+          if (!ThingpediaLexicon.opts.subset.isEmpty() && !ThingpediaLexicon.opts.subset.contains(kind))
+            continue;
+
           String name = set.getString(3);
           String channelType = set.getString(4);
           List<String> argnames = Json.readValueHard(set.getString(5), typeRef);
@@ -85,7 +89,7 @@ public class ThingpediaDataset extends AbstractDataset {
           }
           Value targetValue = ThingTalk.jsonOut(inner);
           if (channelType.equals("trigger"))
-            canonical = "monitor if " + canonical;
+            canonical = "monitor when " + canonical;
 
           Example ex = new Example.Builder()
               .setId("canonical_" + kind + "_" + name)
@@ -97,6 +101,51 @@ public class ThingpediaDataset extends AbstractDataset {
         }
       }
     }
+  }
+
+  private Set<String> findAllKinds(String targetJson) {
+    Map<String, Object> map = Json.readMapHard(targetJson);
+    Set<String> ret = new HashSet<>();
+
+    if (map.containsKey("rule")) {
+      Map<?, ?> rule = (Map<?, ?>) map.get("rule");
+      findKinds(ret, (Map<?, ?>) rule.get("trigger"));
+      findKinds(ret, (Map<?, ?>) rule.get("query"));
+      findKinds(ret, (Map<?, ?>) rule.get("action"));
+    } else {
+      findKinds(ret, (Map<?, ?>) map.get("trigger"));
+      findKinds(ret, (Map<?, ?>) map.get("query"));
+      findKinds(ret, (Map<?, ?>) map.get("action"));
+    }
+    return ret;
+  }
+
+  private String getId(Object obj) {
+    if (obj instanceof String)
+      return (String) obj;
+    Map<?, ?> map = (Map<?, ?>) obj;
+    if (map.containsKey("value"))
+      return (String) map.get("value");
+    return (String) map.get("id");
+  }
+
+  private void findKinds(Set<String> ret, Map<?, ?> map) {
+    if (map == null)
+      return;
+    String function = getId(map.get("name"));
+    if (function.startsWith("tt:"))
+      function = function.substring("tt:".length());
+
+    String[] kindAndNames = function.split("\\.");
+    ret.add(Joiner.on('.').join(Arrays.asList(kindAndNames).subList(0, kindAndNames.length - 1)));
+  }
+
+  private boolean maybeFilterSubset(String targetJson) {
+    if (ThingpediaLexicon.opts.subset.isEmpty())
+      return true;
+
+    Set<String> kinds = findAllKinds(targetJson);
+    return ThingpediaLexicon.opts.subset.containsAll(kinds);
   }
 
   private void readFullExamples(Connection con) throws SQLException {
@@ -127,6 +176,8 @@ public class ThingpediaDataset extends AbstractDataset {
           String type = set.getString(2);
           String utterance = set.getString(3);
           String targetJson = set.getString(4);
+          if (!maybeFilterSubset(targetJson))
+            continue;
           Value targetValue = new StringValue(targetJson);
 
           boolean isTest;
