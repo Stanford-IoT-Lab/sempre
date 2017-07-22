@@ -39,16 +39,14 @@ public class ThingpediaLexicon {
     private final List<String> argcanonicals;
     private final List<Type> argtypes;
     private final String search;
-    private final double weight;
 
     private Entry(String rawPhrase, String kind, String name, String argnames, String argcanonicals,
-        String argtypes, String search, double weight)
+        String argtypes, String search)
         throws JsonProcessingException {
       this.rawPhrase = rawPhrase;
       this.kind = kind;
       this.name = name;
       this.search = search;
-      this.weight = weight;
 
       TypeReference<List<String>> typeRef = new TypeReference<List<String>>() {
       };
@@ -73,7 +71,6 @@ public class ThingpediaLexicon {
     public void addFeatures(FeatureVector vec) {
       if (ThingTalkFeatureComputer.opts.featureDomains.contains("thingtalk_lexicon"))
         vec.add("thingtalk_lexicon", search + "---" + kind);
-      vec.add("thingtalk_lexicon", "weight", weight);
     }
 
     public boolean applyFilter(Object filter) {
@@ -181,7 +178,7 @@ public class ThingpediaLexicon {
         if (!rs.next())
           throw new RuntimeException("Invalid channel " + kindAndName);
         Entry entry = new Entry(rs.getString(1), rs.getString(2), rs.getString(3),
-            rs.getString(4), rs.getString(5), rs.getString(6), null, 0);
+            rs.getString(4), rs.getString(5), rs.getString(6), null);
         long now = System.currentTimeMillis();
         cache.store(new LexiconKey(channel_type, kindName), Collections.singletonList(entry),
             now + CACHE_AGE);
@@ -209,11 +206,11 @@ public class ThingpediaLexicon {
     if (opts.verbose >= 3)
       LogInfo.logs("ThingpediaLexicon cacheMiss");
 
-    String query = "select dscc.canonical,ds.kind,dsc.name,dsc.argnames,dscc.argcanonicals,dsc.types,lex.token_weight from "
+    String query = "select dscc.canonical,ds.kind,dsc.name,dsc.argnames,dscc.argcanonicals,dsc.types from "
         + " device_schema_channels dsc, device_schema ds, device_schema_channel_canonicals dscc, lexicon2 lex "
         + " where dsc.schema_id = ds.id and dsc.version = ds.developer_version and dscc.schema_id = dsc.schema_id "
         + " and dscc.version = dsc.version and dscc.name = dsc.name and dscc.language = ? and channel_type = ? and "
-        + " lex.schema_id = ds.id and ds.kind_type <> 'global' and lex.channel_name = dsc.name and lex.language = ? "
+        + " lex.schema_id = ds.id and ds.kind_type <> 'primary' and lex.channel_name = dsc.name and lex.language = ? "
         + " and lex.token = ? limit "
         + (3 * Parser.opts.beamSize);
 
@@ -233,7 +230,7 @@ public class ThingpediaLexicon {
       try (ResultSet rs = stmt.executeQuery()) {
         while (rs.next()) {
           Entry entry = new Entry(rs.getString(1), rs.getString(2), rs.getString(3),
-              rs.getString(4), rs.getString(5), rs.getString(6), key, rs.getDouble(7));
+              rs.getString(4), rs.getString(5), rs.getString(6), key);
           if (maybeFilterSubset(entry))
             entries.add(entry);
         }

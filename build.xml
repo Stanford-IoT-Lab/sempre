@@ -39,7 +39,7 @@
   </target>
 
   <!-- Build JNI helpers -->
-  <target name="jni" depends="core,corenlp">
+  <target name="jni" depends="core">
    <exec executable="/usr/bin/make">
      <arg value="-C"/>
      <arg value="${root}/jni"/>

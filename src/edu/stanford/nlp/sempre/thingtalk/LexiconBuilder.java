@@ -88,7 +88,7 @@ public class LexiconBuilder {
 
       try (Statement s = connection.createStatement()) {
         try (ResultSet rs = s
-            .executeQuery("select id,kind from device_schema where kind_type <> 'global' lock in share mode")) {
+            .executeQuery("select id,kind from device_schema where kind_type <> 'primary' lock in share mode")) {
           while (rs.next()) {
             schemaIdMap.put(rs.getString(2), rs.getInt(1));
           }
@@ -96,12 +96,12 @@ public class LexiconBuilder {
       }
 
       // The lexicon itself
-      Map<String, Map<Function, Double>> newLexicon = new HashMap<>();
+      Map<String, Set<Function>> newLexicon = new HashMap<>();
       Map<String, Map<Function, Double>> lexicon = new HashMap<>();
       // The priors on the functions
       Map<Function, Double> priors = new HashMap<>();
 
-      Pattern namePattern = Pattern.compile("^tt:(.+)\\.([^\\.]+)$");
+      Pattern namePattern = Pattern.compile("^tt:([^\\.]+)\\.(.+)$");
 
       int count = 0;
       try (PreparedStatement s = connection.prepareStatement(onlyKind == null ? ALL_QUERY : ONLY_KIND_QUERY)) {
@@ -202,9 +202,9 @@ public class LexiconBuilder {
             return (int) Math.signum(p2.getSecond() - p1.getSecond());
           });
 
-          for (int i = 0; i < Math.min(30, functionList.size()); i++) {
+          for (int i = 0; i < Math.min(20, functionList.size()); i++) {
             Pair<Function, Double> p = functionList.get(i);
-            newLexicon.computeIfAbsent(token, (key) -> new HashMap<>()).put(p.getFirst(), p.getSecond());
+            newLexicon.computeIfAbsent(token, (key) -> new HashSet<>()).add(p.getFirst());
           }
         }
 
@@ -216,19 +216,18 @@ public class LexiconBuilder {
         }
 
         count = 0;
-        try (PreparedStatement ps = connection.prepareStatement("insert ignore into lexicon2(language,token,schema_id,channel_name,token_weight) values (?, ?, ?, ?, ?)")) {
+        try (PreparedStatement ps = connection.prepareStatement("insert ignore into lexicon2 values (?, ?, ?, ?)")) {
           count++;
           if (count % 10 == 0)
             System.err.println("Token #" + count + "/" + newLexicon.size());
-          for (Map.Entry<String, Map<Function, Double>> entry : newLexicon.entrySet()) {
+          for (Map.Entry<String, Set<Function>> entry : newLexicon.entrySet()) {
             String token = entry.getKey();
-            for (Map.Entry<Function, Double> fn : entry.getValue().entrySet()) {
+            for (Function fn : entry.getValue()) {
               //System.out.println(token + "\t" + fn.schemaId + "\t" + fn.name);
               ps.setString(1, languageTag);
               ps.setString(2, token);
-              ps.setInt(3, fn.getKey().schemaId);
-              ps.setString(4, fn.getKey().name);
-              ps.setDouble(5, fn.getValue());
+              ps.setInt(3, fn.schemaId);
+              ps.setString(4, fn.name);
               ps.addBatch();
             }
           }
