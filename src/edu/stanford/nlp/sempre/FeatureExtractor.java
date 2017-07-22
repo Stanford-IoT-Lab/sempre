@@ -68,7 +68,10 @@ public class FeatureExtractor {
           computer = (FeatureComputer) fcClass.newInstance();
         }
         featureComputers.add(computer);
-      } catch (ClassNotFoundException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
+      } catch (InvocationTargetException e) {
+        e.getCause().printStackTrace();
+        throw new RuntimeException(e);
+      } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
         throw new RuntimeException(e);
       }
     }
