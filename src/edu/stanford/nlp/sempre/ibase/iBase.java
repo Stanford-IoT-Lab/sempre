@@ -1,9 +1,7 @@
 package edu.stanford.nlp.sempre.ibase;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Calendar;
 
 import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.thingtalk.*;
@@ -26,16 +24,14 @@ public final class iBase {
         return new DurationValue(duration);
     }
 
-    public static Value jsonOutFilters(Value val) {
-        // e.g. {"date": {"$lt": {"type":"tt.time", "value":{"relative": "tt.time.now"}}}}
-        Map<String, Object> json = new HashMap<>();
-        json.put("date", val.toJson());
-        return (new StringValue(Json.writeValueAsStringHard(json)));
+    public static QueryValue query(TypedStringValue project, DurationValue duration) {
+        return new QueryValue(project.value, duration);
     }
 
-    public static Value jsonOutFields() {
-        // eg. {weight: 1, _id: 0}
+    public static Value jsonOut(Value val) {
         Map<String, Object> json = new HashMap<>();
+        json.put("query", ((QueryValue) val).query);
+        json.put("duration", ((QueryValue) val).duration);
         return (new StringValue(Json.writeValueAsStringHard(json)));
     }
 

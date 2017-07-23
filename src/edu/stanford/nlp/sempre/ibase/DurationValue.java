@@ -6,7 +6,6 @@ import edu.stanford.nlp.sempre.Value;
 import fig.basic.LispTree;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,14 +21,14 @@ public class DurationValue extends Value {
     private final Boolean isNow;
 
     public DurationValue(DateValue start, DateValue end) {
-        this.start = start;
-        this.end = end;
+        this.start = getDate(start, null);
+        this.end = getDate(end, null);
         this.isNow = false;
         this.diff = null;
     }
 
     public DurationValue(DateValue start) {
-        this.start = start;
+        this.start = getDate(start, null);
         this.end = DateValue.now();
         this.isNow = true;
         this.diff = null;
@@ -58,28 +57,29 @@ public class DurationValue extends Value {
             cal.set(Calendar.SECOND, (int) date.second);
             cal.set(Calendar.MILLISECOND, (int) ((date.second % 1) * 1000));
         }
-
-        switch(diff.unit) {
-            case "year":
-                cal.add(Calendar.YEAR, (int) diff.value);
-                break;
-            case "month":
-                cal.add(Calendar.MONTH, (int) diff.value);
-                break;
-            case "week":
-                cal.add(Calendar.WEEK_OF_YEAR, (int) diff.value);
-                break;
-            case "day":
-                cal.add(Calendar.DATE, (int) diff.value);
-                break;
-            case "h":
-                cal.add(Calendar.HOUR, (int) diff.value);
-                break;
-            case "s":
-                cal.add(Calendar.SECOND, (int) diff.value);
-                break;
-            default:
-                throw new RuntimeException("Invalid unit for date");
+        if (diff != null) {
+            switch (diff.unit) {
+                case "year":
+                    cal.add(Calendar.YEAR, (int) diff.value);
+                    break;
+                case "month":
+                    cal.add(Calendar.MONTH, (int) diff.value);
+                    break;
+                case "week":
+                    cal.add(Calendar.WEEK_OF_YEAR, (int) diff.value);
+                    break;
+                case "day":
+                    cal.add(Calendar.DATE, (int) diff.value);
+                    break;
+                case "h":
+                    cal.add(Calendar.HOUR, (int) diff.value);
+                    break;
+                case "s":
+                    cal.add(Calendar.SECOND, (int) diff.value);
+                    break;
+                default:
+                    throw new RuntimeException("Invalid unit for date");
+            }
         }
         return new DateValue(
                 cal.get(Calendar.YEAR),
@@ -126,7 +126,14 @@ public class DurationValue extends Value {
 
     @Override
     public boolean equals(Object o) {
-        return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DurationValue that = (DurationValue) o;
+        if (this.isNow != that.isNow) return false;
+        if (this.start != that.start) return false;
+        if (this.end != that.end) return false;
+        if (this.diff != that.diff) return false;
+        return true;
     }
 
     @Override
