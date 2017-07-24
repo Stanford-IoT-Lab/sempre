@@ -1,10 +1,10 @@
 package edu.stanford.nlp.sempre.ibase;
 
+import edu.stanford.nlp.sempre.*;
+import edu.stanford.nlp.sempre.thingtalk.TypedStringValue;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import edu.stanford.nlp.sempre.*;
-import edu.stanford.nlp.sempre.thingtalk.*;
 
 /**
  * Created by silei on 6/9/17.
@@ -24,8 +24,13 @@ public final class iBase {
         return new DurationValue(duration);
     }
 
-    public static QueryValue query(TypedStringValue project, DurationValue duration) {
-        return new QueryValue(project.value, duration);
+    public static QueryValue query(Value project, DurationValue duration) {
+        if (project instanceof TypedStringValue)
+            return new QueryValue(((TypedStringValue) project).value, duration);
+        else if (project instanceof StringValue)
+            return new QueryValue(((StringValue) project).value, duration);
+        else
+            return null;
     }
 
     public static Value jsonOut(Value val) {

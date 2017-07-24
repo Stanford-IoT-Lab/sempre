@@ -13,6 +13,8 @@
 )
 (rule $TimeIntervalValue ($NumValue $TimeUnit) (thingtalk.CallFn @measureValueCast))
 
+(rule $QueryValue ($TOKEN) (ibase.iBaseLexiconFn) (anchored 1))
+
 # DurationValue parsing
 (rule $DurationValue (last $TimeIntervalValue) (thingtalk.CallFn @measureDurationCast))
 (rule $DurationValue (from $DateValue to $DateValue) (thingtalk.CallFn @measureDurationCast))
@@ -21,6 +23,7 @@
 (rule $StringValue ($PHRASE) (thingtalk.NerValueFn QUOTED_STRING String) (anchored 1))
 
 (rule $QUERY ($StringValue $DurationValue) (thingtalk.CallFn @query))
+(rule $QUERY ($QueryValue $DurationValue) (thingtalk.CallFn @query))
 
 (rule $ROOT ($QUERY) (lambda q (call @jsonOut (var q))))
 
