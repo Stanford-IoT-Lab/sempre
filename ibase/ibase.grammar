@@ -16,9 +16,9 @@
 (rule $QueryValue ($TOKEN) (ibase.iBaseLexiconFn) (anchored 1))
 
 # DurationValue parsing
-(rule $DurationValue (last $TimeIntervalValue) (thingtalk.CallFn @measureDurationCast))
-(rule $DurationValue (from $DateValue to $DateValue) (thingtalk.CallFn @measureDurationCast))
-(rule $DurationValue (since $DateValue) (thingtalk.CallFn @measureDurationCast))
+(rule $DurationValue (@last $TimeIntervalValue) (thingtalk.CallFn @measureDurationCast))
+(rule $DurationValue (@from $DateValue @to $DateValue) (thingtalk.CallFn @measureDurationCast))
+(rule $DurationValue (@since $DateValue) (thingtalk.CallFn @measureDurationCast))
 
 (rule $StringValue ($PHRASE) (thingtalk.NerValueFn QUOTED_STRING String) (anchored 1))
 
