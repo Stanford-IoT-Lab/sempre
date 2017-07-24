@@ -11,9 +11,18 @@ import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.Derivation.Cacheability;
 import edu.stanford.nlp.sempre.thingtalk.ArgFilterHelpers;
 import edu.stanford.nlp.sempre.thingtalk.ThingTalk;
+import edu.stanford.nlp.sempre.thingtalk.ThingpediaDataset;
 import fig.basic.LogInfo;
+import fig.basic.Option;
 
 class QueryExchangeState extends AbstractHttpExchangeState {
+  public static class Options {
+    @Option(gloss = "Whether to store each sentence in the log by default or not")
+    public boolean defaultStoreLog = false;
+  }
+
+  public static final Options opts = new Options();
+
   private final APIServer server;
 
   static private final int MAX_ITEMS = 5;
@@ -165,6 +174,7 @@ class QueryExchangeState extends AbstractHttpExchangeState {
     int limit = 0;
     String strLongResponse = reqParams.get("long");
     boolean longResponse = "1".equals(strLongResponse);
+    boolean storeLog = reqParams.containsKey("store") ? !("no".equals(reqParams.get("store"))) : opts.defaultStoreLog;
 
     // From ValueCategory on the client
     String expect = reqParams.get("expect");
@@ -194,8 +204,24 @@ class QueryExchangeState extends AbstractHttpExchangeState {
         session.remoteHost = remoteHost;
 
         derivations = handleUtterance(session, language, query, reqParams.get("expect"));
-        server.logUtterance(language.tag, query);
+
+        if (storeLog && derivations.size() > 0) {
+          Derivation topDerivation = derivations.get(0);
+          if (topDerivation.score == Double.POSITIVE_INFINITY) {
+            if (derivations.size() > 1)
+              topDerivation = derivations.get(1);
+            else
+              topDerivation = null;
+          }
+
+          if (topDerivation != null) {
+            StringValue value = (StringValue) topDerivation.value;
+            String targetJson = value.value;
+            ThingpediaDataset.storeExample(query, targetJson, language.tag, "log", Collections.emptyList());
+          }
+        }
       }
+
       exitStatus = 200;
     } catch (IllegalArgumentException | IllegalStateException e) {
       exitStatus = 400;
