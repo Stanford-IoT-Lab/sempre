@@ -76,34 +76,14 @@ public class APIServer implements Runnable {
     public List<String> languages = Arrays.asList(new String[] { "en", "it", "es", "zh" });
     @Option
     public String accessToken = null;
-    @Option
-    public String utteranceLogFile = null;
   }
 
   public static Options opts = new Options();
-
-  private class LogEntry {
-    private final String languageTag;
-    private final String utterance;
-
-    public LogEntry(String languageTag, String utterance) {
-      this.languageTag = languageTag;
-      this.utterance = utterance;
-    }
-
-    @Override
-    public String toString() {
-      return languageTag + "\t" + utterance;
-    }
-  }
-
-  private final BlockingQueue<LogEntry> logQueue;
 
   private final Map<String, Session> sessionMap = new HashMap<>();
   final Map<String, LanguageContext> langs = new ConcurrentHashMap<>();
 
   public APIServer() {
-    logQueue = new LinkedBlockingQueue<>();
   }
 
   synchronized Session getSession(String sessionId) {
@@ -114,13 +94,6 @@ public class APIServer implements Runnable {
       sessionMap.put(sessionId, newSession);
       return newSession;
     }
-  }
-
-  void logUtterance(String languageTag, String utterance) {
-    if (opts.utteranceLogFile == null)
-      return;
-
-    logQueue.offer(new LogEntry(languageTag, utterance));
   }
 
   private class SessionGCTask extends TimerTask {
@@ -180,10 +153,6 @@ public class APIServer implements Runnable {
       // Add supported languages
       for (String tag : opts.languages)
         addLanguage(tag);
-
-      // open log files (after we dropped privileges, so the log files are not owned by root)
-      if (opts.utteranceLogFile != null)
-        new LogFlusherThread<>(logQueue, opts.utteranceLogFile).start();
 
       for (LanguageContext lang : langs.values())
         lang.exactMatch.load();

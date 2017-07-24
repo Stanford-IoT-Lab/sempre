@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,15 +12,11 @@ import com.sun.net.httpserver.HttpExchange;
 import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.thingtalk.ThingpediaDataset;
 import fig.basic.LogInfo;
-import fig.basic.Option;
 
 public class OnlineLearnExchangeState extends AbstractHttpExchangeState {
-  public static class Options {
-    @Option(gloss = "Probability of storing the example in the test set instead of the train set.")
-    public double testProbability = 0.1;
-  }
-
-  public static final Options opts = new Options();
+  public static enum LearnType {
+    no, automatic, online
+  };
 
   private final APIServer server;
   private final String sessionId;
@@ -99,13 +94,12 @@ public class OnlineLearnExchangeState extends AbstractHttpExchangeState {
         throw new IllegalArgumentException("Target is not valid SEMPRE JSON");
       }
 
-      double diceRoll = ThreadLocalRandom.current().nextDouble();
-      boolean storeAsTest = diceRoll > (1 - opts.testProbability);
-
-      if (storeAsTest)
-        LogInfo.logs("Storing %s as %s in the test set", query, targetJson);
+      LearnType storeAs = LearnType.valueOf(reqParams.getOrDefault("store", "automatic"));
+      
+      if (storeAs != LearnType.no)
+        LogInfo.logs("Storing %s as %s in the %s set", query, targetJson, storeAs.toString());
       else
-        LogInfo.logs("Learning %s as %s", query, targetJson);
+        LogInfo.logs("Not storing %s", query);
 
       Session session = server.getSession(sessionId);
       Example ex = null;
@@ -116,8 +110,9 @@ public class OnlineLearnExchangeState extends AbstractHttpExchangeState {
         session.lang = language.tag;
         session.remoteHost = remoteHost;
 
-        // we only learn in the ML sense if we still have the parsed example...
-        if (!storeAsTest && session.lastEx != null && session.lastEx.utterance != null
+        // we only learn in the ML sense if we still have the parsed example
+        // and this is not something coming from the app automatically
+        if (LearnType.automatic != storeAs && session.lastEx != null && session.lastEx.utterance != null
             && session.lastEx.utterance.equals(query)) {
           ex = session.lastEx;
 
@@ -126,23 +121,17 @@ public class OnlineLearnExchangeState extends AbstractHttpExchangeState {
         }
       }
 
-      String type;
-      if (storeAsTest) {
-        type = "test";
-      } else {
-        // ... but we always save the example in the database, just in case
-        // potentially this allows someone to DDOS our server with bad data
-        // we just hope the ML model is resilient to that (and it should be)
-        type = "online";
+      // reuse the CoreNLP analysis if possible
+      if (storeAs == LearnType.online) {
+        if (ex != null)
+          language.exactMatch.store(ex, targetJson);
+        else
+          language.exactMatch.store(query, targetJson);
       }
 
-      // reuse the CoreNLP analysis if possible
-      if (ex != null)
-        language.exactMatch.store(ex, targetJson);
-      else
-        language.exactMatch.store(query, targetJson);
-
-      ThingpediaDataset.storeExample(query, targetJson, language.tag, type, schemas);
+      if (storeAs != LearnType.no) {
+        ThingpediaDataset.storeExample(query, targetJson, language.tag, storeAs.toString(), schemas);
+      }
 
       // we would need to remove all entries from the cache that are affected by this learning step
       // (which potentially is all of them)
