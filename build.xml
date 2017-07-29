@@ -107,7 +107,7 @@
   </target>
 
   <!-- Compile ibase -->
-  <target name="ibase" depends="init,core,corenlp,overnight">
+  <target name="ibase" depends="init,core,corenlp,overnight,thingtalk">
     <echo message="Compiling ${ant.project.name}: ibase"/>
     <mkdir dir="${classes}/ibase"/>
     <javac srcdir="${src}" destdir="${classes}/ibase" classpathref="lib.path" debug="true" includeantruntime="false" source="${source}" target="${target}">

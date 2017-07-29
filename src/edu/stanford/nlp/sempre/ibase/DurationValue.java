@@ -95,8 +95,11 @@ public class DurationValue extends Value {
     public LispTree toLispTree() {
         LispTree tree = LispTree.proto.newList();
         tree.addChild("duration");
-        tree.addChild(this.start.toLispTree());
+        if (this.start != null)
+            tree.addChild(this.start.toLispTree());
         tree.addChild(this.end.toLispTree());
+        if (this.diff != null)
+            tree.addChild(this.diff.toLispTree());
         return tree;
     }
 
@@ -139,10 +142,5 @@ public class DurationValue extends Value {
     @Override
     public int hashCode() {
         return 0;
-    }
-
-    @Override
-    public String toString() {
-        return start.toString() + end.toString();
     }
 }

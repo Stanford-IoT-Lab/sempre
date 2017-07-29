@@ -12,10 +12,12 @@ import java.util.Map;
 public class QueryValue extends Value {
     public final String query;
     public final DurationValue duration;
+    public final String op;
 
-    public QueryValue(String query, DurationValue duration) {
+    public QueryValue(String query, DurationValue duration, String op) {
         this.query = query;
         this.duration = duration;
+        this.op = op;
     }
 
     @Override
@@ -24,6 +26,8 @@ public class QueryValue extends Value {
         tree.addChild("query");
         tree.addChild(this.query);
         tree.addChild(this.duration.toLispTree());
+        if (op != null)
+            tree.addChild(this.op);
         return tree;
     }
 
@@ -31,7 +35,9 @@ public class QueryValue extends Value {
     public Map<String, Object> toJson() {
         Map<String, Object> json= new HashMap<>();
         json.put("query", this.query);
-        json.put("duration", this.duration);
+        json.put("duration", this.duration.toJson());
+        if (op != null)
+            json.put("op", this.op);
         return json;
     }
 
@@ -42,6 +48,7 @@ public class QueryValue extends Value {
         QueryValue that = (QueryValue) o;
         if (this.query != that.query) return false;
         if (this.duration != that.duration) return false;
+        if (this.op != that.op) return false;
         return true;
     }
 
