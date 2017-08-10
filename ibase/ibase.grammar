@@ -12,7 +12,6 @@
 	(rule $TimeUnit (@unit) (ConstantFn (string @unit)))
 )
 
-
 (rule $TimeIntervalValue ($NumValue $TimeUnit) (thingtalk.CallFn @measureValueCast))
 
 (rule $QueryValue ($TOKEN) (ibase.iBaseLexiconFn) (anchored 1))
@@ -30,8 +29,6 @@
 (for @op (max min avg sum)
     (rule $QUERY (@op $QueryValue $DurationValue) (lambda q (lambda d (call @query (string @op) (var q) (var d)))))
 )
-
-
 
 (rule $ROOT ($QUERY) (lambda q (call @jsonOut (var q))))
 

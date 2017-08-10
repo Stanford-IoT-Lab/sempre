@@ -35,9 +35,11 @@ almond/almond.*.online_learn
 almond/almond.log
 almond/almond.phrase_alignments.*
 
-ibase/ibase.en.params
-ibase/ibase.word_alignments.berkeley
-ibase/ibase.phrase_alignments
+ibase/ibase.canonicals.tsv
+ibase/ibase.*.params
+ibase/ibase.word_alignments.berkeley.source.*
+ibase/ibase.word_alignments.berkeley.*
+ibase/ibase.phrase_alignments.*
 
 ifttt/canonicals.tsv
 ifttt/entity_extraction.tsv
