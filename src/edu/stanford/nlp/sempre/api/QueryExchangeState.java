@@ -15,7 +15,7 @@ import edu.stanford.nlp.sempre.thingtalk.ThingpediaDataset;
 import fig.basic.LogInfo;
 import fig.basic.Option;
 
-class QueryExchangeState extends AbstractHttpExchangeState {
+public class QueryExchangeState extends AbstractHttpExchangeState {
   public static class Options {
     @Option(gloss = "Whether to store each sentence in the log by default or not")
     public boolean defaultStoreLog = false;
