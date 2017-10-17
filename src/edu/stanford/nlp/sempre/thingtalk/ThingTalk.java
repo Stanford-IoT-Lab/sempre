@@ -75,7 +75,7 @@ public final class ThingTalk {
   public static ParametricValue addParam(ParametricValue oldInvocation, ParamNameValue paramName, StringValue operator,
       Value value) {
     ParametricValue newInvocation = oldInvocation.clone();
-    newInvocation.add(paramForm(paramName, operator, value));
+    newInvocation.addParam(paramForm(paramName, operator, value));
     return newInvocation;
   }
 
@@ -194,8 +194,8 @@ public final class ThingTalk {
     ParamNameValue timeName = new ParamNameValue("time", Type.String);
     ParamValue timeParam = new ParamValue(timeName, "Time", "is", time);
     TriggerValue timeTrigger = new TriggerValue(
-        new ChannelNameValue("builtin", "at", Collections.singletonList("time"), Collections.singletonList("time"),
-            Collections.singletonList(Type.String)),
+        new ChannelNameValue("org.thingpedia.builtin.thingengine.builtin", "at", Collections.singletonList("time"), Collections.singletonList("time"),
+            Collections.singletonList(Type.String), Collections.singletonList(true)),
         Collections.singletonList(timeParam));
 
     return new RuleValue(timeTrigger, query, action);
@@ -206,28 +206,28 @@ public final class ThingTalk {
     ParamValue timeParam = new ParamValue(timeName, "Measure", "is", time);
     TriggerValue timeTrigger = new TriggerValue(new ChannelNameValue("builtin", "timer",
         Collections.singletonList("interval"), Collections.singletonList("interval"),
-        Collections.singletonList(new Type.Measure("ms"))),
+        Collections.singletonList(new Type.Measure("ms")), Collections.singletonList(true)),
         Collections.singletonList(timeParam));
 
     return new RuleValue(timeTrigger, query, action);
   }
 
-  public static RuleValue ifttt(TriggerValue trigger, ActionValue action) {
+  public static RuleValue wgd(TriggerValue trigger, ActionValue action) {
     RuleValue ruleVal = new RuleValue(trigger, null, action);
     return ruleVal;
   }
 
-  public static RuleValue ifttt(TriggerValue trigger, QueryValue query) {
+  public static RuleValue wgd(TriggerValue trigger, QueryValue query) {
     RuleValue ruleVal = new RuleValue(trigger, query, null);
     return ruleVal;
   }
 
-  public static RuleValue ifttt(RuleValue rule, ActionValue action) {
+  public static RuleValue wgd(RuleValue rule, ActionValue action) {
     RuleValue ruleVal = new RuleValue(rule.trigger, rule.query, action);
     return ruleVal;
   }
 
-  public static RuleValue ifttt(QueryValue query, ActionValue action) {
+  public static RuleValue wgd(QueryValue query, ActionValue action) {
     RuleValue ruleVal = new RuleValue(null, query, action);
     return ruleVal;
   }

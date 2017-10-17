@@ -8,16 +8,22 @@
 (def @at_work ("在" "公司"))
 (def @at_home ("在" "家"))
 
-(def @containing "包含")
+# FIXME
+(def @contains "包含")
 (def @having "有")
 (def @greater_than ("大于"))
 (def @less_than ("少于"))
+(def @equals equals)
+(def @starts_with (starts with))
+(def @ends_with (ends with))
 
 (def @with "把")
 (def @and "和")
-(def @monitor_if ("监控" "如果"))
+(def @ask "问")
+(def @monitor_when ("监控" "如果"))
 (def @every_day_at ("每天" "在"))
 (def @every "每")
+(def @when "何时")
 (def @if "如果")
 (def @then "就")
 # FIXME

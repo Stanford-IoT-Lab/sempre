@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations.*;
@@ -37,8 +36,14 @@ import fig.basic.Utils;
  */
 public class CoreNLPAnalyzer extends LanguageAnalyzer {
   public static class Options {
+    // Observe that we run almost everything twice
+    // This is because NER and quote_ner have to run before spellcheck (so that spellcheck
+    // doesn't try to fix names and quotes), but we want to rerun lemmatization
+    // after spellcheck so that new spaces and slash-splitting that spellcheck does
+    // are reflected in the lemma tokens and POS tags
     @Option(gloss = "What CoreNLP annotators to run")
-    public List<String> annotators = Lists.newArrayList("ssplit", "pos", "lemma", "ner");
+    public List<String> annotators = Lists.newArrayList("quote2", "ssplit", "pos", "lemma",
+        "ner", "quote_ner", "spellcheck", "ssplit", "pos", "lemma");
 
     @Option(gloss = "Whether to use case-sensitive models")
     public boolean caseSensitive = false;
@@ -72,9 +77,7 @@ public class CoreNLPAnalyzer extends LanguageAnalyzer {
   private static final Set<String> AUX_VERBS = new HashSet<>(Arrays.asList(AUX_VERB_ARR));
   private static final String AUX_VERB_TAG = "VBD-AUX";
 
-  private static final Set<String> NOT_A_NUMBER = Sets.newHashSet("9gag", "score", "gross");
-
-  private static final Pattern INTEGER_PATTERN = Pattern.compile("[0-9]+");
+  private static final Pattern INTEGER_PATTERN = Pattern.compile("[0-9]{4}");
 
   private final String languageTag;
   private final StanfordCoreNLP pipeline;
@@ -133,10 +136,23 @@ public class CoreNLPAnalyzer extends LanguageAnalyzer {
     else
       props.put("annotators", "tokenize," + annotators);
 
-    // force the numeric classifiers on, even if the props file would say otherwise
-    // this is to make sure we can understands at least numbers in number form
-    props.put("ner.applyNumericClassifiers", "true");
-    props.put("ner.useSUTime", "true");
+    // disable ssplit (even though we need it to run the rest of the annotators)
+    props.put("ssplit.isOneSentence", "true");
+
+    // disable all the builtin numeric classifiers, we have our own
+    props.put("ner.applyNumericClassifiers", "false");
+    props.put("ner.useSUTime", "false");
+
+    // move quotes to a NER tag
+    props.put("customAnnotatorClass.quote2", QuotedStringAnnotator.class.getCanonicalName());
+    props.put("customAnnotatorClass.quote_ner", QuotedStringEntityAnnotator.class.getCanonicalName());
+
+    // enable spell checking with our custom annotator
+    props.put("customAnnotatorClass.spellcheck", SpellCheckerAnnotator.class.getCanonicalName());
+    props.put("spellcheck.dictPath", languageTag);
+
+    // ask for binary tree parses
+    props.put("parse.binaryTrees", "true");
 
     pipeline = new StanfordCoreNLP(props);
 
@@ -182,7 +198,12 @@ public class CoreNLPAnalyzer extends LanguageAnalyzer {
     return buf.toString();
   }
 
-  private static final Pattern BETWEEN_PATTERN = Pattern.compile("(-?[0-9]+.[0-9]+)-(-?[0-9]+.[0-9]+)");
+  // recognize two numbers in one token, because CoreNLP's tokenizer will not split them
+  private static final Pattern BETWEEN_PATTERN = Pattern.compile("(-?[0-9]+(?:\\.[0-9]+)?)-(-?[0-9]+(?:\\.[0-9]+)?)");
+
+  private void recognizeNumberSequences(List<CoreLabel> words) {
+    QuantifiableEntityNormalizer.applySpecializedNER(words);
+  }
 
   @Override
   public LanguageInfo analyze(String utterance) {
@@ -203,6 +224,9 @@ public class CoreNLPAnalyzer extends LanguageAnalyzer {
 
     // Run Stanford CoreNLP
     Annotation annotation = pipeline.process(utterance);
+
+    // run numeric classifiers
+    recognizeNumberSequences(annotation.get(CoreAnnotations.TokensAnnotation.class));
 
     for (CoreLabel token : annotation.get(CoreAnnotations.TokensAnnotation.class)) {
       String word = token.get(TextAnnotation.class);
@@ -228,15 +252,37 @@ public class CoreNLPAnalyzer extends LanguageAnalyzer {
 
       if (opts.yearsAsNumbers && nerTag.equals("DATE") && INTEGER_PATTERN.matcher(nerValue).matches()) {
         nerTag = "NUMBER";
-      } else if (nerTag.equals("NUMBER") && NOT_A_NUMBER.contains(wordLower)) {
-        nerTag = "O";
-        posTag = "NNP";
-        nerValue = null;
       }
 
-      if (wordLower.equals("everyday")) {
-        nerTag = "SET";
-        nerValue = "P1D";
+      if (wordLower.equals("9-11") || wordLower.equals("911")) {
+        nerTag = "O";
+      } else {
+        Matcher twoNumbers = BETWEEN_PATTERN.matcher(wordLower);
+        if (twoNumbers.matches()) {
+          // CoreNLP does something somewhat dumb when it comes to X-Y when X and Y are both numbers
+          // we want to split them and treat them separately
+          String num1 = twoNumbers.group(1);
+          String num2 = twoNumbers.group(2);
+
+          languageInfo.tokens.add(num1);
+          languageInfo.lemmaTokens.add(num1);
+          languageInfo.posTags.add("CD");
+          languageInfo.nerTags.add("NUMBER");
+          languageInfo.nerValues.add(num1);
+
+          languageInfo.tokens.add("-");
+          languageInfo.lemmaTokens.add("-");
+          languageInfo.posTags.add(":");
+          languageInfo.nerTags.add("O");
+          languageInfo.nerValues.add(null);
+
+          languageInfo.tokens.add(num2);
+          languageInfo.lemmaTokens.add(num2);
+          languageInfo.posTags.add("CD");
+          languageInfo.nerTags.add("NUMBER");
+          languageInfo.nerValues.add(num2);
+          continue;
+        }
       }
 
       if (LanguageAnalyzer.opts.lowerCaseTokens) {
@@ -250,6 +296,11 @@ public class CoreNLPAnalyzer extends LanguageAnalyzer {
         languageInfo.posTags.add(token.get(PartOfSpeechAnnotation.class));
       }
       languageInfo.lemmaTokens.add(token.get(LemmaAnnotation.class));
+
+      // if it's not a noun and not an adjective it's not an organization 
+      if (!posTag.startsWith("N") && !posTag.startsWith("J") && nerTag.equals("ORGANIZATION"))
+        nerTag = "O";
+
       languageInfo.nerTags.add(nerTag);
       languageInfo.nerValues.add(nerValue);
 
@@ -282,21 +333,44 @@ public class CoreNLPAnalyzer extends LanguageAnalyzer {
         }
       }
     }
-    
-    // fix corenlp NER being weird around "between X and Y"
-    for (int i = 0; i < n; i++) {
-      String nerTag = languageInfo.nerTags.get(i);
-      if (nerTag.equals("NUMBER") && languageInfo.nerValues.get(i) != null) {
-        Matcher matcher = BETWEEN_PATTERN.matcher(languageInfo.nerValues.get(i)); 
-        if (matcher.matches()) {
-          if (i < n-2 &&
-              (languageInfo.tokens.get(i + 1).equals("and") || languageInfo.tokens.get(i + 1).equals("to"))) {
-            languageInfo.nerTags.set(i + 1, "O");
-            languageInfo.nerValues.set(i, matcher.group(1));
-            languageInfo.nerValues.set(i + 2, matcher.group(2));
-            i += 2;
-          }
-        }
+
+    // fix corenlp sometimes tagging Washington as location in "washington post"
+    for (int i = 0; i < n - 1; i++) {
+      String token = languageInfo.tokens.get(i);
+      String next = languageInfo.tokens.get(i + 1);
+
+      if (!("O".equals(languageInfo.nerTags.get(i)) ||
+          "ORGANIZATION".equals(languageInfo.nerTags.get(i)) ||
+          "LOCATION".equals(languageInfo.nerTags.get(i))))
+        continue;
+
+      if (("washington".equals(token) && "post".equals(next)) ||
+          ("chicago".equals(token) && "cubs".equals(next)) ||
+          ("toronto".equals(token) && "fc".equals(next))) {
+        languageInfo.nerTags.set(i, "ORGANIZATION");
+        languageInfo.nerValues.set(i, null);
+
+        languageInfo.nerTags.set(i + 1, "ORGANIZATION");
+        languageInfo.nerValues.set(i + 1, null);
+      }
+
+      // apple post is not a f... newspaper
+      // stupid corenlp
+      if ("apple".equals(token) && "post".equals(next)) {
+        languageInfo.nerTags.set(i + 1, "O");
+        languageInfo.nerValues.set(i + 1, null);
+      }
+
+      // topic is not an organization
+      if ("topic".equals(token)) {
+        languageInfo.nerTags.set(i, "O");
+        languageInfo.nerValues.set(i, null);
+      }
+
+      // merge locations separated by a comma (eg Palo Alto, California)
+      if (",".equals(token) && i >0 && "LOCATION".equals(languageInfo.nerTags.get(i-1))
+          && "LOCATION".equals(languageInfo.nerTags.get(i+1))) {
+        languageInfo.nerTags.set(i, "LOCATION");
       }
     }
 
@@ -332,16 +406,19 @@ public class CoreNLPAnalyzer extends LanguageAnalyzer {
 
   // Test on example sentence.
   public static void main(String[] args) {
-    CoreNLPAnalyzer.opts.annotators = Lists.newArrayList("ssplit", "pos", "lemma", "ner");
     CoreNLPAnalyzer.opts.entityRecognizers = Lists.newArrayList("corenlp.PhoneNumberEntityRecognizer",
-        "corenlp.EmailEntityRecognizer", "corenlp.QuotedStringEntityRecognizer", "corenlp.URLEntityRecognizer");
+        "corenlp.EmailEntityRecognizer", "corenlp.URLEntityRecognizer");
     CoreNLPAnalyzer.opts.regularExpressions = Lists.newArrayList("USERNAME:[@](.+)", "HASHTAG:[#](.+)");
+    CoreNLPAnalyzer.opts.yearsAsNumbers = true;
+    CoreNLPAnalyzer.opts.splitHyphens = false;
     CoreNLPAnalyzer analyzer = new CoreNLPAnalyzer();
-    while (true) {
-      try {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+      while (true) {
         System.out.println("Enter some text:");
         String text = reader.readLine();
+        if (text == null)
+          break;
         LanguageInfo langInfo = analyzer.analyze(text);
         LogInfo.begin_track("Analyzing \"%s\"", text);
         LogInfo.logs("tokens: %s", langInfo.tokens);
@@ -351,9 +428,9 @@ public class CoreNLPAnalyzer extends LanguageAnalyzer {
         LogInfo.logs("nerValues: %s", langInfo.nerValues);
         LogInfo.logs("dependencyChildren: %s", langInfo.dependencyChildren);
         LogInfo.end_track();
-      } catch (IOException e) {
-        e.printStackTrace();
       }
+    } catch (IOException e) {
+        e.printStackTrace();
     }
   }
 }

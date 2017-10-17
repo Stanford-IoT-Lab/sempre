@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import edu.stanford.nlp.sempre.*;
 import edu.stanford.nlp.sempre.thingtalk.ThingpediaDatabase;
+import fig.basic.LogInfo;
 import fig.basic.Option;
 import fig.exec.Execution;
 
@@ -25,7 +26,7 @@ public class ExtractSeq2Seq implements Runnable {
 
   public static Options opts = new Options();
 
-  private static final String QUERY_TMPL = "select id, type, utterance, target_json from example_utterances where language = ? and type in (%s)";
+  private static final String QUERY_TMPL = "select id, type, utterance, target_json from example_utterances where language = ? and is_base = 0 and type in (%s)";
 
   private static String addTypesToQuery() {
     return String.format(QUERY_TMPL, opts.types.stream()
@@ -58,9 +59,14 @@ public class ExtractSeq2Seq implements Runnable {
               .setTargetValue(targetValue)
               .createExample();
 
-          ex.preprocess();
+          try {
+            ex.preprocess();
 
-          Seq2SeqConverter.writeSequences(converter.run(ex), writer);
+            Seq2SeqConverter.writeSequences(id, converter.run(ex), writer);
+          } catch (Exception e) {
+            LogInfo.logs("Failed to process example " + ex.id);
+            e.printStackTrace();
+          }
         }
       }
     } catch (SQLException | IOException e) {

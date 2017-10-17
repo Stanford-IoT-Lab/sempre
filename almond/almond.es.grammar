@@ -8,17 +8,23 @@
 (def @at_work (en el trabajo))
 (def @at_home (en casa))
 
-(def @containing contiene)
+# FIXME
+(def @contains contiene)
 (def @having tiene)
 (def @greater_than (mayor que))
 (def @less_than (menos que))
+(def @equals equals)
+(def @starts_with (starts with))
+(def @ends_with (ends with))
 
 (def @of de)
 (def @with con)
 (def @and y)
-(def @monitor_if (controla se))
+(def @ask pedir)
+(def @monitor_when (controla se))
 (def @every_day_at (todos los "días" a))
 (def @every cada)
+(def @when cuando)
 (def @if si)
 (def @then entonces)
 # FIXME
